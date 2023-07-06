@@ -6,7 +6,7 @@ namespace Savannah
 {
     public class GameFlow
     {
-        static readonly int Dimension = 8;
+        static readonly int Dimension = 6;
         private readonly InitializeGrid _initializeGrid;
         private readonly Display _display;
         private readonly UpdateGame _updateGame;
@@ -29,17 +29,17 @@ namespace Savannah
                 {
                     _updateGame.MoveAnimals(Dimension, grid, turn);
                     turn = false;
-                    Thread.Sleep(1000);
+                    Thread.Sleep(250);
                 }
                 else
                 {
                    _updateGame.MoveAnimals(Dimension, grid, turn);
                     turn = true;
-                    Thread.Sleep(1000);
+                    Thread.Sleep(250);
                 }
                 ButtonListener(grid);
                 count++;
-                if (count % 4 == 0) Console.Clear();
+                //if (count % 4 == 0) Console.Clear();
             }
         }
         private void ButtonListener(List<GridCellModel> grid)

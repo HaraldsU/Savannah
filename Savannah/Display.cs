@@ -8,7 +8,7 @@ namespace Savannah
         public void DisplayGrid(List<GridCellModel> grid, int dimension)
         {
             Console.CursorVisible = false;
-            //Console.SetCursorPosition(0, 0);
+            Console.SetCursorPosition(0, 0);
             StringBuilder gridStringBuilder = new StringBuilder();
             int height = (dimension * 2) + 1;
             int width = (dimension * 3) + 2;
