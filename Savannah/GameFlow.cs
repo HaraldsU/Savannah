@@ -1,12 +1,12 @@
 ﻿using ClassLibrary;
 using ClassLibrary.Models;
-using System.Threading.Tasks;
+using Figgle;
 
 namespace Savannah
 {
     public class GameFlow
     {
-        static readonly int Dimension = 6;
+        static readonly int Dimension = 11;
         private readonly InitializeGrid _initializeGrid;
         private readonly Display _display;
         private readonly UpdateGame _updateGame;
@@ -18,13 +18,15 @@ namespace Savannah
         }
         public void Run()
         {
+            Console.WriteLine(FiggleFonts.MaxFour.Render("Savannah!"));
+            int cursorTop = Console.CursorTop;
             bool check = true;
             bool turn = true;
-            int count = 0;
             var grid = _initializeGrid.Initialize(Dimension);
+
             while (check)
             {
-                _display.DisplayGrid(grid, Dimension);
+                _display.DisplayGrid(grid, Dimension, cursorTop);
                 if (turn)
                 {
                     _updateGame.MoveAnimals(Dimension, grid, turn);
@@ -33,13 +35,11 @@ namespace Savannah
                 }
                 else
                 {
-                   _updateGame.MoveAnimals(Dimension, grid, turn);
+                    _updateGame.MoveAnimals(Dimension, grid, turn);
                     turn = true;
                     Thread.Sleep(250);
                 }
                 ButtonListener(grid);
-                count++;
-                //if (count % 4 == 0) Console.Clear();
             }
         }
         private void ButtonListener(List<GridCellModel> grid)
@@ -49,13 +49,9 @@ namespace Savannah
                 ConsoleKeyInfo click;
                 click = Console.ReadKey(true);
                 if (click.Key == ConsoleKey.A)
-                {
                     _updateGame.AddAnimal('A', grid);
-                }
                 else if (click.Key == ConsoleKey.L)
-                {
                     _updateGame.AddAnimal('L', grid);
-                }
             }
         }
     }

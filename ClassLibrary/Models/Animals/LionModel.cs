@@ -8,7 +8,7 @@ namespace ClassLibrary.Models
 {
     public class LionModel
     {
-        public char Name { get; set; } = ' ';
+        public char Name { get; set; } = '\0';
         public readonly int Speed = 2;
         public readonly int Range = 3;
     }

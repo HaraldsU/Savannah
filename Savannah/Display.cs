@@ -1,15 +1,16 @@
 ﻿using ClassLibrary.Models;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace Savannah
 {
     public class Display
     {
-        public void DisplayGrid(List<GridCellModel> grid, int dimension)
+        public void DisplayGrid(List<GridCellModel> grid, int dimension, int cursorTop)
         {
             Console.CursorVisible = false;
-            Console.SetCursorPosition(0, 0);
-            StringBuilder gridStringBuilder = new StringBuilder();
+            Console.SetCursorPosition(0, cursorTop - 1);
+            StringBuilder gridStringBuilder = new();
             int height = (dimension * 2) + 1;
             int width = (dimension * 3) + 2;
             int count = 0;
@@ -22,9 +23,7 @@ namespace Savannah
                     if (i % 2 == 0)
                     {
                         if (j != width - 1)
-                        {
                             gridStringBuilder.Append('-');
-                        }
                     }
                     else
                     {
@@ -58,7 +57,26 @@ namespace Savannah
                 gridStringBuilder.Append('\n');
             }
             gridStringBuilder.Append('\n');
-            Console.WriteLine(gridStringBuilder.ToString());
+            for (int i = 0; i < gridStringBuilder.Length; i++)
+            {
+                if (gridStringBuilder[i] == 'A')
+                    ChangeColor(gridStringBuilder[i].ToString(), "gray");
+                else if (gridStringBuilder[i] == 'L')
+                    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
+                else
+                    ChangeColor(gridStringBuilder[i].ToString(), "red");
+            }
+        }
+        private void ChangeColor(string text, string color)
+        {
+            if (color == "yellow")
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            else if (color == "gray")
+                Console.ForegroundColor = ConsoleColor.Gray;
+            else if (color == "red")
+                Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(text); 
+            Console.ResetColor();
         }
     }
 }

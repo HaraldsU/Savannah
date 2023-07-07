@@ -51,7 +51,7 @@ namespace ClassLibrary
             {
                 for (int j = 0; j < dimension; j++)
                 {
-                    var coordinates = i * dimension + j;
+                    var coordinates = ((i + 1) * dimension) - (dimension - j);
                     var coordinatesOld = coordinates;
 
                     if (grid[coordinates].Animal != null)
@@ -123,11 +123,7 @@ namespace ClassLibrary
         }
         private Tuple<int, int> GetTarget(int x, int y, int dimension, GridCellModel gridItem, List<GridCellModel> grid)
         {
-            int widthStart;
-            int widthEnd;
-            int heightStart;
-            int heightEnd;
-
+            dimension--;
             int range = 0;
 
             if (gridItem.Animal != null)
@@ -138,21 +134,21 @@ namespace ClassLibrary
                     range = gridItem.Animal.Antelope.Range;
             }
 
-            widthStart = Math.Max(0, gridItem.X - range);
-            heightStart = Math.Max(0, gridItem.Y - range);
-            widthEnd = Math.Min(dimension, gridItem.X + range);
-            heightEnd = Math.Min(dimension, gridItem.X + range);
+            int widthStart = Math.Max(0, gridItem.X - range);
+            int heightStart = Math.Max(0, gridItem.Y - range);
+            int widthEnd = Math.Min(dimension, gridItem.X + range);
+            int heightEnd = Math.Min(dimension, gridItem.Y + range);
 
             if (gridItem.Animal != null)
             {
                 if (gridItem.Animal.Lion != null)
                     return GetTargetForLoop(dimension, gridItem, grid,
-                                            0, 0, 0, 0,
-                                            heightStart, heightEnd, widthStart, widthEnd);
+                                            heightStart, heightEnd, widthStart, widthEnd
+                                           );
                 else if (gridItem.Animal.Antelope != null)
                     return GetTargetForLoop(dimension, gridItem, grid,
-                                            heightStart, heightEnd, widthStart, widthEnd,
-                                            0,0,0,0);
+                                            heightStart, heightEnd, widthStart, widthEnd
+                                           );
             }
             else
                 return Tuple.Create(-1, -1);
@@ -160,44 +156,28 @@ namespace ClassLibrary
             return Tuple.Create(-1, -1);
         }
         private Tuple<int, int> GetTargetForLoop(
-                                                     int dimension, GridCellModel gridItem, List<GridCellModel> grid,
-                                                     int heightStart1, int heightEnd1, int widthStart1, int widthEnd1,
-                                                     int heightStart2, int heightEnd2, int widthStart2, int widthEnd2
-                                                    )
+                                                 int dimension, GridCellModel gridItem, List<GridCellModel> grid,
+                                                 int heightStart, int heightEnd, int widthStart, int widthEnd
+                                                )
+        {
+            dimension++;
+            for (int i = heightStart; i < heightEnd + 1; i++) // Height (Y)
             {
-                if (gridItem.Animal.Antelope != null)
+                for (int j = widthStart; j < widthEnd + 1; j++) // Width (x)
                 {
-                    for (int i = heightStart1; i < heightEnd1; i++) // Height (Y)
+                    var coordinates = ((i + 1) * dimension) - (dimension - j);
+                    var gridItemCoordinates = ((gridItem.Y + 1) * dimension) - (dimension - gridItem.X);
+                    var x = grid[coordinates];
+                    if (grid[coordinates].Animal != null && coordinates != gridItemCoordinates)
                     {
-                        for (int j = widthStart1; j < widthEnd1; j++) // Width (x)
-                        {
-                            var coordinates = ((i + 1) * dimension) - (j + 1);
-                            var x = grid[coordinates];
-                            if (grid[coordinates].Animal != null && coordinates != (((gridItem.Y + 1) * dimension) - gridItem.X) && grid[coordinates].Animal.Lion != null)
-                            {
-                                return Tuple.Create(grid[coordinates].X, grid[coordinates].Y);
-                            }
-                        }
+                        if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Antelope != null)
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y);
+                        else if (gridItem.Animal.Antelope != null && grid[coordinates].Animal.Lion != null)
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y);
                     }
-                    return Tuple.Create(-1, -1);
                 }
-                else if (gridItem.Animal.Lion != null)
-                {
-                    for (int i = heightStart2; i < heightEnd2; i++) // Height (Y)
-                    {
-                        for (int j = widthStart2; j < widthEnd2; j++) // Width (x)
-                        {
-                            var coordinates = ((i + 1) * dimension) - (j + 1);
-                            var x = grid[coordinates];
-                            if (grid[coordinates].Animal != null && coordinates != (((gridItem.Y + 1) * dimension) - gridItem.X) && grid[coordinates].Animal.Antelope != null)
-                            {
-                                return Tuple.Create(grid[coordinates].X, grid[coordinates].Y);
-                            }
-                        }
-                    }
-                    return Tuple.Create(-1, -1);
-                }
-                return Tuple.Create(-1, -1);
+            }
+            return Tuple.Create(-1, -1);
         }
         private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, char directionXSign, char directionYSign,
                                         GridCellModel? gridItem = null, Tuple<int, int>? target = null)
@@ -251,13 +231,38 @@ namespace ClassLibrary
             int coordinatesOld = coordinates;
             int coordinatesTmp = coordinates;
             var gridTmp = grid;
-            char directionXSign;
+            char directionXSign = '\0';
+            char directionYSign = '\0';
+
+            GenerateRandomSign(ref directionXSign, ref directionYSign);
+            MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign);
+            if (coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null || updates.ContainsValue(coordinatesTmp))
+            {
+                do
+                {
+                    GenerateRandomSign(ref directionXSign, ref directionYSign);
+                    coordinatesTmp = coordinates;
+                    MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign); // Get new coordinates
+                    count++;
+                } while ((coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null
+                         || updates.ContainsValue(coordinatesTmp)) && count <= 8);
+                if (count >= 8)
+                {
+                    directionXSign = 'n';
+                    directionYSign = 'n';
+                }
+            }
+            var returnData = Tuple.Create(directionXSign, directionYSign);
+
+            return returnData;
+        }
+        private void GenerateRandomSign(ref char directionXSign, ref char directionYSign)
+        {
             int directionX = RandomGenerator.Next(3);
             if (directionX == 0) directionXSign = '-';
             else if (directionX == 1) directionXSign = '+';
             else directionXSign = 'n';
 
-            char directionYSign;
             if (directionXSign == 'n')
             {
                 int directionY = RandomGenerator.Next(2);
@@ -278,53 +283,6 @@ namespace ClassLibrary
                     else if (directionX == 1) directionXSign = '+';
                 }
             }
-            MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign);
-            if (coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null || updates.ContainsValue(coordinatesTmp))
-            {
-                do
-                {
-                    directionX = RandomGenerator.Next(3);
-                    if (directionX == 0) directionXSign = '-';
-                    else if (directionX == 1) directionXSign = '+';
-                    else directionXSign = 'n';
-
-                    if (directionXSign == 'n')
-                    {
-                        int directionY = RandomGenerator.Next(2);
-                        if (directionY == 0) directionYSign = '-';
-                        else directionYSign = '+';
-                    }
-                    else
-                    {
-                        int directionY = RandomGenerator.Next(3);
-                        if (directionY == 0) directionYSign = '-';
-                        else if (directionY == 1) directionYSign = '+';
-                        else directionYSign = 'n';
-
-                        if (directionYSign == 'n')
-                        {
-                            directionX = RandomGenerator.Next(2);
-                            if (directionX == 0) directionXSign = '-';
-                            else if (directionX == 1) directionXSign = '+';
-                        }
-                    }
-                    coordinatesTmp = coordinates;
-                    MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign); // Get new coordinates
-                    var xx = 2;
-                    count++;
-                } while ((coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null 
-                         || updates.ContainsValue(coordinatesTmp)) && count <= 8);
-                if (count >= 8)
-                {
-                    directionXSign = 'n';
-                    directionYSign = 'n';
-                }
-            }
-
-
-            var returnData = Tuple.Create(directionXSign, directionYSign);
-
-            return returnData;
         }
         private Tuple<char, char> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int> target,
                                                           GridCellModel gridItem, Dictionary<int, int> updates)
@@ -383,12 +341,12 @@ namespace ClassLibrary
                     directionYSign = 'n';
             }
             MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign, gridItem, target);
-            if (coordinatesTmp == coordinatesOld || updates.ContainsValue(coordinatesTmp))
+            if (coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null || updates.ContainsValue(coordinatesTmp))
             {
                 if (gridTmp[coordinatesTmp].Animal != null)
                 {
-                    if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) &&
-                        gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null)
+                    if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) ||
+                        (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
                     {
                         directionXSign = 'n';
                         directionYSign = 'n';
