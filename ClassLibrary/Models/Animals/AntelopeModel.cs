@@ -8,8 +8,11 @@ namespace ClassLibrary.Models.Animals
 {
     public class AntelopeModel
     {
-        public char Name { get; set; } = '\0';
         public readonly int Speed = 1;
         public readonly int Range = 2;
+        public readonly int BreedingCooldown = 5;
+        public int BreedingTime = 2;
+        public int ActiveBreedingCooldown = 0;
+        public bool IsBirthing = false;
     }
 }

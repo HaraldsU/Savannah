@@ -42,9 +42,9 @@ namespace Savannah
                             if (grid[listIndex].Animal != null)
                             {
                                 if (grid[listIndex].Animal.Lion != null)
-                                    gridStringBuilder.Append(grid[listIndex].Animal.Lion.Name);
+                                    gridStringBuilder.Append('L');
                                 else if (grid[listIndex].Animal.Antelope != null)
-                                    gridStringBuilder.Append(grid[listIndex].Animal.Antelope.Name);
+                                    gridStringBuilder.Append('A');
                             }
                             else
                                 gridStringBuilder.Append(' ');

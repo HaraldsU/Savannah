@@ -6,7 +6,8 @@ namespace Savannah
 {
     public class GameFlow
     {
-        static readonly int Dimension = 11;
+        static readonly int Dimension = 4;
+        public int AnimalCount = 0;
         private readonly InitializeGrid _initializeGrid;
         private readonly Display _display;
         private readonly UpdateGame _updateGame;
@@ -27,15 +28,15 @@ namespace Savannah
             while (check)
             {
                 _display.DisplayGrid(grid, Dimension, cursorTop);
-                if (turn)
+                if (turn) // Lion turn
                 {
-                    _updateGame.MoveAnimals(Dimension, grid, turn);
+                    _updateGame.MoveAnimals(Dimension, ref AnimalCount, grid, turn);
                     turn = false;
                     Thread.Sleep(250);
                 }
-                else
+                else // AMtelope turn
                 {
-                    _updateGame.MoveAnimals(Dimension, grid, turn);
+                    _updateGame.MoveAnimals(Dimension, ref AnimalCount, grid, turn);
                     turn = true;
                     Thread.Sleep(250);
                 }
@@ -49,9 +50,9 @@ namespace Savannah
                 ConsoleKeyInfo click;
                 click = Console.ReadKey(true);
                 if (click.Key == ConsoleKey.A)
-                    _updateGame.AddAnimal('A', grid);
+                    _updateGame.AddAnimal('A', ref AnimalCount, grid, false);
                 else if (click.Key == ConsoleKey.L)
-                    _updateGame.AddAnimal('L', grid);
+                    _updateGame.AddAnimal('L', ref AnimalCount, grid, false);
             }
         }
     }
