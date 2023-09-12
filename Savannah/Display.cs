@@ -45,6 +45,8 @@ namespace Savannah
                                     gridStringBuilder.Append('L');
                                 else if (grid[listIndex].Animal.Antelope != null)
                                     gridStringBuilder.Append('A');
+                                else
+                                    gridStringBuilder.Append(' ');
                             }
                             else
                                 gridStringBuilder.Append(' ');

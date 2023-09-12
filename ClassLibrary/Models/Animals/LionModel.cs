@@ -10,5 +10,6 @@ namespace ClassLibrary.Models
     {
         public readonly int Speed = 2;
         public readonly int Range = 3;
+        public float Health = 2;
     }
 }

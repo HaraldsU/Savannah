@@ -10,6 +10,7 @@ namespace ClassLibrary.Models.Animals
     {
         public readonly int Speed = 1;
         public readonly int Range = 2;
+        public float Health = 3;
         public readonly int BreedingCooldown = 5;
         public int BreedingTime = 2;
         public int ActiveBreedingCooldown = 0;

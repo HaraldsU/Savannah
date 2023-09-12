@@ -5,6 +5,7 @@ namespace ClassLibrary
 {
     public class UpdateGame
     {
+        // Adds a new antelope or lion depending on input
         public void AddAnimal(char animal, ref int animalCount, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
             var cellIndex = RandomGenerator.Next(grid.Count);
@@ -66,6 +67,7 @@ namespace ClassLibrary
                 }
             }
         }
+
         public void MoveAnimals(int dimension, ref int animalCount, List<GridCellModel> grid, bool turn)
         {
             var updates = new Dictionary<int, int>();
@@ -80,14 +82,18 @@ namespace ClassLibrary
 
                     if (grid[coordinates].Animal != null)
                     {
+                        // Lion moving
                         if (turn == true)
                         {
                             if (grid[coordinates].Animal.Lion != null)
                             {
                                 var target = GetTarget(grid[coordinates].X, grid[coordinates].Y, dimension, grid[coordinates], grid);
+                                var currentItemLion = grid[coordinates].Animal.Lion;
 
+                                // Check if any antelopes to eat
                                 if (target.Item1 == -1)
                                 {
+                                    //Console.WriteLine("No antelope\n");
                                     var directionSigns = GetRandomDirectionSigns(dimension, grid, coordinates, updates);
                                     var directionXSign = directionSigns.Item1;
                                     var directionYSign = directionSigns.Item2;
@@ -95,14 +101,17 @@ namespace ClassLibrary
                                 }
                                 else
                                 {
+                                    //Console.WriteLine("Antelope\n");
                                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                                     var directionXSign = directionSigns.Item1;
                                     var directionYSign = directionSigns.Item2;
                                     MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
                                 }
                                 updates.Add(coordinatesOld, coordinates);
+                                currentItemLion.Health -= .5f;
                             }
                         }
+                        // Antelope moving
                         else
                         {
                             if (grid[coordinates].Animal.Antelope != null)
@@ -132,6 +141,7 @@ namespace ClassLibrary
                                     var directionXSign = directionSigns.Item1;
                                     var directionYSign = directionSigns.Item2;
                                     var x = grid[coordinates];
+                                    // Antelope breeds antelope
                                     if (directionXSign == 'n' && directionYSign == 'n'
                                         && (currentItemAntelope.ActiveBreedingCooldown == 0 && targetItemAntelope.ActiveBreedingCooldown == 0))
                                     {
@@ -143,7 +153,11 @@ namespace ClassLibrary
                                     {
                                         if ((updates.Count + animalCount) >= grid.Count)
                                         {
-                                            var updatesElement = updates.Where(a => a.Key != a.Value).First();
+                                            //foreach (var update in updates)
+                                            //{
+                                            //    Console.WriteLine(update);
+                                            //}
+                                            var updatesElement = updates.Where(a => a.Key != a.Value).FirstOrDefault();
                                             updates.Remove(updatesElement.Key);
                                             updates.Add(updatesElement.Key, updatesElement.Key);
                                         }
@@ -162,6 +176,7 @@ namespace ClassLibrary
                                     MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
                                 }
                                 updates.Add(coordinatesOld, coordinates);
+                                currentItemAntelope.Health -= .5f;
                             }
                         }
                     }
@@ -170,11 +185,32 @@ namespace ClassLibrary
 
             foreach (var update in updates)
             {
+                var keyAnimal = grid[update.Key].Animal;
                 var oldValue = grid[update.Value].Animal;
                 grid[update.Value].Animal = grid[update.Key].Animal;
                 if (grid[update.Value].Animal != oldValue)
+                {
                     grid[update.Key].Animal = null;
+                    //Console.WriteLine("Delete");
+                }
                 else { }
+                if (keyAnimal != null)
+                {
+                    if (keyAnimal.Lion != null)
+                    {
+                        if (keyAnimal.Lion.Health == 0)
+                        {
+                            keyAnimal.Lion = null;
+                        }
+                    }
+                    else if (keyAnimal.Antelope != null)
+                    {
+                        if (keyAnimal.Antelope.Health == 0)
+                        {
+                            keyAnimal.Antelope = null;
+                        }
+                    }
+                }
             }
 
             var afterAnimals = GetAnimalCount(grid);
@@ -183,6 +219,7 @@ namespace ClassLibrary
                 var xx = 1;
             }
         }
+        // Calls "GetTargetForLoop" with the appropriate variables
         private Tuple<int, int, string> GetTarget(int x, int y, int dimension, GridCellModel gridItem, List<GridCellModel> grid)
         {
             dimension--;
@@ -217,6 +254,7 @@ namespace ClassLibrary
 
             return Tuple.Create(-1, -1, string.Empty);
         }
+        // Finds the "Target"
         private Tuple<int, int, string> GetTargetForLoop(
                                                  int dimension, GridCellModel gridItem, List<GridCellModel> grid,
                                                  int heightStart, int heightEnd, int widthStart, int widthEnd
@@ -233,11 +271,14 @@ namespace ClassLibrary
                     if (grid[coordinates].Animal != null && coordinates != gridItemCoordinates)
                     {
                         if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Antelope != null) // Lion catching antelope
+                        {
+                            gridItem.Animal.Lion.Health += 2;
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Enemy");
+                        }
                         else if (gridItem.Animal.Antelope != null && grid[coordinates].Animal.Lion != null) // Antelope fleeing lion
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Enemy");
-                        else if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Lion != null) // Lion breeding lion
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, string.Empty);
+                        //else if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Lion != null) // Lion breeding lion
+                        //    return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, string.Empty);
                         else if (gridItem.Animal.Antelope != null  // Antelope breeding antelope
                                  && grid[coordinates].Animal.Antelope != null 
                                  && (gridItem.Animal.Antelope.ActiveBreedingCooldown == 0 || gridItem.Animal.Antelope.ActiveBreedingCooldown > 5)
@@ -249,6 +290,7 @@ namespace ClassLibrary
             }
             return Tuple.Create(-1, -1, string.Empty);
         }
+        // Sets the new coordinates
         private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, char directionXSign, char directionYSign,
                                         GridCellModel? gridItem = null, Tuple<int, int, string>? target = null)
         {
@@ -256,6 +298,7 @@ namespace ClassLibrary
             int coordinatesOld = coordinates;
 
             // x abscissa 
+            // Get steps
             if (grid[coordinates].Animal.Lion != null)
             {
                 steps = grid[coordinates].Animal.Lion.Speed;
@@ -272,13 +315,15 @@ namespace ClassLibrary
 
             if (directionXSign == '-' && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
                 coordinates -= steps;
-            else if (directionXSign == '+' && (coordinates + steps) < grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
+            else if (directionXSign == '+' && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
                 coordinates += steps;
 
             // y abscissa 
+            // Get steps
             if (grid[coordinatesOld].Animal.Lion != null)
             {
                 steps = grid[coordinatesOld].Animal.Lion.Speed;
+                // target is x, y, action
                 if (target != null)
                 {
                     if (gridItem.Y + steps > target.Item2 && directionYSign == '+')
@@ -292,7 +337,7 @@ namespace ClassLibrary
 
             if (directionYSign == '-' && (coordinates - (dimension * steps)) >= 0) // Move up
                 coordinates -= dimension * steps;
-            else if (directionYSign == '+' && (coordinates + (dimension * steps)) < grid.Count - 1)    // Move down
+            else if (directionYSign == '+' && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
                 coordinates += dimension * steps;
         }
         private Tuple<char, char> GetRandomDirectionSigns(int dimension, List<GridCellModel> grid, int coordinates, Dictionary<int, int> updates)
@@ -439,7 +484,7 @@ namespace ClassLibrary
                 if (updates.ContainsValue(coordinatesTmp))
                 {
                     coordinatesTmp = updates.First(x => x.Value == coordinatesTmp).Key;
-                    if (gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null)
+                    if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) || (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
                     {
                         directionXSign = 'n';
                         directionYSign = 'n';
@@ -447,7 +492,7 @@ namespace ClassLibrary
                 }
                 else
                 {
-                    if (gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null)
+                    if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) || (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
                     {
                         directionXSign = 'n';
                         directionYSign = 'n';
