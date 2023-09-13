@@ -1,5 +1,4 @@
 ﻿using ClassLibrary.Models;
-using System.Reflection.Metadata;
 using System.Text;
 
 namespace Savannah
@@ -77,7 +76,7 @@ namespace Savannah
                 Console.ForegroundColor = ConsoleColor.Gray;
             else if (color == "red")
                 Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(text); 
+            Console.Write(text);
             Console.ResetColor();
         }
     }
