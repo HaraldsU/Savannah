@@ -67,7 +67,7 @@ namespace ClassLibrary
                 }
             }
         }
-
+        // Sets animal's new coordinates
         public void MoveAnimals(int dimension, List<GridCellModel> grid, bool turn)
         {
             var updates = new Dictionary<int, int>();
@@ -221,7 +221,7 @@ namespace ClassLibrary
                 var xx = 1;
             }
         }
-        // Calls "GetTargetForLoop" with the appropriate variables
+        // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
         private Tuple<int, int, string> GetTarget(int x, int y, int dimension, GridCellModel gridItem, List<GridCellModel> grid)
         {
             dimension--;
@@ -282,7 +282,7 @@ namespace ClassLibrary
                         //else if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Lion != null) // Lion breeding lion
                         //    return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, string.Empty);
                         else if (gridItem.Animal.Antelope != null  // Antelope breeding antelope
-                                 && grid[coordinates].Animal.Antelope != null 
+                                 && grid[coordinates].Animal.Antelope != null
                                  && (gridItem.Animal.Antelope.ActiveBreedingCooldown == 0 || gridItem.Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
                                  && (grid[coordinates].Animal.Antelope.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
                                 )
@@ -292,7 +292,7 @@ namespace ClassLibrary
             }
             return Tuple.Create(-1, -1, string.Empty);
         }
-        // Sets the new coordinates
+        // Gets the new coordinates
         private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, char directionXSign, char directionYSign,
                                         GridCellModel? gridItem = null, Tuple<int, int, string>? target = null)
         {
@@ -342,6 +342,7 @@ namespace ClassLibrary
             else if (directionYSign == '+' && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
                 coordinates += dimension * steps;
         }
+        // Generates a random directional sign: "-", "+" or 'n' (no sign). Defaults as 'n' if fails after 8 tries
         private Tuple<char, char> GetRandomDirectionSigns(int dimension, List<GridCellModel> grid, int coordinates, Dictionary<int, int> updates)
         {
             int count = 0;
@@ -373,6 +374,7 @@ namespace ClassLibrary
 
             return returnData;
         }
+        // Generates a random sign: "-", "+" or 'n' (no sign)
         private void GenerateRandomSign(ref char directionXSign, ref char directionYSign)
         {
             int directionX = RandomGenerator.Next(3);
@@ -401,6 +403,7 @@ namespace ClassLibrary
                 }
             }
         }
+        // Generates a directional sign depending on the direction of the target: "-", "+" or 'n' (no sign)
         private Tuple<char, char> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, string> target,
                                                           GridCellModel gridItem, Dictionary<int, int> updates)
         {
@@ -460,7 +463,7 @@ namespace ClassLibrary
                 }
                 else // Breeding
                 {
-                    if ((subjectX + 1) != targetX || (subjectX -1) != targetX)    // x cords
+                    if ((subjectX + 1) != targetX || (subjectX - 1) != targetX)    // x cords
                     {
                         if (subjectX - 1 > targetX)
                             directionXSign = '-';
@@ -505,6 +508,7 @@ namespace ClassLibrary
 
             return returnData;
         }
+        // Gets the current animal count
         private int GetAnimalCount(List<GridCellModel> grid)
         {
             int count = 0;
@@ -514,6 +518,7 @@ namespace ClassLibrary
             }
             return count;
         }
+        // Sets empty animals to null
         private void ClearGridAnimals(List<GridCellModel> grid)
         {
             foreach (var cell in grid)

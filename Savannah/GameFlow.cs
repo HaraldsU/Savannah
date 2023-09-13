@@ -33,7 +33,7 @@ namespace Savannah
                     turn = false;
                     Thread.Sleep(250);
                 }
-                else // AMtelope turn
+                else // Antelope turn
                 {
                     _updateGame.MoveAnimals(Dimension, grid, turn);
                     turn = true;
