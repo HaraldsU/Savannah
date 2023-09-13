@@ -6,9 +6,11 @@ namespace ClassLibrary
     public class UpdateGame
     {
         // Adds a new antelope or lion depending on input
-        public void AddAnimal(char animal, ref int animalCount, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
+        public void AddAnimal(char animal, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
+            ClearGridAnimals(grid);
             var cellIndex = RandomGenerator.Next(grid.Count);
+            var animalCount = GetAnimalCount(grid);
             bool check = true;
 
             if (updates == null)
@@ -27,14 +29,14 @@ namespace ClassLibrary
             }
             else
             {
-                if (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex))
+                if ((grid[cellIndex].Animal != null) || updates.ContainsValue(cellIndex))
                 {
                     if (animalCount <= grid.Count)
                     {
                         do
                         {
                             cellIndex = RandomGenerator.Next(grid.Count);
-                        } while (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex));
+                        } while ((grid[cellIndex].Animal != null) || updates.ContainsValue(cellIndex));
                     }
                     else check = false;
                 }
@@ -53,7 +55,6 @@ namespace ClassLibrary
                         Antelope = antelope
                     };
                     grid[cellIndex].Animal = animalModel;
-                    animalCount++;
                 }
                 else if (animal == 'L')
                 {
@@ -63,15 +64,14 @@ namespace ClassLibrary
                         Lion = lion
                     };
                     grid[cellIndex].Animal = animalModel;
-                    animalCount++;
                 }
             }
         }
 
-        public void MoveAnimals(int dimension, ref int animalCount, List<GridCellModel> grid, bool turn)
+        public void MoveAnimals(int dimension, List<GridCellModel> grid, bool turn)
         {
             var updates = new Dictionary<int, int>();
-            var beforeAnimals = GetAnimalCount(grid);
+            var animalCount = GetAnimalCount(grid);
 
             for (int i = 0; i < dimension; i++)
             {
@@ -122,7 +122,7 @@ namespace ClassLibrary
                                 if (currentItemAntelope.ActiveBreedingCooldown != 0) // Reset cooldown
                                 {
                                     currentItemAntelope.ActiveBreedingCooldown--;
-                                    if (currentItemAntelope.ActiveBreedingCooldown == 5)
+                                    if (currentItemAntelope.ActiveBreedingCooldown == currentItemAntelope.BreedingCooldown)
                                         currentItemAntelope.IsBirthing = false;
                                 }
 
@@ -149,7 +149,7 @@ namespace ClassLibrary
                                         currentItemAntelope.IsBirthing = true;
                                         targetItemAntelope.ActiveBreedingCooldown = targetItemAntelope.BreedingTime + targetItemAntelope.BreedingCooldown;
                                     }
-                                    else if (currentItemAntelope.ActiveBreedingCooldown == 6 && currentItemAntelope.IsBirthing == true)
+                                    else if (currentItemAntelope.ActiveBreedingCooldown == currentItemAntelope.BreedingCooldown + 1 && currentItemAntelope.IsBirthing == true)
                                     {
                                         if ((updates.Count + animalCount) >= grid.Count)
                                         {
@@ -161,7 +161,7 @@ namespace ClassLibrary
                                             updates.Remove(updatesElement.Key);
                                             updates.Add(updatesElement.Key, updatesElement.Key);
                                         }
-                                        AddAnimal('A', ref animalCount, grid, true, updates);
+                                        AddAnimal('A', grid, true, updates);
                                         directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                                         directionXSign = directionSigns.Item1;
                                         directionXSign = directionSigns.Item2;
@@ -201,6 +201,7 @@ namespace ClassLibrary
                         if (keyAnimal.Lion.Health == 0)
                         {
                             keyAnimal.Lion = null;
+                            keyAnimal = null;
                         }
                     }
                     else if (keyAnimal.Antelope != null)
@@ -208,13 +209,14 @@ namespace ClassLibrary
                         if (keyAnimal.Antelope.Health == 0)
                         {
                             keyAnimal.Antelope = null;
+                            keyAnimal = null;
                         }
                     }
                 }
             }
 
             var afterAnimals = GetAnimalCount(grid);
-            if (afterAnimals != beforeAnimals)
+            if (afterAnimals != animalCount)
             {
                 var xx = 1;
             }
@@ -281,8 +283,8 @@ namespace ClassLibrary
                         //    return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, string.Empty);
                         else if (gridItem.Animal.Antelope != null  // Antelope breeding antelope
                                  && grid[coordinates].Animal.Antelope != null 
-                                 && (gridItem.Animal.Antelope.ActiveBreedingCooldown == 0 || gridItem.Animal.Antelope.ActiveBreedingCooldown > 5)
-                                 && (grid[coordinates].Animal.Antelope.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Antelope.ActiveBreedingCooldown > 5)
+                                 && (gridItem.Animal.Antelope.ActiveBreedingCooldown == 0 || gridItem.Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
+                                 && (grid[coordinates].Animal.Antelope.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
                                 )
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Breed");
                     }
@@ -508,9 +510,22 @@ namespace ClassLibrary
             int count = 0;
             foreach (var cell in grid)
             {
-                if (cell.Animal != null) count++;
+                if (cell.Animal != null && (cell.Animal.Antelope != null || cell.Animal.Lion != null)) count++;
             }
             return count;
+        }
+        private void ClearGridAnimals(List<GridCellModel> grid)
+        {
+            foreach (var cell in grid)
+            {
+                if (cell.Animal != null)
+                {
+                    if (cell.Animal.Antelope == null && cell.Animal.Lion == null)
+                    {
+                        cell.Animal = null;
+                    }
+                }
+            }
         }
     }
 }
