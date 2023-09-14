@@ -76,6 +76,8 @@ namespace Savannah
                 Console.ForegroundColor = ConsoleColor.Gray;
             else if (color == "red")
                 Console.ForegroundColor = ConsoleColor.Red;
+            else if (color == "white")
+                Console.ForegroundColor = ConsoleColor.White;
             Console.Write(text);
             Console.ResetColor();
         }

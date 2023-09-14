@@ -40,6 +40,9 @@ namespace Savannah
                     Thread.Sleep(250);
                 }
                 ButtonListener(grid);
+                Console.WriteLine("Press 'L' to add a Lion ...");
+                Console.WriteLine("Press 'A' to add an Antelope ...");
+                Console.WriteLine("Press 'Q' to quit ...");
             }
         }
         private void ButtonListener(List<GridCellModel> grid)
@@ -52,6 +55,8 @@ namespace Savannah
                     _updateGame.AddAnimal('A', grid, false);
                 else if (click.Key == ConsoleKey.L)
                     _updateGame.AddAnimal('L', grid, false);
+                else if ((click.Key == ConsoleKey.Q))
+                    Environment.Exit(0);
             }
         }
     }

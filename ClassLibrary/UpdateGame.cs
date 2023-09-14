@@ -75,14 +75,14 @@ namespace ClassLibrary
                 var oldValue = grid[update.Value].Animal;
                 // Moving of the animal
                 grid[update.Value].Animal = grid[update.Key].Animal;
+                if (grid[update.Key].Animal != null)
+                {
+                    DeleteAnimalNoHealth(grid[update.Key].Animal);
+                }
                 // If animal moved, empty the previous cell 
                 if (grid[update.Value].Animal != oldValue)
                 {
                     grid[update.Key].Animal = null;
-                }
-                if (grid[update.Key].Animal != null)
-                {
-                    DeleteAnimalNoHealth(grid[update.Key].Animal);
                 }
             }
         }
