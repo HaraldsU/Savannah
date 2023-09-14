@@ -6,7 +6,7 @@ namespace ClassLibrary
     public class UpdateGame
     {
         // Adds a new antelope or lion depending on input
-        public void AddAnimal(char animal, List<GridCellModel> grid, bool isChild, string? action = null, Dictionary<int, int>? updates = null)
+        public void AddAnimal(char animal, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
             ClearGridAnimals(grid);
             var cellIndex = RandomGenerator.Next(grid.Count);
@@ -31,7 +31,7 @@ namespace ClassLibrary
                         do
                         {
                             cellIndex = RandomGenerator.Next(grid.Count);
-                            if (grid[cellIndex].Animal == null && action == "Breed")
+                            if (grid[cellIndex].Animal == null && isChild == true)
                             {
                                 break;
                             }
@@ -54,6 +54,8 @@ namespace ClassLibrary
                 else if (animal == 'L')
                 {
                     var lion = new LionModel();
+                    if (isChild)
+                        lion.ActiveBreedingCooldown = lion.BreedingCooldown;
                     var animalModel = new AnimalsModel
                     {
                         Lion = lion
@@ -62,12 +64,31 @@ namespace ClassLibrary
                 }
             }
         }
-        // Sets animal's new coordinates
+        // Sets the new animals positions and clears the old ones
         public void MoveAnimals(int dimension, List<GridCellModel> grid, bool turn)
         {
             var updates = new Dictionary<int, int>();
-            var animalCount = GetAnimalCount(grid);
+            GetAnimalsNewPositions(dimension, grid, turn, updates);
 
+            foreach (var update in updates)
+            {
+                var oldValue = grid[update.Value].Animal;
+                // Moving of the animal
+                grid[update.Value].Animal = grid[update.Key].Animal;
+                // If animal moved, empty the previous cell 
+                if (grid[update.Value].Animal != oldValue)
+                {
+                    grid[update.Key].Animal = null;
+                }
+                if (grid[update.Key].Animal != null)
+                {
+                    DeleteAnimalNoHealth(grid[update.Key].Animal);
+                }
+            }
+        }
+        // Gets the animals new positions
+        private void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, bool turn, Dictionary<int, int> updates)
+        {
             for (int i = 0; i < dimension; i++)
             {
                 for (int j = 0; j < dimension; j++)
@@ -82,67 +103,7 @@ namespace ClassLibrary
                         {
                             if (grid[coordinates].Animal.Lion != null)
                             {
-                                var target = GetTarget(grid[coordinates].X, grid[coordinates].Y, dimension, grid[coordinates], grid);
-                                var currentLion = grid[coordinates].Animal.Lion;
-
-                                if (currentLion.ActiveBreedingCooldown != 0) // Reset cooldown
-                                {
-                                    currentLion.ActiveBreedingCooldown--;
-                                    if (currentLion.ActiveBreedingCooldown == currentLion.BreedingCooldown)
-                                        currentLion.IsBirthing = false;
-                                }
-
-                                // Check if any antelopes to eat
-                                if (target.Item1 == -1)
-                                {
-                                    var directionSigns = GetRandomDirectionSigns(dimension, grid, coordinates, updates);
-                                    var directionXSign = directionSigns.Item1;
-                                    var directionYSign = directionSigns.Item2;
-                                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign);
-                                }
-                                else if (target.Item3 == "Breed") // Other lion in range
-                                {
-                                    var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                                    var targetLion = grid[targetIndex].Animal.Lion;
-                                    var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
-                                    var directionXSign = directionSigns.Item1;
-                                    var directionYSign = directionSigns.Item2;
-                                    var x = grid[coordinates];
-                                    // Lion breeds lion
-                                    if (directionXSign == 'n' && directionYSign == 'n'
-                                        && (currentLion.ActiveBreedingCooldown == 0 && targetLion.ActiveBreedingCooldown == 0))
-                                    {
-                                        currentLion.ActiveBreedingCooldown = currentLion.BreedingTime + currentLion.BreedingCooldown;
-                                        currentLion.IsBirthing = true;
-                                        targetLion.ActiveBreedingCooldown = targetLion.BreedingTime + targetLion.BreedingCooldown;
-                                    }
-                                    else if (currentLion.ActiveBreedingCooldown == currentLion.BreedingCooldown + 1 && currentLion.IsBirthing == true)
-                                    {
-                                        if ((updates.Count + animalCount) >= grid.Count)
-                                        {
-                                            var updatesElement = updates.Where(a => a.Key != a.Value).FirstOrDefault();
-                                            updates.Remove(updatesElement.Key);
-                                            updates.Add(updatesElement.Key, updatesElement.Key);
-                                        }
-                                        AddAnimal('L', grid, true, "Breed", updates);
-                                        directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
-                                        directionXSign = directionSigns.Item1;
-                                        directionXSign = directionSigns.Item2;
-                                    }
-                                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
-                                }
-                                else // Antelope in range
-                                {
-                                    var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
-                                    var directionXSign = directionSigns.Item1;
-                                    var directionYSign = directionSigns.Item2;
-                                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
-                                }
-                                if (!updates.ContainsKey(coordinatesOld))
-                                {
-                                    updates.Add(coordinatesOld, coordinates);
-                                }
-                                currentLion.Health -= .5f;
+                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, 'L', updates);
                             }
                         }
                         // Antelope moving
@@ -150,108 +111,106 @@ namespace ClassLibrary
                         {
                             if (grid[coordinates].Animal.Antelope != null)
                             {
-                                var target = GetTarget(grid[coordinates].X, grid[coordinates].Y, dimension, grid[coordinates], grid); // Scans the range
-                                var currentAntelope = grid[coordinates].Animal.Antelope;
-
-                                if (currentAntelope.ActiveBreedingCooldown != 0) // Reset cooldown
-                                {
-                                    currentAntelope.ActiveBreedingCooldown--;
-                                    if (currentAntelope.ActiveBreedingCooldown == currentAntelope.BreedingCooldown)
-                                        currentAntelope.IsBirthing = false;
-                                }
-
-                                if (target.Item1 == -1) // No animals in range
-                                {
-                                    var directionSigns = GetRandomDirectionSigns(dimension, grid, coordinates, updates);
-                                    var directionXSign = directionSigns.Item1;
-                                    var directionYSign = directionSigns.Item2;
-                                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign);
-                                }
-                                else if (target.Item3 == "Breed") // Other antelope in range
-                                {
-                                    var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                                    var targetAntelope = grid[targetIndex].Animal.Antelope;
-                                    var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
-                                    var directionXSign = directionSigns.Item1;
-                                    var directionYSign = directionSigns.Item2;
-                                    var x = grid[coordinates];
-                                    // Antelope breeds antelope
-                                    if (directionXSign == 'n' && directionYSign == 'n'
-                                        && (currentAntelope.ActiveBreedingCooldown == 0 && targetAntelope.ActiveBreedingCooldown == 0))
-                                    {
-                                        currentAntelope.ActiveBreedingCooldown = currentAntelope.BreedingTime + currentAntelope.BreedingCooldown;
-                                        currentAntelope.IsBirthing = true;
-                                        targetAntelope.ActiveBreedingCooldown = targetAntelope.BreedingTime + targetAntelope.BreedingCooldown;
-                                    }
-                                    else if (currentAntelope.ActiveBreedingCooldown == currentAntelope.BreedingCooldown + 1 && currentAntelope.IsBirthing == true)
-                                    {
-                                        if ((updates.Count + animalCount) >= grid.Count)
-                                        {
-                                            var updatesElement = updates.Where(a => a.Key != a.Value).FirstOrDefault();
-                                            updates.Remove(updatesElement.Key);
-                                            updates.Add(updatesElement.Key, updatesElement.Key);
-                                        }
-                                        AddAnimal('A', grid, true, "Breed", updates);
-                                        directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
-                                        directionXSign = directionSigns.Item1;
-                                        directionXSign = directionSigns.Item2;
-                                    }
-                                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
-                                }
-                                else // Lion in range
-                                {
-                                    var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
-                                    var directionXSign = directionSigns.Item1;
-                                    var directionYSign = directionSigns.Item2;
-                                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
-                                }
-                                updates.Add(coordinatesOld, coordinates);
-                                currentAntelope.Health -= .5f;
+                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, 'A', updates);
                             }
                         }
                     }
                 }
             }
+        }
+        // Gets one animal new position
+        private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, int coordinates, int coordinatesOld, char animal, Dictionary<int, int> updates)
+        {
+            var animalCount = GetAnimalCount(grid);
+            var target = GetTarget(dimension, grid[coordinates], grid);
+            var currentAnimal = animal == 'A' ? (IAnimal)grid[coordinates].Animal.Antelope : (IAnimal)grid[coordinates].Animal.Lion;
 
-            foreach (var update in updates)
+            if (currentAnimal != null)
             {
-                var keyAnimal = grid[update.Key].Animal;
-                var oldValue = grid[update.Value].Animal;
-                grid[update.Value].Animal = grid[update.Key].Animal;
-                if (grid[update.Value].Animal != oldValue)
+                if (currentAnimal.ActiveBreedingCooldown != 0) // Reset cooldown
                 {
-                    grid[update.Key].Animal = null;
+                    currentAnimal.ActiveBreedingCooldown--;
+                    if (currentAnimal.ActiveBreedingCooldown == currentAnimal.BreedingCooldown)
+                        currentAnimal.IsBirthing = false;
                 }
-                else { }
-                if (keyAnimal != null)
+
+                // No target animals in range
+                if (target.Item1 == -1)
                 {
-                    if (keyAnimal.Lion != null)
+                    var directionSigns = GetRandomDirectionSigns(dimension, grid, coordinates, updates);
+                    var directionXSign = directionSigns.Item1;
+                    var directionYSign = directionSigns.Item2;
+                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign);
+                }
+                else if (target.Item3 == "Breed") // Other animal of same type in range
+                {
+                    var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
+                    var targetAnimal = animal == 'A' ? (IAnimal)grid[targetIndex].Animal.Antelope : (IAnimal)grid[targetIndex].Animal.Lion;
+                    var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
+                    var directionXSign = directionSigns.Item1;
+                    var directionYSign = directionSigns.Item2;
+                    var x = grid[coordinates];
+                    // Animal breeds animal
+                    if (directionXSign == 'n' && directionYSign == 'n'
+                        && (currentAnimal.ActiveBreedingCooldown == 0 && targetAnimal.ActiveBreedingCooldown == 0))
                     {
-                        if (keyAnimal.Lion.Health == 0)
-                        {
-                            keyAnimal.Lion = null;
-                            keyAnimal = null;
-                        }
+                        currentAnimal.ActiveBreedingCooldown = currentAnimal.BreedingTime + currentAnimal.BreedingCooldown;
+                        currentAnimal.IsBirthing = true;
+                        targetAnimal.ActiveBreedingCooldown = targetAnimal.BreedingTime + targetAnimal.BreedingCooldown;
                     }
-                    else if (keyAnimal.Antelope != null)
+                    else if (currentAnimal.ActiveBreedingCooldown == currentAnimal.BreedingCooldown + 1 && currentAnimal.IsBirthing == true)
                     {
-                        if (keyAnimal.Antelope.Health == 0)
+                        if ((updates.Count + animalCount) >= grid.Count)
                         {
-                            keyAnimal.Antelope = null;
-                            keyAnimal = null;
+                            var updatesElement = updates.Where(a => a.Key != a.Value).FirstOrDefault();
+                            updates.Remove(updatesElement.Key);
+                            updates.Add(updatesElement.Key, updatesElement.Key);
                         }
+                        AddAnimal(animal, grid, true, updates);
+                        directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
+                        directionXSign = directionSigns.Item1;
+                        directionXSign = directionSigns.Item2;
                     }
+                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
+                }
+                else // Target animal in range
+                {
+                    var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
+                    var directionXSign = directionSigns.Item1;
+                    var directionYSign = directionSigns.Item2;
+                    MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
+                }
+                if (!updates.ContainsKey(coordinatesOld))
+                {
+                    updates.Add(coordinatesOld, coordinates);
+                }
+                RemoveAnimalHealth(currentAnimal);
+            }
+        }
+        // Remove animal health
+        private void RemoveAnimalHealth(IAnimal currentAnimal)
+        {
+            currentAnimal.Health -= .5f;
+        }
+        private void DeleteAnimalNoHealth(AnimalsModel keyAnimal)
+        {
+            if (keyAnimal.Lion != null)
+            {
+                if (keyAnimal.Lion.Health == 0)
+                {
+                    keyAnimal.Lion = null;
                 }
             }
-
-            var afterAnimals = GetAnimalCount(grid);
-            if (afterAnimals != animalCount)
+            else if (keyAnimal.Antelope != null)
             {
-                var xx = 1;
+                if (keyAnimal.Antelope.Health == 0)
+                {
+                    keyAnimal.Antelope = null;
+                }
             }
         }
         // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
-        private Tuple<int, int, string> GetTarget(int x, int y, int dimension, GridCellModel gridItem, List<GridCellModel> grid)
+        private Tuple<int, int, string> GetTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid)
         {
             dimension--;
             int range = 0;
@@ -566,12 +525,26 @@ namespace ClassLibrary
             return returnData;
         }
         // Gets the current animal count
-        private int GetAnimalCount(List<GridCellModel> grid)
+        private int GetAnimalCount(List<GridCellModel> grid, string? type = "All")
         {
             int count = 0;
             foreach (var cell in grid)
             {
-                if (cell.Animal != null && (cell.Animal.Antelope != null || cell.Animal.Lion != null)) count++;
+                if (type == "All")
+                {
+                    if (cell.Animal != null && (cell.Animal.Antelope != null || cell.Animal.Lion != null))
+                        count++;
+                }
+                else if (type == "Antelope")
+                {
+                    if (cell.Animal != null && cell.Animal.Antelope != null)
+                        count++;
+                }
+                else if (type == "Lion")
+                {
+                    if (cell.Animal != null && cell.Animal.Lion != null)
+                        count++;
+                }
             }
             return count;
         }

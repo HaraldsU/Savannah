@@ -1,13 +1,23 @@
 ﻿namespace ClassLibrary.Models
 {
-    public class LionModel
+    public class LionModel : IAnimal
     {
-        public readonly int Speed = 2;
-        public readonly int Range = 3;
-        public float Health = 4;
-        public readonly int BreedingCooldown = 4;
-        public int BreedingTime = 2;
-        public int ActiveBreedingCooldown = 0;
-        public bool IsBirthing = false;
+        public int Speed { get; set; }
+        public int Range { get; set; }
+        public float Health { get; set; }
+        public int BreedingCooldown { get; set; }
+        public int BreedingTime { get; set; }
+        public int ActiveBreedingCooldown { get; set; }
+        public bool IsBirthing { get; set; }
+        public LionModel()
+        {
+            Speed = 2;
+            Range = 3;
+            Health = 4;
+            BreedingCooldown = 4;
+            BreedingTime = 2;
+            ActiveBreedingCooldown = 0;
+            IsBirthing = false;
+        }
     }
 }
