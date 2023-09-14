@@ -1,4 +1,4 @@
-﻿namespace ClassLibrary.Models
+﻿namespace AnimalLibrary.Models
 {
     public class GridCellModel
     {

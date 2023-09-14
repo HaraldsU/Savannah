@@ -1,5 +1,5 @@
 ﻿using ClassLibrary;
-using ClassLibrary.Models;
+using AnimalLibrary.Models;
 using Figgle;
 
 namespace Savannah

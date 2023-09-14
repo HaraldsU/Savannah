@@ -1,6 +1,6 @@
-﻿namespace ClassLibrary.Models
+﻿namespace AnimalLibrary.Models.Animals
 {
-    public class LionModel : IAnimal
+    public class AntelopeModel : IAnimal
     {
         public int Speed { get; set; }
         public int Range { get; set; }
@@ -9,11 +9,11 @@
         public int BreedingTime { get; set; }
         public int ActiveBreedingCooldown { get; set; }
         public bool IsBirthing { get; set; }
-        public LionModel()
+        public AntelopeModel()
         {
-            Speed = 2;
-            Range = 3;
-            Health = 4;
+            Speed = 1;
+            Range = 2;
+            Health = 6;
             BreedingCooldown = 4;
             BreedingTime = 2;
             ActiveBreedingCooldown = 0;
