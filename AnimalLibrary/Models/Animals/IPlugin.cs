@@ -1,8 +1,11 @@
-﻿namespace AnimalLibrary.Models
+﻿namespace AnimalLibrary.Models.Animals
 {
     public interface IPlugin
     {
-        char Name { get; }
+        string Name { get; }
+        char FirstLetter { get; }
+        string Type { get; }
+        string Color { get; }
         int Speed { get; }
         int Range { get; }
         float Health { get; set; }

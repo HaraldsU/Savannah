@@ -1,6 +1,8 @@
 ﻿using AnimalLibrary.Models;
 using AnimalLibrary;
 using System.Text;
+using AnimalLibrary.Models.Animals;
+using System.Text.RegularExpressions;
 
 namespace Savannah
 {
@@ -41,10 +43,10 @@ namespace Savannah
                             }
                             if (grid[listIndex].Animal != null)
                             {
-                                if (grid[listIndex].Animal.Lion != null)
-                                    gridStringBuilder.Append(grid[listIndex].Animal.Lion.Name);
-                                else if (grid[listIndex].Animal.Antelope != null)
-                                    gridStringBuilder.Append(grid[listIndex].Animal.Antelope.Name);
+                                if (grid[listIndex].Animal.Predator != null)
+                                    gridStringBuilder.Append(grid[listIndex].Animal.Predator.FirstLetter);
+                                else if (grid[listIndex].Animal.Prey != null)
+                                    gridStringBuilder.Append(grid[listIndex].Animal.Prey.FirstLetter);
                                 else
                                     gridStringBuilder.Append(' ');
                             }
@@ -59,25 +61,64 @@ namespace Savannah
                 gridStringBuilder.Append('\n');
             }
             gridStringBuilder.Append('\n');
+            string pattern = @"^[A-Z]$";
             for (int i = 0; i < gridStringBuilder.Length; i++)
             {
-                if (gridStringBuilder[i] == 'A')
-                    ChangeColor(gridStringBuilder[i].ToString(), "gray");
-                else if (gridStringBuilder[i] == 'L')
-                    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
+                bool isAnimal = Regex.IsMatch(gridStringBuilder[i].ToString(), pattern);
+                if (isAnimal)
+                {
+                    ChangeColor(gridStringBuilder[i].ToString(), GetColor(gridStringBuilder[i]));
+                }
+                //if (gridStringBuilder[i] == 'A')
+                //    ChangeColor(gridStringBuilder[i].ToString(), "gray");
+                //else if (gridStringBuilder[i] == 'L')
+                //    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
                 else
-                    ChangeColor(gridStringBuilder[i].ToString(), "red");
+                    ChangeColor(gridStringBuilder[i].ToString(), "Red");
             }
+        }
+        private string GetColor(char firstLetter)
+        {
+            foreach (IPlugin plugin in Program._plugins)
+            {
+                if (plugin.FirstLetter == firstLetter)
+                {
+                    return plugin.Color;
+                }
+            }
+            return string.Empty;
         }
         private void ChangeColor(string text, string color)
         {
-            if (color == "yellow")
+            if (color == "Yellow")
                 Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (color == "gray")
+            else if (color == "Dark_yellow")
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+            else if (color == "Gray")
                 Console.ForegroundColor = ConsoleColor.Gray;
-            else if (color == "red")
+            else if (color == "Dark_gray")
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            else if (color == "Red")
                 Console.ForegroundColor = ConsoleColor.Red;
-            else if (color == "white")
+            else if (color == "Dark_red")
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+            else if (color == "Blue")
+                Console.ForegroundColor = ConsoleColor.Blue;
+            else if (color == "Dark_blue")
+                Console.ForegroundColor = ConsoleColor.DarkBlue;
+            else if (color == "Green")
+                Console.ForegroundColor = ConsoleColor.Green;
+            else if (color == "Dark_green")
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+            else if (color == "Magenta")
+                Console.ForegroundColor = ConsoleColor.Magenta;
+            else if (color == "Dark_magenta")
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            else if (color == "Cyan")
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            else if (color == "Dark_cyan")
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+            else if (color == "White")
                 Console.ForegroundColor = ConsoleColor.White;
             Console.Write(text);
             Console.ResetColor();

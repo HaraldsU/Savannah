@@ -2,9 +2,12 @@
 {
     public class AntelopeModel : IPlugin
     {
-        public char Name { get; set; }
-        public int Speed { get; set; }
-        public int Range { get; set; }
+        public string Name { get; }
+        public char FirstLetter { get; }
+        public string Type { get; }
+        public string Color { get; }
+        public int Speed { get; }
+        public int Range { get; }
         public float Health { get; set; }
         public int BreedingCooldown { get; set; }
         public int BreedingTime { get; set; }
@@ -12,7 +15,10 @@
         public bool IsBirthing { get; set; }
         public AntelopeModel()
         {
-            Name = 'A';
+            Name = "Antelope";
+            FirstLetter = 'A';
+            Type = "Prey";
+            Color = "Grey";
             Speed = 1;
             Range = 2;
             Health = 6;

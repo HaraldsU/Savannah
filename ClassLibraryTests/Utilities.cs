@@ -1,4 +1,4 @@
-﻿using ClassLibrary.Models;
+﻿using AnimalLibrary.Models;
 
 namespace ClassLibraryTests
 {
