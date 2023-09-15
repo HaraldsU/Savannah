@@ -1,9 +1,10 @@
 ﻿namespace AnimalLibrary.Models
 {
-    public interface IAnimal
+    public interface IPlugin
     {
-        int Speed { get; set; }
-        int Range { get; set; }
+        char Name { get; }
+        int Speed { get; }
+        int Range { get; }
         float Health { get; set; }
         int BreedingCooldown { get; set; }
         int BreedingTime { get; set; }

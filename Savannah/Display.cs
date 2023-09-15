@@ -1,4 +1,5 @@
 ﻿using AnimalLibrary.Models;
+using AnimalLibrary;
 using System.Text;
 
 namespace Savannah
@@ -41,9 +42,9 @@ namespace Savannah
                             if (grid[listIndex].Animal != null)
                             {
                                 if (grid[listIndex].Animal.Lion != null)
-                                    gridStringBuilder.Append('L');
+                                    gridStringBuilder.Append(grid[listIndex].Animal.Lion.Name);
                                 else if (grid[listIndex].Animal.Antelope != null)
-                                    gridStringBuilder.Append('A');
+                                    gridStringBuilder.Append(grid[listIndex].Animal.Antelope.Name);
                                 else
                                     gridStringBuilder.Append(' ');
                             }

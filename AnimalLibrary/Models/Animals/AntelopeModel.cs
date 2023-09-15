@@ -1,7 +1,8 @@
 ﻿namespace AnimalLibrary.Models.Animals
 {
-    public class AntelopeModel : IAnimal
+    public class AntelopeModel : IPlugin
     {
+        public char Name { get; set; }
         public int Speed { get; set; }
         public int Range { get; set; }
         public float Health { get; set; }
@@ -11,6 +12,7 @@
         public bool IsBirthing { get; set; }
         public AntelopeModel()
         {
+            Name = 'A';
             Speed = 1;
             Range = 2;
             Health = 6;

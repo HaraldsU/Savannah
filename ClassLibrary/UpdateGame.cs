@@ -123,7 +123,7 @@ namespace ClassLibrary
         {
             var animalCount = GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animal == 'A' ? (IAnimal)grid[coordinates].Animal.Antelope : (IAnimal)grid[coordinates].Animal.Lion;
+            var currentAnimal = animal == 'A' ? (IPlugin)grid[coordinates].Animal.Antelope : (IPlugin)grid[coordinates].Animal.Lion;
 
             if (currentAnimal != null)
             {
@@ -145,7 +145,7 @@ namespace ClassLibrary
                 else if (target.Item3 == "Breed") // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                    var targetAnimal = animal == 'A' ? (IAnimal)grid[targetIndex].Animal.Antelope : (IAnimal)grid[targetIndex].Animal.Lion;
+                    var targetAnimal = animal == 'A' ? (IPlugin)grid[targetIndex].Animal.Antelope : (IPlugin)grid[targetIndex].Animal.Lion;
                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                     var directionXSign = directionSigns.Item1;
                     var directionYSign = directionSigns.Item2;
@@ -188,7 +188,7 @@ namespace ClassLibrary
             }
         }
         // Remove animal health
-        private void RemoveAnimalHealth(IAnimal currentAnimal)
+        private void RemoveAnimalHealth(IPlugin currentAnimal)
         {
             currentAnimal.Health -= .5f;
         }

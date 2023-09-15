@@ -1,7 +1,8 @@
 ﻿namespace AnimalLibrary.Models.Animals
 {
-    public class LionModel : IAnimal
+    public class LionModel : IPlugin
     {
+        public char Name { get; set; }
         public int Speed { get; set; }
         public int Range { get; set; }
         public float Health { get; set; }
@@ -11,6 +12,7 @@
         public bool IsBirthing { get; set; }
         public LionModel()
         {
+            Name = 'L';
             Speed = 2;
             Range = 3;
             Health = 4;
