@@ -1,5 +1,7 @@
-﻿using ClassLibraryTests;
+﻿using AnimalLibrary.Models.Animals;
+using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Savannah;
 
 namespace ClassLibrary.Tests
 {
@@ -8,13 +10,18 @@ namespace ClassLibrary.Tests
     {
         private UpdateGame _updateGame;
         private InitializeGrid _grid;
+        public PluginLoader _pluginLoader = new();
+        public static List<IPlugin> _plugins;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _updateGame = new UpdateGame();
+            _pluginLoader = new PluginLoader();
+            _plugins = _pluginLoader.LoadPlugins();
+            _updateGame = new UpdateGame(_plugins);
             _grid = new InitializeGrid();
         }
+
 
         [TestMethod()]
         public void AddAnimalTest()

@@ -4,24 +4,24 @@ namespace ClassLibraryTests
 {
     public static class Utilities
     {
-        public static int GetAnimalCount(List<GridCellModel> grid, string? type = "All")
+        public static int GetAnimalCount(List<GridCellModel> grid, string? name = "All")
         {
             int count = 0;
             foreach (var cell in grid)
             {
-                if (type == "All")
+                if (name == "All")
                 {
-                    if (cell.Animal != null && (cell.Animal.Antelope != null || cell.Animal.Lion != null))
+                    if (cell.Animal != null && (cell.Animal.Prey != null || cell.Animal.Predator != null))
                         count++;
                 }
-                else if (type == "Antelope")
+                else if (name == "Antelope")
                 {
-                    if (cell.Animal != null && cell.Animal.Antelope != null)
+                    if (cell.Animal != null && cell.Animal.Prey != null && cell.Animal.Prey.Name == "Antelope")
                         count++;
                 }
-                else if (type == "Lion")
+                else if (name == "Lion")
                 {
-                    if (cell.Animal != null && cell.Animal.Lion != null)
+                    if (cell.Animal != null && cell.Animal.Predator != null && cell.Animal.Predator.Name == "Lion")
                         count++;
                 }
             }

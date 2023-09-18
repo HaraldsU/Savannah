@@ -56,17 +56,11 @@ namespace ClassLibrary
 
                         if (plugin.Type == "Prey")
                         {
-                            animalModel = new AnimalsModel
-                            {
-                                Prey = plugin
-                            };
+                            animalModel.Prey = plugin.CreateNewAnimal();
                         }
                         else if (plugin.Type == "Predator")
                         {
-                            animalModel = new AnimalsModel
-                            {
-                                Predator = plugin
-                            };
+                            animalModel.Predator = plugin.CreateNewAnimal(); ;
                         }
                         grid[cellIndex].Animal = animalModel;
                     }
@@ -278,19 +272,28 @@ namespace ClassLibrary
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Enemy");
                         }
                         else if (gridItem.Animal.Prey != null && grid[coordinates].Animal.Predator != null) // Prey fleeing predator
+                        {
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Enemy");
-                        else if (gridItem.Animal.Predator != null // Predator breeding predator
-                                 && grid[coordinates].Animal.Predator != null
+                        }
+                        else if ((gridItem.Animal.Predator != null) // Predator breeding predator
+                                 && (grid[coordinates].Animal.Predator != null)
                                  && (gridItem.Animal.Predator.ActiveBreedingCooldown == 0 || gridItem.Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
                                  && (grid[coordinates].Animal.Predator.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
+                                 && (gridItem.Animal.Predator.FirstLetter == grid[coordinates].Animal.Predator.FirstLetter)
                                 )
+                        {
+
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Breed");
-                        else if (gridItem.Animal.Prey != null  // Prey breeding prey
-                                 && grid[coordinates].Animal.Prey != null
+                        }
+                        else if ((gridItem.Animal.Prey != null)  // Prey breeding prey
+                                 && (grid[coordinates].Animal.Prey != null)
                                  && (gridItem.Animal.Prey.ActiveBreedingCooldown == 0 || gridItem.Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
                                  && (grid[coordinates].Animal.Prey.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
+                                 && (gridItem.Animal.Prey.FirstLetter == grid[coordinates].Animal.Prey.FirstLetter)
                                 )
+                        {
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Breed");
+                        }
                     }
                 }
             }
@@ -549,12 +552,12 @@ namespace ClassLibrary
                 }
                 else if (type == "Antelope")
                 {
-                    if (cell.Animal != null && cell.Animal.Prey != null)
+                    if (cell.Animal != null && cell.Animal.Prey != null && cell.Animal.Prey.Name == "Antelope")
                         count++;
                 }
                 else if (type == "Lion")
                 {
-                    if (cell.Animal != null && cell.Animal.Predator != null)
+                    if (cell.Animal != null && cell.Animal.Predator != null && cell.Animal.Prey.Name == "Lion")
                         count++;
                 }
             }

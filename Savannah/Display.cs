@@ -66,13 +66,7 @@ namespace Savannah
             {
                 bool isAnimal = Regex.IsMatch(gridStringBuilder[i].ToString(), pattern);
                 if (isAnimal)
-                {
                     ChangeColor(gridStringBuilder[i].ToString(), GetColor(gridStringBuilder[i]));
-                }
-                //if (gridStringBuilder[i] == 'A')
-                //    ChangeColor(gridStringBuilder[i].ToString(), "gray");
-                //else if (gridStringBuilder[i] == 'L')
-                //    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
                 else
                     ChangeColor(gridStringBuilder[i].ToString(), "Red");
             }
@@ -82,9 +76,7 @@ namespace Savannah
             foreach (IPlugin plugin in Program._plugins)
             {
                 if (plugin.FirstLetter == firstLetter)
-                {
                     return plugin.Color;
-                }
             }
             return string.Empty;
         }

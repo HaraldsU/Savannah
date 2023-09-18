@@ -2,6 +2,7 @@
 using AnimalLibrary.Models;
 using Figgle;
 using AnimalLibrary.Models.Animals;
+using System.Text.RegularExpressions;
 
 namespace Savannah
 {
@@ -41,12 +42,18 @@ namespace Savannah
                     Thread.Sleep(250);
                 }
                 ButtonListener(grid);
-                //Console.WriteLine("Press 'L' to add a Lion ...");
-                //Console.WriteLine("Press 'A' to add an Antelope ...");
+                string article;
+                string pattern = @"[AEIOU]";
+                bool isVowel;
                 foreach (IPlugin plugin in Program._plugins)
                 {
-                    Console.WriteLine("Press " + plugin.FirstLetter + " to add an " + plugin.Name + " ...");
-                }   
+                    isVowel = Regex.IsMatch(plugin.FirstLetter.ToString(), pattern);
+                    if (isVowel)
+                        article = "an";
+                    else
+                        article = "a";
+                    Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + plugin.Type + ")");
+                }
                 Console.WriteLine("Press 'Q' to quit ...");
             }
         }

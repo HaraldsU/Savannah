@@ -5,11 +5,11 @@ namespace Savannah
 {
     public class PluginLoader
     {
-        public static List<IPlugin> ReadPlugins()
+        public List<IPlugin> LoadPlugins()
         {
             var pluginsLists = new List<IPlugin>();
             // 1 - Read the dll files from the extensions folder
-            var files = Directory.GetFiles("Plugins", "*.dll");
+            var files = Directory.GetFiles("C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\Savannah\\bin\\Debug\\net7.0\\Plugins", "*.dll");
 
             // 2 - Read the assembly from files 
             foreach (var file in files)
@@ -26,7 +26,11 @@ namespace Savannah
                     pluginsLists.Add(pluginInstance);
                 }
             }
-
+            LionModel lionModel = new();
+            AntelopeModel antelopeModel = new();
+            pluginsLists.Add(lionModel);
+            pluginsLists.Add(antelopeModel);
+            pluginsLists.Sort((plugin1, plugin2) => plugin1.FirstLetter.CompareTo(plugin2.FirstLetter));
             return pluginsLists;
         }
     }
