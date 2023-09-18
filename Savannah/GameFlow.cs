@@ -1,24 +1,27 @@
 ﻿using ClassLibrary;
 using ClassLibrary.Models;
-using Figgle;
+using Savanna.cons;
 
 namespace Savannah
 {
     public class GameFlow
     {
-        static readonly int Dimension = 4;
-        private readonly InitializeGrid _initializeGrid;
+        public static int Dimension;
+        private readonly GridService _initializeGrid;
         private readonly Display _display;
+        private readonly Input _input;
         private readonly UpdateGame _updateGame;
         public GameFlow()
         {
-            _initializeGrid = new InitializeGrid();
-            _display = new Display();
-            _updateGame = new UpdateGame();
+            _initializeGrid = new();
+            _display = new();
+            _input = new();
+            _updateGame = new();
         }
         public void Run()
         {
-            Console.WriteLine(FiggleFonts.MaxFour.Render("Savannah!"));
+            Dimension = _input.GridSizeInput();
+            _display.DisplayGameTitle();
             int cursorTop = Console.CursorTop;
             bool check = true;
             bool turn = true;
@@ -26,7 +29,7 @@ namespace Savannah
 
             while (check)
             {
-                _display.DisplayGrid(grid, Dimension, cursorTop);
+                _display.DisplayGrid(grid, cursorTop, Dimension);
                 if (turn) // Lion turn
                 {
                     _updateGame.MoveAnimals(Dimension, grid, turn);
@@ -40,9 +43,7 @@ namespace Savannah
                     Thread.Sleep(250);
                 }
                 ButtonListener(grid);
-                Console.WriteLine("Press 'L' to add a Lion ...");
-                Console.WriteLine("Press 'A' to add an Antelope ...");
-                Console.WriteLine("Press 'Q' to quit ...");
+                _display.DisplayGameplayInfo();
             }
         }
         private void ButtonListener(List<GridCellModel> grid)

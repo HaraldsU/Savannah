@@ -7,13 +7,13 @@ namespace ClassLibrary.Tests
     public class UpdateGameTests
     {
         private UpdateGame _updateGame;
-        private InitializeGrid _grid;
+        private GridService _grid;
 
         [TestInitialize()]
         public void Initialize()
         {
             _updateGame = new UpdateGame();
-            _grid = new InitializeGrid();
+            _grid = new GridService();
         }
 
         [TestMethod()]

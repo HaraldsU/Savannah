@@ -1,15 +1,44 @@
 ﻿using ClassLibrary.Models;
+using Figgle;
 using System.Text;
 
 namespace Savannah
 {
     public class Display
     {
-        public void DisplayGrid(List<GridCellModel> grid, int dimension, int cursorTop)
+        public void DisplayGridSizeInputPrompt()
+        {
+            Console.SetCursorPosition(0, 0);
+            Console.Write("Enter Grid Size (int 4 to 10): ");
+        }
+        public void DisplayGameTitle()
+        {
+            Console.WriteLine(FiggleFonts.MaxFour.Render("Savannah!"));
+        }
+        public void DisplayGameplayInfo()
+        {
+            Console.WriteLine("Press 'L' to add a Lion ...");
+            Console.WriteLine("Press 'A' to add an Antelope ...");
+            Console.WriteLine("Press 'Q' to quit ...");
+        }
+        public void DisplayGrid(List<GridCellModel> grid, int cursorTop, int dimension)
         {
             Console.CursorVisible = false;
             Console.SetCursorPosition(0, cursorTop - 1);
             StringBuilder gridStringBuilder = new();
+            gridStringBuilder = MakeGrid(grid, gridStringBuilder, dimension);
+            for (int i = 0; i < gridStringBuilder.Length; i++)
+            {
+                if (gridStringBuilder[i] == 'A')
+                    ChangeColor(gridStringBuilder[i].ToString(), "gray");
+                else if (gridStringBuilder[i] == 'L')
+                    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
+                else
+                    ChangeColor(gridStringBuilder[i].ToString(), "red");
+            }
+        }
+        private StringBuilder MakeGrid(List<GridCellModel> grid, StringBuilder gridStringBuilder, int dimension)
+        {
             int height = (dimension * 2) + 1;
             int width = (dimension * 3) + 2;
             int count = 0;
@@ -38,15 +67,10 @@ namespace Savannah
                                 listIndex++;
                                 count = 1;
                             }
-                            if (grid[listIndex].Animal != null)
-                            {
-                                if (grid[listIndex].Animal.Lion != null)
-                                    gridStringBuilder.Append('L');
-                                else if (grid[listIndex].Animal.Antelope != null)
-                                    gridStringBuilder.Append('A');
-                                else
-                                    gridStringBuilder.Append(' ');
-                            }
+                            if (grid[listIndex].Animal?.Lion != null)
+                                gridStringBuilder.Append('L');
+                            else if (grid[listIndex].Animal?.Antelope != null)
+                                gridStringBuilder.Append('A');
                             else
                                 gridStringBuilder.Append(' ');
                         }
@@ -58,17 +82,9 @@ namespace Savannah
                 gridStringBuilder.Append('\n');
             }
             gridStringBuilder.Append('\n');
-            for (int i = 0; i < gridStringBuilder.Length; i++)
-            {
-                if (gridStringBuilder[i] == 'A')
-                    ChangeColor(gridStringBuilder[i].ToString(), "gray");
-                else if (gridStringBuilder[i] == 'L')
-                    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
-                else
-                    ChangeColor(gridStringBuilder[i].ToString(), "red");
-            }
+            return gridStringBuilder;
         }
-        private void ChangeColor(string text, string color)
+        public void ChangeColor(string text, string color)
         {
             if (color == "yellow")
                 Console.ForegroundColor = ConsoleColor.Yellow;

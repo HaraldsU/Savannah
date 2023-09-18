@@ -1,5 +1,7 @@
-﻿using ClassLibrary.Models;
+﻿using ClassLibrary;
+using ClassLibrary.Models;
 using ClassLibrary.Models.Animals;
+using ClassLibrary.Constants;
 
 namespace ClassLibrary
 {
@@ -123,7 +125,7 @@ namespace ClassLibrary
         {
             var animalCount = GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animal == 'A' ? (IAnimal)grid[coordinates].Animal.Antelope : (IAnimal)grid[coordinates].Animal.Lion;
+            var currentAnimal = animal == 'A' ? (IAnimal)grid[coordinates].Animal.Antelope : grid[coordinates].Animal.Lion;
 
             if (currentAnimal != null)
             {
@@ -142,7 +144,7 @@ namespace ClassLibrary
                     var directionYSign = directionSigns.Item2;
                     MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign);
                 }
-                else if (target.Item3 == "Breed") // Other animal of same type in range
+                else if (target.Item3 == AnimalTargetConstants.breed) // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
                     var targetAnimal = animal == 'A' ? (IAnimal)grid[targetIndex].Animal.Antelope : (IAnimal)grid[targetIndex].Animal.Lion;
@@ -151,7 +153,7 @@ namespace ClassLibrary
                     var directionYSign = directionSigns.Item2;
                     var x = grid[coordinates];
                     // Animal breeds animal
-                    if (directionXSign == 'n' && directionYSign == 'n'
+                    if (directionXSign == DirectionConstants.noDirectionSign && directionYSign == DirectionConstants.noDirectionSign
                         && (currentAnimal.ActiveBreedingCooldown == 0 && targetAnimal.ActiveBreedingCooldown == 0))
                     {
                         currentAnimal.ActiveBreedingCooldown = currentAnimal.BreedingTime + currentAnimal.BreedingCooldown;
@@ -263,22 +265,22 @@ namespace ClassLibrary
                         if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Antelope != null) // Lion catching antelope
                         {
                             gridItem.Animal.Lion.Health += 2;
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Enemy");
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.enemy);
                         }
                         else if (gridItem.Animal.Antelope != null && grid[coordinates].Animal.Lion != null) // Antelope fleeing lion
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Enemy");
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.enemy);
                         else if (gridItem.Animal.Lion != null // Lion breeding lion
                                  && grid[coordinates].Animal.Lion != null
                                  && (gridItem.Animal.Lion.ActiveBreedingCooldown == 0 || gridItem.Animal.Lion.ActiveBreedingCooldown > gridItem.Animal.Lion.BreedingCooldown)
                                  && (grid[coordinates].Animal.Lion.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Lion.ActiveBreedingCooldown > gridItem.Animal.Lion.BreedingCooldown)
                                 )
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Breed");
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.breed);
                         else if (gridItem.Animal.Antelope != null  // Antelope breeding antelope
                                  && grid[coordinates].Animal.Antelope != null
                                  && (gridItem.Animal.Antelope.ActiveBreedingCooldown == 0 || gridItem.Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
                                  && (grid[coordinates].Animal.Antelope.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
                                 )
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, "Breed");
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.breed);
                     }
                 }
             }
@@ -298,18 +300,18 @@ namespace ClassLibrary
                 steps = grid[coordinates].Animal.Lion.Speed;
                 if (target != null)
                 {
-                    if (gridItem.X + steps > target.Item1 && directionXSign == '+')
+                    if (gridItem.X + steps > target.Item1 && directionXSign == DirectionConstants.positiveDirectionSign)
                         steps--;
-                    else if (gridItem.X - steps < target.Item1 && directionXSign == '-')
+                    else if (gridItem.X - steps < target.Item1 && directionXSign == DirectionConstants.negativeDirectionSign)
                         steps--;
                 }
             }
             else
                 steps = grid[coordinates].Animal.Antelope.Speed;
 
-            if (directionXSign == '-' && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
+            if (directionXSign == DirectionConstants.negativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
                 coordinates -= steps;
-            else if (directionXSign == '+' && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
+            else if (directionXSign == DirectionConstants.positiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
                 coordinates += steps;
 
             // y abscissa 
@@ -320,18 +322,18 @@ namespace ClassLibrary
                 // target is x, y, action
                 if (target != null)
                 {
-                    if (gridItem.Y + steps > target.Item2 && directionYSign == '+')
+                    if (gridItem.Y + steps > target.Item2 && directionYSign == DirectionConstants.positiveDirectionSign)
                         steps--;
-                    else if (gridItem.Y - steps < target.Item2 && directionYSign == '-')
+                    else if (gridItem.Y - steps < target.Item2 && directionYSign == DirectionConstants.negativeDirectionSign)
                         steps--;
                 }
             }
             else
                 steps = grid[coordinatesOld].Animal.Antelope.Speed;
 
-            if (directionYSign == '-' && (coordinates - (dimension * steps)) >= 0) // Move up
+            if (directionYSign == DirectionConstants.negativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
                 coordinates -= dimension * steps;
-            else if (directionYSign == '+' && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
+            else if (directionYSign == DirectionConstants.positiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
                 coordinates += dimension * steps;
         }
         // Generates a random directional sign: "-", "+" or 'n' (no sign). Defaults as 'n' if fails after 8 tries
@@ -358,8 +360,8 @@ namespace ClassLibrary
                          || updates.ContainsValue(coordinatesTmp)) && count <= 8);
                 if (count >= 8)
                 {
-                    directionXSign = 'n';
-                    directionYSign = 'n';
+                    directionXSign = DirectionConstants.noDirectionSign;
+                    directionYSign = DirectionConstants.noDirectionSign;
                 }
             }
             var returnData = Tuple.Create(directionXSign, directionYSign);
@@ -370,37 +372,37 @@ namespace ClassLibrary
         private void GenerateRandomSign(ref char directionXSign, ref char directionYSign)
         {
             int directionX = RandomGenerator.Next(3);
-            if (directionX == 0) directionXSign = '-';
-            else if (directionX == 1) directionXSign = '+';
-            else directionXSign = 'n';
+            if (directionX == 0) directionXSign = DirectionConstants.negativeDirectionSign;
+            else if (directionX == 1) directionXSign = DirectionConstants.positiveDirectionSign;
+            else directionXSign = DirectionConstants.noDirectionSign;
 
-            if (directionXSign == 'n')
+            if (directionXSign == DirectionConstants.noDirectionSign)
             {
                 int directionY = RandomGenerator.Next(2);
-                if (directionY == 0) directionYSign = '-';
-                else directionYSign = '+';
+                if (directionY == 0) directionYSign = DirectionConstants.negativeDirectionSign;
+                else directionYSign = DirectionConstants.positiveDirectionSign;
             }
             else
             {
                 int directionY = RandomGenerator.Next(3);
-                if (directionY == 0) directionYSign = '-';
-                else if (directionY == 1) directionYSign = '+';
-                else directionYSign = 'n';
+                if (directionY == 0) directionYSign = DirectionConstants.negativeDirectionSign;
+                else if (directionY == 1) directionYSign = DirectionConstants.positiveDirectionSign;
+                else directionYSign = DirectionConstants.noDirectionSign;
 
-                if (directionYSign == 'n')
+                if (directionYSign == DirectionConstants.noDirectionSign)
                 {
                     directionX = RandomGenerator.Next(2);
-                    if (directionX == 0) directionXSign = '-';
-                    else if (directionX == 1) directionXSign = '+';
+                    if (directionX == 0) directionXSign = DirectionConstants.negativeDirectionSign;
+                    else if (directionX == 1) directionXSign = DirectionConstants.positiveDirectionSign;
                 }
             }
         }
-        // Generates a directional sign depending on the direction of the target: "-", "+" or 'n' (no sign)
+        // Generates a directional sign depending on the direction of the target: "-", "+" or DirectionConstants.noDirectionSign (no sign)
         private Tuple<char, char> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, string> target,
                                                           GridCellModel gridItem, Dictionary<int, int> updates)
         {
-            char directionXSign = 'n';
-            char directionYSign = 'n';
+            char directionXSign = DirectionConstants.noDirectionSign;
+            char directionYSign = DirectionConstants.noDirectionSign;
             int subjectX = gridItem.X;
             int subjectY = gridItem.Y;
             int targetX = target.Item1;
@@ -411,92 +413,92 @@ namespace ClassLibrary
 
             if (gridItem.Animal.Lion != null)   // Lions
             {
-                if (target.Item3 == "Enemy") // Attacking
+                if (target.Item3 == AnimalTargetConstants.enemy) // Attacking
                 {
                     if (subjectX != targetX)
                     {
                         if (subjectX > targetX)
-                            directionXSign = '-';
+                            directionXSign = DirectionConstants.negativeDirectionSign;
                         else
-                            directionXSign = '+';
+                            directionXSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
-                        directionXSign = 'n';
+                        directionXSign = DirectionConstants.noDirectionSign;
                     if (subjectY != targetY)
                     {
                         if (subjectY > targetY)
-                            directionYSign = '-';
+                            directionYSign = DirectionConstants.negativeDirectionSign;
                         else
-                            directionYSign = '+';
+                            directionYSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
-                        directionYSign = 'n';
+                        directionYSign = DirectionConstants.noDirectionSign;
                 }
                 else // Breeding
                 {
-                    if ((subjectX + 2) != targetX || (subjectX - 2) != targetX)    // x cords
+                    if ((subjectX + gridItem.Animal.Lion.Speed) != targetX || (subjectX - gridItem.Animal.Lion.Speed) != targetX)    // x cords
                     {
-                        if (subjectX - 2 > targetX)
-                            directionXSign = '-';
-                        else if (subjectX + 2 < targetX)
-                            directionXSign = '+';
+                        if (subjectX - gridItem.Animal.Lion.Speed > targetX)
+                            directionXSign = DirectionConstants.negativeDirectionSign;
+                        else if (subjectX + gridItem.Animal.Lion.Speed < targetX)
+                            directionXSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
-                        directionXSign = 'n';
-                    if ((subjectY + 2) != targetY || (subjectY - 2) != targetY)    // y cords
+                        directionXSign = DirectionConstants.noDirectionSign;
+                    if ((subjectY + gridItem.Animal.Lion.Speed) != targetY || (subjectY - gridItem.Animal.Lion.Speed) != targetY)    // y cords
                     {
-                        if (subjectY - 2 > targetY)
-                            directionYSign = '-';
-                        else if (subjectY + 2 < targetY)
-                            directionYSign = '+';
+                        if (subjectY - gridItem.Animal.Lion.Speed > targetY)
+                            directionYSign = DirectionConstants.negativeDirectionSign;
+                        else if (subjectY + gridItem.Animal.Lion.Speed < targetY)
+                            directionYSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
-                        directionYSign = 'n';
+                        directionYSign = DirectionConstants.noDirectionSign;
                 }
             }
             else // Antelopes
             {
-                if (target.Item3 == "Enemy") // Fleeing
+                if (target.Item3 == AnimalTargetConstants.enemy) // Fleeing
                 {
                     if (subjectX != targetX)
                     {
                         if (subjectX > targetX)
-                            directionXSign = '+';
+                            directionXSign = DirectionConstants.positiveDirectionSign;
                         else
-                            directionXSign = '-';
+                            directionXSign = DirectionConstants.negativeDirectionSign;
                     }
                     else
-                        directionXSign = 'n';
+                        directionXSign = DirectionConstants.noDirectionSign;
                     if (subjectY != targetY)
                     {
                         if (subjectY > targetY)
-                            directionYSign = '+';
+                            directionYSign = DirectionConstants.positiveDirectionSign;
                         else
-                            directionYSign = '-';
+                            directionYSign = DirectionConstants.negativeDirectionSign;
                     }
                     else
-                        directionYSign = 'n';
+                        directionYSign = DirectionConstants.noDirectionSign;
                 }
                 else // Breeding
                 {
-                    if ((subjectX + 1) != targetX || (subjectX - 1) != targetX)    // x cords
+                    if ((subjectX + gridItem.Animal.Antelope?.Speed) != targetX || (subjectX - gridItem.Animal.Antelope?.Speed) != targetX)    // x cords
                     {
-                        if (subjectX - 1 > targetX)
-                            directionXSign = '-';
-                        else if (subjectX + 1 < targetX)
-                            directionXSign = '+';
+                        if (subjectX - gridItem.Animal.Antelope?.Speed > targetX)
+                            directionXSign = DirectionConstants.negativeDirectionSign;
+                        else if (subjectX + gridItem.Animal.Antelope?.Speed < targetX)
+                            directionXSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
-                        directionXSign = 'n';
-                    if ((subjectY + 1) != targetY || (subjectY - 1) != targetY)    // y cords
+                        directionXSign = DirectionConstants.noDirectionSign;
+                    if ((subjectY + gridItem.Animal.Antelope?.Speed) != targetY || (subjectY - gridItem.Animal.Antelope?.Speed) != targetY)    // y cords
                     {
-                        if (subjectY - 1 > targetY)
-                            directionYSign = '-';
-                        else if (subjectY + 1 < targetY)
-                            directionYSign = '+';
+                        if (subjectY - gridItem.Animal.Antelope?.Speed > targetY)
+                            directionYSign = DirectionConstants.negativeDirectionSign;
+                        else if (subjectY + gridItem.Animal.Antelope?.Speed < targetY)
+                            directionYSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
-                        directionYSign = 'n';
+                        directionYSign = DirectionConstants.noDirectionSign;
                 }
             }
             MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign, gridItem, target);
@@ -507,16 +509,16 @@ namespace ClassLibrary
                     coordinatesTmp = updates.First(x => x.Value == coordinatesTmp).Key;
                     if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) || (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
                     {
-                        directionXSign = 'n';
-                        directionYSign = 'n';
+                        directionXSign = DirectionConstants.noDirectionSign;
+                        directionYSign = DirectionConstants.noDirectionSign;
                     }
                 }
                 else
                 {
                     if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) || (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
                     {
-                        directionXSign = 'n';
-                        directionYSign = 'n';
+                        directionXSign = DirectionConstants.noDirectionSign;
+                        directionYSign = DirectionConstants.noDirectionSign;
                     }
                 }
             }
