@@ -10,7 +10,7 @@
         public int Range { get; set; } = 2;
         public float Health { get; set; } = 6f;
         public int BreedingCooldown { get; set; } = 4;
-        public int BreedingTime { get; set; } = 2;
+        public int BreedingTime { get; set; } = 3;
         public int ActiveBreedingCooldown { get; set; } = 0;
         public bool IsBirthing { get; set; } = false;
         public IPlugin CreateNewAnimal()

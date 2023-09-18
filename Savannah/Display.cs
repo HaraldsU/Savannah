@@ -8,6 +8,10 @@ namespace Savannah
 {
     public class Display
     {
+        public void DisplayAnimalCount()
+        {
+            Console.WriteLine($"{Program.Plugins.Count} animal(s) found\n");
+        }
         public void DisplayGridSizeInputPrompt()
         {
             Console.SetCursorPosition(0, 0);

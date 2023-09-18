@@ -21,6 +21,7 @@ namespace Savannah
         public void Run()
         {
             Dimension = _input.GridSizeInput();
+            _display.DisplayAnimalCount();
             _display.DisplayGameTitle();
             int cursorTop = Console.CursorTop;
             bool check = true;

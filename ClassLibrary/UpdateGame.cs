@@ -54,11 +54,11 @@ namespace ClassLibrary
                         if (isChild)
                             animal.ActiveBreedingCooldown = animal.BreedingCooldown;
 
-                        if (plugin.Type == "Prey")
+                        if (plugin.Type == AnimalTypeConstants.prey)
                         {
                             animalModel.Prey = plugin.CreateNewAnimal();
                         }
-                        else if (plugin.Type == "Predator")
+                        else if (plugin.Type == AnimalTypeConstants.predator)
                         {
                             animalModel.Predator = plugin.CreateNewAnimal(); ;
                         }
@@ -91,7 +91,7 @@ namespace ClassLibrary
         }
         private void RemoveAnimalHealth(AnimalsModel currentAnimal, string animalType)
         {
-            if (animalType == "Predator")
+            if (animalType == AnimalTypeConstants.predator)
                 currentAnimal.Predator.Health -= .5f;
             else
                 currentAnimal.Prey.Health -= .5f;
@@ -164,7 +164,7 @@ namespace ClassLibrary
         {
             var animalCount = GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animalType == "Prey" ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
+            var currentAnimal = animalType == AnimalTypeConstants.prey ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
 
             if (currentAnimal != null)
             {
@@ -186,7 +186,7 @@ namespace ClassLibrary
                 else if (target.Item3 == AnimalTargetConstants.breed) // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                    var targetAnimal = animalType == "Prey" ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
+                    var targetAnimal = animalType == AnimalTypeConstants.prey ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                     var directionXSign = directionSigns.Item1;
                     var directionYSign = directionSigns.Item2;
@@ -311,22 +311,23 @@ namespace ClassLibrary
         {
             int steps;
             int coordinatesOld = coordinates;
+            var animalTmp = grid[coordinatesOld].Animal;
+            IPlugin animal = new AnimalsModel().Predator;
+            if (animalTmp.Predator != null)
+                animal = animalTmp.Predator;
+            else if (animalTmp.Prey != null)
+                animal = animalTmp.Prey;
 
             // x abscissa 
             // Get steps
-            if (grid[coordinates].Animal.Predator != null)
+            steps = animal.Speed;
+            if (target != null)
             {
-                steps = grid[coordinates].Animal.Predator.Speed;
-                if (target != null)
-                {
-                    if (gridItem.X + steps > target.Item1 && directionXSign == DirectionConstants.positiveDirectionSign)
-                        steps--;
-                    else if (gridItem.X - steps < target.Item1 && directionXSign == DirectionConstants.negativeDirectionSign)
-                        steps--;
-                }
+                if (gridItem.X + steps >= target.Item1 && directionXSign == DirectionConstants.positiveDirectionSign)
+                    steps--;
+                else if (gridItem.X - steps <= target.Item1 && directionXSign == DirectionConstants.negativeDirectionSign)
+                    steps--;
             }
-            else
-                steps = grid[coordinates].Animal.Prey.Speed;
 
             if (directionXSign == DirectionConstants.negativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
                 coordinates -= steps;
@@ -335,20 +336,15 @@ namespace ClassLibrary
 
             // y abscissa 
             // Get steps
-            if (grid[coordinatesOld].Animal.Predator != null)
+            steps = animal.Speed;
+            // target is Tuple(x, y, action)
+            if (target != null)
             {
-                steps = grid[coordinatesOld].Animal.Predator.Speed;
-                // target is x, y, action
-                if (target != null)
-                {
-                    if (gridItem.Y + steps > target.Item2 && directionYSign == DirectionConstants.positiveDirectionSign)
-                        steps--;
-                    else if (gridItem.Y - steps < target.Item2 && directionYSign == DirectionConstants.negativeDirectionSign)
-                        steps--;
-                }
+                if (gridItem.Y + steps >= target.Item2 && directionYSign == DirectionConstants.positiveDirectionSign)
+                    steps--;
+                else if (gridItem.Y - steps <= target.Item2 && directionYSign == DirectionConstants.negativeDirectionSign)
+                    steps--;
             }
-            else
-                steps = grid[coordinatesOld].Animal.Prey.Speed;
 
             if (directionYSign == DirectionConstants.negativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
                 coordinates -= dimension * steps;
@@ -422,10 +418,13 @@ namespace ClassLibrary
         {
             char directionXSign = DirectionConstants.noDirectionSign;
             char directionYSign = DirectionConstants.noDirectionSign;
+            // Subject animal coordinates
             int subjectX = gridItem.X;
             int subjectY = gridItem.Y;
+            // Target animal coordinates
             int targetX = target.Item1;
             int targetY = target.Item2;
+
             int coordinatesOld = coordinates;
             int coordinatesTmp = coordinates;
             var gridTmp = grid;
@@ -455,24 +454,7 @@ namespace ClassLibrary
                 }
                 else // Breeding
                 {
-                    if ((subjectX + gridItem.Animal.Predator.Speed) != targetX || (subjectX - gridItem.Animal.Predator.Speed) != targetX)    // x cords
-                    {
-                        if (subjectX - gridItem.Animal.Predator.Speed > targetX)
-                            directionXSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectX + gridItem.Animal.Predator.Speed < targetX)
-                            directionXSign = DirectionConstants.positiveDirectionSign;
-                    }
-                    else
-                        directionXSign = DirectionConstants.noDirectionSign;
-                    if ((subjectY + gridItem.Animal.Predator.Speed) != targetY || (subjectY - gridItem.Animal.Predator.Speed) != targetY)    // y cords
-                    {
-                        if (subjectY - gridItem.Animal.Predator.Speed > targetY)
-                            directionYSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectY + gridItem.Animal.Predator.Speed < targetY)
-                            directionYSign = DirectionConstants.positiveDirectionSign;
-                    }
-                    else
-                        directionYSign = DirectionConstants.noDirectionSign;
+                    SetTargetBreedingDirectionSigns(subjectX, targetX, subjectY, targetY, ref directionXSign, ref directionYSign);
                 }
             }
             else // Preys
@@ -500,24 +482,7 @@ namespace ClassLibrary
                 }
                 else // Breeding
                 {
-                    if ((subjectX + gridItem.Animal.Prey?.Speed) != targetX || (subjectX - gridItem.Animal.Prey?.Speed) != targetX)    // x cords
-                    {
-                        if (subjectX - gridItem.Animal.Prey?.Speed > targetX)
-                            directionXSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectX + gridItem.Animal.Prey?.Speed < targetX)
-                            directionXSign = DirectionConstants.positiveDirectionSign;
-                    }
-                    else
-                        directionXSign = DirectionConstants.noDirectionSign;
-                    if ((subjectY + gridItem.Animal.Prey?.Speed) != targetY || (subjectY - gridItem.Animal.Prey?.Speed) != targetY)    // y cords
-                    {
-                        if (subjectY - gridItem.Animal.Prey?.Speed > targetY)
-                            directionYSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectY + gridItem.Animal.Prey?.Speed < targetY)
-                            directionYSign = DirectionConstants.positiveDirectionSign;
-                    }
-                    else
-                        directionYSign = DirectionConstants.noDirectionSign;
+                    SetTargetBreedingDirectionSigns(subjectX, targetX, subjectY, targetY, ref directionXSign, ref directionYSign);
                 }
             }
             MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign, gridItem, target);
@@ -537,23 +502,50 @@ namespace ClassLibrary
 
             return returnData;
         }
+        public void SetTargetBreedingDirectionSigns(int subjectX, int targetX, int subjectY, int targetY, ref char directionXSign, ref char directionYSign)
+        {
+            if (Math.Abs(subjectX - targetX) != 1 && Math.Abs(subjectX + targetX) != 1)
+            {
+                if (subjectX != targetX)    // x cords
+                {
+                    if (subjectX - 1 >= targetX)
+                        directionXSign = DirectionConstants.negativeDirectionSign;
+                    else if (subjectX + 1 <= targetX)
+                        directionXSign = DirectionConstants.positiveDirectionSign;
+                }
+                else
+                    directionXSign = DirectionConstants.noDirectionSign;
+            }
+            if (Math.Abs(subjectY - targetY) != 1 && Math.Abs(subjectY + targetY) != 1)
+            {
+                if (subjectY != targetY)    // y cords
+                {
+                    if (subjectY - 1 >= targetY)
+                        directionYSign = DirectionConstants.negativeDirectionSign;
+                    else if (subjectY + 1 <= targetY)
+                        directionYSign = DirectionConstants.positiveDirectionSign;
+                }
+                else
+                    directionYSign = DirectionConstants.noDirectionSign;
+            }
+        }
         // Gets the current animal count
-        private int GetAnimalCount(List<GridCellModel> grid, string? type = "All")
+        private int GetAnimalCount(List<GridCellModel> grid, string? type = AnimalTypeConstants.all)
         {
             int count = 0;
             foreach (var cell in grid)
             {
-                if (type == "All")
+                if (type == AnimalTypeConstants.all)
                 {
                     if (cell.Animal != null && (cell.Animal.Prey != null || cell.Animal.Predator != null))
                         count++;
                 }
-                else if (type == "Antelope")
+                else if (type == AnimalTypeConstants.prey)
                 {
                     if (cell.Animal != null && cell.Animal.Prey != null)
                         count++;
                 }
-                else if (type == "Lion")
+                else if (type == AnimalTypeConstants.predator)
                 {
                     if (cell.Animal != null && cell.Animal.Predator != null)
                         count++;
