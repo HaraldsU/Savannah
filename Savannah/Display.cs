@@ -37,6 +37,19 @@ namespace Savannah
                     ChangeColor(gridStringBuilder[i].ToString(), "red");
             }
         }
+        public void ChangeColor(string text, string color)
+        {
+            if (color == "yellow")
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            else if (color == "gray")
+                Console.ForegroundColor = ConsoleColor.Gray;
+            else if (color == "red")
+                Console.ForegroundColor = ConsoleColor.Red;
+            else if (color == "white")
+                Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(text);
+            Console.ResetColor();
+        }
         private StringBuilder MakeGrid(List<GridCellModel> grid, StringBuilder gridStringBuilder, int dimension)
         {
             int height = (dimension * 2) + 1;
@@ -83,19 +96,6 @@ namespace Savannah
             }
             gridStringBuilder.Append('\n');
             return gridStringBuilder;
-        }
-        public void ChangeColor(string text, string color)
-        {
-            if (color == "yellow")
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (color == "gray")
-                Console.ForegroundColor = ConsoleColor.Gray;
-            else if (color == "red")
-                Console.ForegroundColor = ConsoleColor.Red;
-            else if (color == "white")
-                Console.ForegroundColor = ConsoleColor.White;
-            Console.Write(text);
-            Console.ResetColor();
         }
     }
 }

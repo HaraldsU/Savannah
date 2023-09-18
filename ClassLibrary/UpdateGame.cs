@@ -88,6 +88,41 @@ namespace ClassLibrary
                 }
             }
         }
+        private void RemoveAnimalHealth(IAnimal currentAnimal)
+        {
+            currentAnimal.Health -= .5f;
+        }
+        private void DeleteAnimalNoHealth(AnimalsModel keyAnimal)
+        {
+            if (keyAnimal.Lion != null)
+            {
+                if (keyAnimal.Lion.Health == 0)
+                {
+                    keyAnimal.Lion = null;
+                }
+            }
+            else if (keyAnimal.Antelope != null)
+            {
+                if (keyAnimal.Antelope.Health == 0)
+                {
+                    keyAnimal.Antelope = null;
+                }
+            }
+        }
+        // Sets empty animals to null
+        private void ClearGridAnimals(List<GridCellModel> grid)
+        {
+            foreach (var cell in grid)
+            {
+                if (cell.Animal != null)
+                {
+                    if (cell.Animal.Antelope == null && cell.Animal.Lion == null)
+                    {
+                        cell.Animal = null;
+                    }
+                }
+            }
+        }
         // Gets the animals new positions
         private void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, bool turn, Dictionary<int, int> updates)
         {
@@ -187,28 +222,6 @@ namespace ClassLibrary
                     updates.Add(coordinatesOld, coordinates);
                 }
                 RemoveAnimalHealth(currentAnimal);
-            }
-        }
-        // Remove animal health
-        private void RemoveAnimalHealth(IAnimal currentAnimal)
-        {
-            currentAnimal.Health -= .5f;
-        }
-        private void DeleteAnimalNoHealth(AnimalsModel keyAnimal)
-        {
-            if (keyAnimal.Lion != null)
-            {
-                if (keyAnimal.Lion.Health == 0)
-                {
-                    keyAnimal.Lion = null;
-                }
-            }
-            else if (keyAnimal.Antelope != null)
-            {
-                if (keyAnimal.Antelope.Health == 0)
-                {
-                    keyAnimal.Antelope = null;
-                }
             }
         }
         // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
@@ -549,20 +562,6 @@ namespace ClassLibrary
                 }
             }
             return count;
-        }
-        // Sets empty animals to null
-        private void ClearGridAnimals(List<GridCellModel> grid)
-        {
-            foreach (var cell in grid)
-            {
-                if (cell.Animal != null)
-                {
-                    if (cell.Animal.Antelope == null && cell.Animal.Lion == null)
-                    {
-                        cell.Animal = null;
-                    }
-                }
-            }
         }
     }
 }
