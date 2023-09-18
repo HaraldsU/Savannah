@@ -1,23 +1,24 @@
-﻿namespace ClassLibrary.Models
+﻿namespace ClassLibrary.Models.Animals
 {
-    public class LionModel : IAnimal
+    public class LionModel : IPlugin
     {
-        public int Speed { get; set; }
-        public int Range { get; set; }
-        public float Health { get; set; }
-        public int BreedingCooldown { get; set; }
-        public int BreedingTime { get; set; }
-        public int ActiveBreedingCooldown { get; set; }
-        public bool IsBirthing { get; set; }
-        public LionModel()
+        public string Name { get; set; } = "Lion";
+        public char FirstLetter { get; set; } = 'L';
+        public string Type { get; set; } = "Predator";
+        public string Color { get; set; } = "Yellow";
+        public int Speed { get; set; } = 2;
+        public int Range { get; set; } = 3;
+        public float Health { get; set; } = 4f;
+        public int BreedingCooldown { get; set; } = 4;
+        public int BreedingTime { get; set; } = 2;
+        public int ActiveBreedingCooldown { get; set; } = 0;
+        public bool IsBirthing { get; set; } = false;
+        public IPlugin CreateNewAnimal()
         {
-            Speed = 2;
-            Range = 3;
-            Health = 4;
-            BreedingCooldown = 4;
-            BreedingTime = 2;
-            ActiveBreedingCooldown = 0;
-            IsBirthing = false;
+            return new LionModel
+            {
+
+            };
         }
     }
 }

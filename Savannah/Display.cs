@@ -1,6 +1,8 @@
 ﻿using ClassLibrary.Models;
+using ClassLibrary.Models.Animals;
 using Figgle;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Savannah
 {
@@ -17,8 +19,18 @@ namespace Savannah
         }
         public void DisplayGameplayInfo()
         {
-            Console.WriteLine("Press 'L' to add a Lion ...");
-            Console.WriteLine("Press 'A' to add an Antelope ...");
+            string article;
+            string pattern = @"[AEIOU]";
+            bool isVowel;
+            foreach (var plugin in Program.Plugins)
+            {
+                isVowel = Regex.IsMatch(plugin.FirstLetter.ToString(), pattern);
+                if (isVowel)
+                    article = "an";
+                else
+                    article = "a";
+                Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + plugin.Type + ")");
+            }
             Console.WriteLine("Press 'Q' to quit ...");
         }
         public void DisplayGrid(List<GridCellModel> grid, int cursorTop, int dimension)
@@ -27,28 +39,60 @@ namespace Savannah
             Console.SetCursorPosition(0, cursorTop - 1);
             StringBuilder gridStringBuilder = new();
             gridStringBuilder = MakeGrid(grid, gridStringBuilder, dimension);
+
+            string pattern = @"^[A-Z]$";
             for (int i = 0; i < gridStringBuilder.Length; i++)
             {
-                if (gridStringBuilder[i] == 'A')
-                    ChangeColor(gridStringBuilder[i].ToString(), "gray");
-                else if (gridStringBuilder[i] == 'L')
-                    ChangeColor(gridStringBuilder[i].ToString(), "yellow");
+                bool isAnimal = Regex.IsMatch(gridStringBuilder[i].ToString(), pattern);
+                if (isAnimal)
+                    ChangeColor(gridStringBuilder[i].ToString(), GetColor(gridStringBuilder[i]));
                 else
-                    ChangeColor(gridStringBuilder[i].ToString(), "red");
+                    ChangeColor(gridStringBuilder[i].ToString(), "Red");
             }
         }
         public void ChangeColor(string text, string color)
         {
-            if (color == "yellow")
+            if (color == "Yellow")
                 Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (color == "gray")
+            else if (color == "Dark_yellow")
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+            else if (color == "Gray")
                 Console.ForegroundColor = ConsoleColor.Gray;
-            else if (color == "red")
+            else if (color == "Dark_gray")
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            else if (color == "Red")
                 Console.ForegroundColor = ConsoleColor.Red;
-            else if (color == "white")
+            else if (color == "Dark_red")
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+            else if (color == "Blue")
+                Console.ForegroundColor = ConsoleColor.Blue;
+            else if (color == "Dark_blue")
+                Console.ForegroundColor = ConsoleColor.DarkBlue;
+            else if (color == "Green")
+                Console.ForegroundColor = ConsoleColor.Green;
+            else if (color == "Dark_green")
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+            else if (color == "Magenta")
+                Console.ForegroundColor = ConsoleColor.Magenta;
+            else if (color == "Dark_magenta")
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            else if (color == "Cyan")
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            else if (color == "Dark_cyan")
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+            else if (color == "White")
                 Console.ForegroundColor = ConsoleColor.White;
             Console.Write(text);
             Console.ResetColor();
+        }
+        private string GetColor(char firstLetter)
+        {
+            foreach (var plugin in Program.Plugins)
+            {
+                if (plugin.FirstLetter == firstLetter)
+                    return plugin.Color;
+            }
+            return string.Empty;
         }
         private StringBuilder MakeGrid(List<GridCellModel> grid, StringBuilder gridStringBuilder, int dimension)
         {
@@ -80,10 +124,10 @@ namespace Savannah
                                 listIndex++;
                                 count = 1;
                             }
-                            if (grid[listIndex].Animal?.Lion != null)
-                                gridStringBuilder.Append('L');
-                            else if (grid[listIndex].Animal?.Antelope != null)
-                                gridStringBuilder.Append('A');
+                            if (grid[listIndex].Animal?.Predator != null)
+                                gridStringBuilder.Append(grid[listIndex].Animal?.Predator.FirstLetter);
+                            else if (grid[listIndex].Animal?.Prey != null)
+                                gridStringBuilder.Append(grid[listIndex].Animal?.Prey.FirstLetter);
                             else
                                 gridStringBuilder.Append(' ');
                         }

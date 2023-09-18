@@ -1,23 +1,24 @@
 ﻿namespace ClassLibrary.Models.Animals
 {
-    public class AntelopeModel : IAnimal
+    public class AntelopeModel : IPlugin
     {
-        public int Speed { get; set; }
-        public int Range { get; set; }
-        public float Health { get; set; }
-        public int BreedingCooldown { get; set; }
-        public int BreedingTime { get; set; }
-        public int ActiveBreedingCooldown { get; set; }
-        public bool IsBirthing { get; set; }
-        public AntelopeModel()
+        public string Name { get; set; } = "Antelope";
+        public char FirstLetter { get; set; } = 'A';
+        public string Type { get; set; } = "Prey";
+        public string Color { get; set; } = "Grey";
+        public int Speed { get; set; } = 1;
+        public int Range { get; set; } = 2;
+        public float Health { get; set; } = 6f;
+        public int BreedingCooldown { get; set; } = 4;
+        public int BreedingTime { get; set; } = 2;
+        public int ActiveBreedingCooldown { get; set; } = 0;
+        public bool IsBirthing { get; set; } = false;
+        public IPlugin CreateNewAnimal()
         {
-            Speed = 1;
-            Range = 2;
-            Health = 6;
-            BreedingCooldown = 4;
-            BreedingTime = 2;
-            ActiveBreedingCooldown = 0;
-            IsBirthing = false;
+            return new AntelopeModel
+            {
+
+            };
         }
     }
 }

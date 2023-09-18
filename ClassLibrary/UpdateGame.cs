@@ -1,14 +1,18 @@
-﻿using ClassLibrary;
+﻿using ClassLibrary.Constants;
 using ClassLibrary.Models;
 using ClassLibrary.Models.Animals;
-using ClassLibrary.Constants;
 
 namespace ClassLibrary
 {
     public class UpdateGame
     {
-        // Adds a new antelope or lion depending on input
-        public void AddAnimal(char animal, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
+        public static List<IPlugin> Plugins;
+        public UpdateGame(List<IPlugin> plugins)
+        {
+            Plugins = plugins;
+        }
+        // Adds a new prey or predator depending on input
+        public void AddAnimal(char animalName, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
             ClearGridAnimals(grid);
             var cellIndex = RandomGenerator.Next(grid.Count);
@@ -41,28 +45,25 @@ namespace ClassLibrary
                     }
                 }
 
-                if (animal == 'A')
+                foreach (IPlugin plugin in Plugins)
                 {
-                    var antelope = new AntelopeModel();
-                    if (isChild)
-                        antelope.ActiveBreedingCooldown = antelope.BreedingCooldown;
+                    if (animalName == plugin.FirstLetter)
+                    {
+                        var animal = plugin;
+                        var animalModel = new AnimalsModel();
+                        if (isChild)
+                            animal.ActiveBreedingCooldown = animal.BreedingCooldown;
 
-                    var animalModel = new AnimalsModel
-                    {
-                        Antelope = antelope
-                    };
-                    grid[cellIndex].Animal = animalModel;
-                }
-                else if (animal == 'L')
-                {
-                    var lion = new LionModel();
-                    if (isChild)
-                        lion.ActiveBreedingCooldown = lion.BreedingCooldown;
-                    var animalModel = new AnimalsModel
-                    {
-                        Lion = lion
-                    };
-                    grid[cellIndex].Animal = animalModel;
+                        if (plugin.Type == "Prey")
+                        {
+                            animalModel.Prey = plugin.CreateNewAnimal();
+                        }
+                        else if (plugin.Type == "Predator")
+                        {
+                            animalModel.Predator = plugin.CreateNewAnimal(); ;
+                        }
+                        grid[cellIndex].Animal = animalModel;
+                    }
                 }
             }
         }
@@ -88,24 +89,27 @@ namespace ClassLibrary
                 }
             }
         }
-        private void RemoveAnimalHealth(IAnimal currentAnimal)
+        private void RemoveAnimalHealth(AnimalsModel currentAnimal, string animalType)
         {
-            currentAnimal.Health -= .5f;
+            if (animalType == "Predator")
+                currentAnimal.Predator.Health -= .5f;
+            else
+                currentAnimal.Prey.Health -= .5f;
         }
         private void DeleteAnimalNoHealth(AnimalsModel keyAnimal)
         {
-            if (keyAnimal.Lion != null)
+            if (keyAnimal.Predator != null)
             {
-                if (keyAnimal.Lion.Health == 0)
+                if (keyAnimal.Predator.Health == 0)
                 {
-                    keyAnimal.Lion = null;
+                    keyAnimal.Predator = null;
                 }
             }
-            else if (keyAnimal.Antelope != null)
+            else if (keyAnimal.Prey != null)
             {
-                if (keyAnimal.Antelope.Health == 0)
+                if (keyAnimal.Prey.Health == 0)
                 {
-                    keyAnimal.Antelope = null;
+                    keyAnimal.Prey = null;
                 }
             }
         }
@@ -116,7 +120,7 @@ namespace ClassLibrary
             {
                 if (cell.Animal != null)
                 {
-                    if (cell.Animal.Antelope == null && cell.Animal.Lion == null)
+                    if (cell.Animal.Prey == null && cell.Animal.Predator == null)
                     {
                         cell.Animal = null;
                     }
@@ -135,20 +139,20 @@ namespace ClassLibrary
 
                     if (grid[coordinates].Animal != null)
                     {
-                        // Lion moving
+                        // Predator moving
                         if (turn == true)
                         {
-                            if (grid[coordinates].Animal.Lion != null)
+                            if (grid[coordinates].Animal.Predator != null)
                             {
-                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, 'L', updates);
+                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, grid[coordinates].Animal.Predator.FirstLetter, grid[coordinates].Animal.Predator.Type, updates);
                             }
                         }
-                        // Antelope moving
+                        // Prey moving
                         else
                         {
-                            if (grid[coordinates].Animal.Antelope != null)
+                            if (grid[coordinates].Animal.Prey != null)
                             {
-                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, 'A', updates);
+                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, grid[coordinates].Animal.Prey.FirstLetter, grid[coordinates].Animal.Prey.Type, updates);
                             }
                         }
                     }
@@ -156,11 +160,11 @@ namespace ClassLibrary
             }
         }
         // Gets one animal new position
-        private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, int coordinates, int coordinatesOld, char animal, Dictionary<int, int> updates)
+        private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, int coordinates, int coordinatesOld, char animal, string animalType, Dictionary<int, int> updates)
         {
             var animalCount = GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animal == 'A' ? (IAnimal)grid[coordinates].Animal.Antelope : grid[coordinates].Animal.Lion;
+            var currentAnimal = animalType == "Prey" ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
 
             if (currentAnimal != null)
             {
@@ -182,7 +186,7 @@ namespace ClassLibrary
                 else if (target.Item3 == AnimalTargetConstants.breed) // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                    var targetAnimal = animal == 'A' ? (IAnimal)grid[targetIndex].Animal.Antelope : (IAnimal)grid[targetIndex].Animal.Lion;
+                    var targetAnimal = animalType == "Prey" ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                     var directionXSign = directionSigns.Item1;
                     var directionYSign = directionSigns.Item2;
@@ -221,7 +225,7 @@ namespace ClassLibrary
                 {
                     updates.Add(coordinatesOld, coordinates);
                 }
-                RemoveAnimalHealth(currentAnimal);
+                RemoveAnimalHealth(grid[coordinatesOld].Animal, animalType);
             }
         }
         // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
@@ -232,10 +236,10 @@ namespace ClassLibrary
 
             if (gridItem.Animal != null)
             {
-                if (gridItem.Animal.Lion != null)
-                    range = gridItem.Animal.Lion.Range;
-                else if (gridItem.Animal.Antelope != null)
-                    range = gridItem.Animal.Antelope.Range;
+                if (gridItem.Animal.Predator != null)
+                    range = gridItem.Animal.Predator.Range;
+                else if (gridItem.Animal.Prey != null)
+                    range = gridItem.Animal.Prey.Range;
             }
 
             int widthStart = Math.Max(0, gridItem.X - range);
@@ -245,11 +249,11 @@ namespace ClassLibrary
 
             if (gridItem.Animal != null)
             {
-                if (gridItem.Animal.Lion != null)
+                if (gridItem.Animal.Predator != null)
                     return GetTargetForLoop(dimension, gridItem, grid,
                                             heightStart, heightEnd, widthStart, widthEnd
                                            );
-                else if (gridItem.Animal.Antelope != null)
+                else if (gridItem.Animal.Prey != null)
                     return GetTargetForLoop(dimension, gridItem, grid,
                                             heightStart, heightEnd, widthStart, widthEnd
                                            );
@@ -275,23 +279,25 @@ namespace ClassLibrary
                     var x = grid[coordinates];
                     if (grid[coordinates].Animal != null && coordinates != gridItemCoordinates)
                     {
-                        if (gridItem.Animal.Lion != null && grid[coordinates].Animal.Antelope != null) // Lion catching antelope
+                        if (gridItem.Animal.Predator != null && grid[coordinates].Animal.Prey != null) // Predator catching prey
                         {
-                            gridItem.Animal.Lion.Health += 2;
+                            gridItem.Animal.Predator.Health += 2;
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.enemy);
                         }
-                        else if (gridItem.Animal.Antelope != null && grid[coordinates].Animal.Lion != null) // Antelope fleeing lion
+                        else if (gridItem.Animal.Prey != null && grid[coordinates].Animal.Predator != null) // Prey fleeing predator
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.enemy);
-                        else if (gridItem.Animal.Lion != null // Lion breeding lion
-                                 && grid[coordinates].Animal.Lion != null
-                                 && (gridItem.Animal.Lion.ActiveBreedingCooldown == 0 || gridItem.Animal.Lion.ActiveBreedingCooldown > gridItem.Animal.Lion.BreedingCooldown)
-                                 && (grid[coordinates].Animal.Lion.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Lion.ActiveBreedingCooldown > gridItem.Animal.Lion.BreedingCooldown)
+                        else if (gridItem.Animal.Predator != null // Predator breeding predator
+                                 && grid[coordinates].Animal.Predator != null
+                                 && (gridItem.Animal.Predator.ActiveBreedingCooldown == 0 || gridItem.Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
+                                 && (grid[coordinates].Animal.Predator.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
+                                 && (gridItem.Animal.Predator.FirstLetter == grid[coordinates].Animal.Predator.FirstLetter)
                                 )
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.breed);
-                        else if (gridItem.Animal.Antelope != null  // Antelope breeding antelope
-                                 && grid[coordinates].Animal.Antelope != null
-                                 && (gridItem.Animal.Antelope.ActiveBreedingCooldown == 0 || gridItem.Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
-                                 && (grid[coordinates].Animal.Antelope.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Antelope.ActiveBreedingCooldown > gridItem.Animal.Antelope.BreedingCooldown)
+                        else if (gridItem.Animal.Prey != null  // Prey breeding prey
+                                 && grid[coordinates].Animal.Prey != null
+                                 && (gridItem.Animal.Prey.ActiveBreedingCooldown == 0 || gridItem.Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
+                                 && (grid[coordinates].Animal.Prey.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
+                                 && (gridItem.Animal.Prey.FirstLetter == grid[coordinates].Animal.Prey.FirstLetter)
                                 )
                             return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.breed);
                     }
@@ -308,9 +314,9 @@ namespace ClassLibrary
 
             // x abscissa 
             // Get steps
-            if (grid[coordinates].Animal.Lion != null)
+            if (grid[coordinates].Animal.Predator != null)
             {
-                steps = grid[coordinates].Animal.Lion.Speed;
+                steps = grid[coordinates].Animal.Predator.Speed;
                 if (target != null)
                 {
                     if (gridItem.X + steps > target.Item1 && directionXSign == DirectionConstants.positiveDirectionSign)
@@ -320,7 +326,7 @@ namespace ClassLibrary
                 }
             }
             else
-                steps = grid[coordinates].Animal.Antelope.Speed;
+                steps = grid[coordinates].Animal.Prey.Speed;
 
             if (directionXSign == DirectionConstants.negativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
                 coordinates -= steps;
@@ -329,9 +335,9 @@ namespace ClassLibrary
 
             // y abscissa 
             // Get steps
-            if (grid[coordinatesOld].Animal.Lion != null)
+            if (grid[coordinatesOld].Animal.Predator != null)
             {
-                steps = grid[coordinatesOld].Animal.Lion.Speed;
+                steps = grid[coordinatesOld].Animal.Predator.Speed;
                 // target is x, y, action
                 if (target != null)
                 {
@@ -342,7 +348,7 @@ namespace ClassLibrary
                 }
             }
             else
-                steps = grid[coordinatesOld].Animal.Antelope.Speed;
+                steps = grid[coordinatesOld].Animal.Prey.Speed;
 
             if (directionYSign == DirectionConstants.negativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
                 coordinates -= dimension * steps;
@@ -424,7 +430,7 @@ namespace ClassLibrary
             int coordinatesTmp = coordinates;
             var gridTmp = grid;
 
-            if (gridItem.Animal.Lion != null)   // Lions
+            if (gridItem.Animal.Predator != null)   // Predators
             {
                 if (target.Item3 == AnimalTargetConstants.enemy) // Attacking
                 {
@@ -449,27 +455,27 @@ namespace ClassLibrary
                 }
                 else // Breeding
                 {
-                    if ((subjectX + gridItem.Animal.Lion.Speed) != targetX || (subjectX - gridItem.Animal.Lion.Speed) != targetX)    // x cords
+                    if ((subjectX + gridItem.Animal.Predator.Speed) != targetX || (subjectX - gridItem.Animal.Predator.Speed) != targetX)    // x cords
                     {
-                        if (subjectX - gridItem.Animal.Lion.Speed > targetX)
+                        if (subjectX - gridItem.Animal.Predator.Speed > targetX)
                             directionXSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectX + gridItem.Animal.Lion.Speed < targetX)
+                        else if (subjectX + gridItem.Animal.Predator.Speed < targetX)
                             directionXSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
                         directionXSign = DirectionConstants.noDirectionSign;
-                    if ((subjectY + gridItem.Animal.Lion.Speed) != targetY || (subjectY - gridItem.Animal.Lion.Speed) != targetY)    // y cords
+                    if ((subjectY + gridItem.Animal.Predator.Speed) != targetY || (subjectY - gridItem.Animal.Predator.Speed) != targetY)    // y cords
                     {
-                        if (subjectY - gridItem.Animal.Lion.Speed > targetY)
+                        if (subjectY - gridItem.Animal.Predator.Speed > targetY)
                             directionYSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectY + gridItem.Animal.Lion.Speed < targetY)
+                        else if (subjectY + gridItem.Animal.Predator.Speed < targetY)
                             directionYSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
                         directionYSign = DirectionConstants.noDirectionSign;
                 }
             }
-            else // Antelopes
+            else // Preys
             {
                 if (target.Item3 == AnimalTargetConstants.enemy) // Fleeing
                 {
@@ -494,20 +500,20 @@ namespace ClassLibrary
                 }
                 else // Breeding
                 {
-                    if ((subjectX + gridItem.Animal.Antelope?.Speed) != targetX || (subjectX - gridItem.Animal.Antelope?.Speed) != targetX)    // x cords
+                    if ((subjectX + gridItem.Animal.Prey?.Speed) != targetX || (subjectX - gridItem.Animal.Prey?.Speed) != targetX)    // x cords
                     {
-                        if (subjectX - gridItem.Animal.Antelope?.Speed > targetX)
+                        if (subjectX - gridItem.Animal.Prey?.Speed > targetX)
                             directionXSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectX + gridItem.Animal.Antelope?.Speed < targetX)
+                        else if (subjectX + gridItem.Animal.Prey?.Speed < targetX)
                             directionXSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
                         directionXSign = DirectionConstants.noDirectionSign;
-                    if ((subjectY + gridItem.Animal.Antelope?.Speed) != targetY || (subjectY - gridItem.Animal.Antelope?.Speed) != targetY)    // y cords
+                    if ((subjectY + gridItem.Animal.Prey?.Speed) != targetY || (subjectY - gridItem.Animal.Prey?.Speed) != targetY)    // y cords
                     {
-                        if (subjectY - gridItem.Animal.Antelope?.Speed > targetY)
+                        if (subjectY - gridItem.Animal.Prey?.Speed > targetY)
                             directionYSign = DirectionConstants.negativeDirectionSign;
-                        else if (subjectY + gridItem.Animal.Antelope?.Speed < targetY)
+                        else if (subjectY + gridItem.Animal.Prey?.Speed < targetY)
                             directionYSign = DirectionConstants.positiveDirectionSign;
                     }
                     else
@@ -520,19 +526,11 @@ namespace ClassLibrary
                 if (updates.ContainsValue(coordinatesTmp))
                 {
                     coordinatesTmp = updates.First(x => x.Value == coordinatesTmp).Key;
-                    if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) || (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
-                    {
-                        directionXSign = DirectionConstants.noDirectionSign;
-                        directionYSign = DirectionConstants.noDirectionSign;
-                    }
                 }
-                else
+                if ((gridTmp[coordinatesTmp].Animal.Prey != null && gridTmp[coordinates].Animal.Prey != null) || (gridTmp[coordinatesTmp].Animal.Predator != null && gridTmp[coordinates].Animal.Predator != null))
                 {
-                    if ((gridTmp[coordinatesTmp].Animal.Antelope != null && gridTmp[coordinates].Animal.Antelope != null) || (gridTmp[coordinatesTmp].Animal.Lion != null && gridTmp[coordinates].Animal.Lion != null))
-                    {
-                        directionXSign = DirectionConstants.noDirectionSign;
-                        directionYSign = DirectionConstants.noDirectionSign;
-                    }
+                    directionXSign = DirectionConstants.noDirectionSign;
+                    directionYSign = DirectionConstants.noDirectionSign;
                 }
             }
             var returnData = Tuple.Create(directionXSign, directionYSign);
@@ -547,17 +545,17 @@ namespace ClassLibrary
             {
                 if (type == "All")
                 {
-                    if (cell.Animal != null && (cell.Animal.Antelope != null || cell.Animal.Lion != null))
+                    if (cell.Animal != null && (cell.Animal.Prey != null || cell.Animal.Predator != null))
                         count++;
                 }
                 else if (type == "Antelope")
                 {
-                    if (cell.Animal != null && cell.Animal.Antelope != null)
+                    if (cell.Animal != null && cell.Animal.Prey != null)
                         count++;
                 }
                 else if (type == "Lion")
                 {
-                    if (cell.Animal != null && cell.Animal.Lion != null)
+                    if (cell.Animal != null && cell.Animal.Predator != null)
                         count++;
                 }
             }

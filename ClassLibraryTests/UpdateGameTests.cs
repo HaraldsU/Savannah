@@ -1,4 +1,5 @@
-﻿using ClassLibraryTests;
+﻿using ClassLibrary.Models.Animals;
+using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassLibrary.Tests
@@ -8,11 +9,15 @@ namespace ClassLibrary.Tests
     {
         private UpdateGame _updateGame;
         private GridService _grid;
+        public PluginLoader _pluginLoader;
+        public static List<IPlugin> Plugins;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _updateGame = new UpdateGame();
+            _pluginLoader = new();
+            Plugins = _pluginLoader.LoadPlugins();
+            _updateGame = new UpdateGame(Plugins);
             _grid = new GridService();
         }
 

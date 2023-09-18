@@ -4,7 +4,7 @@ namespace ClassLibrary.Models
 {
     public class AnimalsModel
     {
-        public LionModel? Lion { get; set; } = null;
-        public AntelopeModel? Antelope { get; set; } = null;
+        public IPlugin? Predator { get; set; } = null;
+        public IPlugin? Prey { get; set; } = null;
     }
 }
