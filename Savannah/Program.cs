@@ -5,7 +5,7 @@ namespace Savannah;
 class Program
 {
     public static List<IPlugin> Plugins;
-    public static PluginLoader _pluginLoader = new PluginLoader();
+    private static PluginLoader _pluginLoader = new PluginLoader();
     static void Main(string[] args)
     {
         Plugins = _pluginLoader.LoadPlugins();

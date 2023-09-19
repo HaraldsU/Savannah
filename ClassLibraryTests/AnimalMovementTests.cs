@@ -11,8 +11,8 @@ namespace ClassLibrary.Tests
         private UpdateGame _updateGame;
         private GridService _grid;
         private AnimalMovement _animalMovement;
-        public PluginLoader _pluginLoader;
-        public static List<IPlugin> Plugins;
+        private PluginLoader _pluginLoader;
+        private static List<IPlugin> Plugins;
 
         [TestInitialize()]
         public void Initialize()

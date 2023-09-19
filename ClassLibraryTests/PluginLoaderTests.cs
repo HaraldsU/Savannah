@@ -6,7 +6,7 @@ namespace ClassLibrary.Tests
     [TestClass()]
     public class PluginLoaderTests
     {
-        PluginLoader _pluginLoader;
+        private PluginLoader _pluginLoader;
         public PluginLoaderTests()
         {
             _pluginLoader = new();
