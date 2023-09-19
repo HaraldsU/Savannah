@@ -1,6 +1,4 @@
-﻿using ClassLibrary.Models.Animals;
-
-namespace ClassLibrary.Models
+﻿namespace ClassLibrary.Models
 {
     public class AnimalsModel
     {

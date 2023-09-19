@@ -1,5 +1,5 @@
-﻿using ClassLibrary.Models.Animals;
-using ClassLibrary;
+﻿using ClassLibrary;
+using ClassLibrary.Models;
 
 namespace Savannah;
 class Program
@@ -9,8 +9,6 @@ class Program
     static void Main(string[] args)
     {
         Plugins = _pluginLoader.LoadPlugins();
-        Console.WriteLine($"{Plugins.Count} plugin(s) found\n");
-
         var gameFlow = new GameFlow();
         gameFlow.Run();
     }

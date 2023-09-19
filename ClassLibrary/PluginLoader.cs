@@ -1,4 +1,5 @@
-﻿using ClassLibrary.Models.Animals;
+﻿using ClassLibrary.Models;
+using System.Reflection;
 
 namespace ClassLibrary
 {
@@ -7,10 +8,15 @@ namespace ClassLibrary
         public List<IPlugin> LoadPlugins()
         {
             var pluginsLists = new List<IPlugin>();
-            LionModel lionModel = new();
-            AntelopeModel antelopeModel = new();
-            pluginsLists.Add(lionModel);
-            pluginsLists.Add(antelopeModel);
+            
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var types = currentAssembly.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface);
+            foreach (var type in types)
+            {
+                var instance = Activator.CreateInstance(type) as IPlugin;
+                pluginsLists.Add(instance);
+            }
+            
             pluginsLists.Sort((plugin1, plugin2) => plugin1.FirstLetter.CompareTo(plugin2.FirstLetter));
             return pluginsLists;
         }

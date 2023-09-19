@@ -1,4 +1,6 @@
-﻿using ClassLibrary.Models.Animals;
+﻿using ClassLibrary;
+using ClassLibrary.Constants;
+using ClassLibrary.Models;
 using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,12 +33,12 @@ namespace ClassLibrary.Tests
             bool isChild = false;
 
             // Act
-            _updateGame.AddAnimal(animalAntelope, grid, isChild);
-            _updateGame.AddAnimal(animalLion, grid, isChild);
+            UpdateGame.AddAnimal(animalAntelope, grid, isChild);
+            UpdateGame.AddAnimal(animalLion, grid, isChild);
 
             // Assert
-            Assert.AreEqual(1, Utilities.GetAnimalCount(grid, "Antelope"));
-            Assert.AreEqual(1, Utilities.GetAnimalCount(grid, "Lion"));
+            Assert.AreEqual(1, UpdateGame.GetAnimalCount(grid, AnimalTypeConstants.prey));
+            Assert.AreEqual(1, UpdateGame.GetAnimalCount(grid, AnimalTypeConstants.predator));
         }
 
         [TestMethod()]
@@ -45,7 +47,9 @@ namespace ClassLibrary.Tests
             // Arrange
             int dimensions = 8;
             var grid = _grid.Initialize(dimensions);
-            _updateGame.AddAnimal('L', grid, false);
+            char animalCharacter = 'L';
+            bool isChild = false;
+            UpdateGame.AddAnimal(animalCharacter, grid, isChild);
             bool turn = true;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
@@ -61,7 +65,9 @@ namespace ClassLibrary.Tests
             // Arrange
             int dimensions = 8;
             var grid = _grid.Initialize(dimensions);
-            _updateGame.AddAnimal('A', grid, false);
+            char animalCharacter = 'A';
+            bool isChild = false;
+            UpdateGame.AddAnimal(animalCharacter, grid, isChild);
             bool turn = false;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
@@ -70,6 +76,23 @@ namespace ClassLibrary.Tests
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
+        }
+
+        [TestMethod()]
+        public void GetAnimalCountTest()
+        {
+            // Arrange
+            char animalAntelopeCharacter = 'A';
+            char animalLionCharacter = 'L';
+            var grid = _grid.Initialize(8);
+            bool isChild = false;
+
+            // Act
+            UpdateGame.AddAnimal(animalAntelopeCharacter, grid, isChild);
+            UpdateGame.AddAnimal(animalLionCharacter, grid, isChild);
+
+            // Assert
+            Assert.AreEqual(2, UpdateGame.GetAnimalCount(grid, AnimalTypeConstants.all));
         }
     }
 }

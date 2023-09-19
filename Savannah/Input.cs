@@ -7,11 +7,9 @@ namespace Savanna.cons
     public class Input
     {
         private Display _display;
-        private UpdateGame _updateGame;
         public Input() 
         { 
             _display = new();
-            _updateGame = new(Program.Plugins);
         }
         public int GridSizeInput()
         {
@@ -62,7 +60,7 @@ namespace Savanna.cons
                     {
                         if (click.Key == dictionary.GetValueOrDefault(plugin.FirstLetter))
                         {
-                            _updateGame.AddAnimal(plugin.FirstLetter, grid, false);
+                            UpdateGame.AddAnimal(plugin.FirstLetter, grid, false);
                         }
                     }
                 }

@@ -10,7 +10,7 @@ namespace Savannah
     {
         public void DisplayAnimalCount()
         {
-            Console.WriteLine($"{Program.Plugins.Count} animal(s) found\n");
+            Console.WriteLine($"{Program.Plugins.Count} plugin(s) found\n");
         }
         public void DisplayGridSizeInputPrompt()
         {

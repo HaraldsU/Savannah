@@ -1,4 +1,4 @@
-﻿namespace ClassLibrary.Models.Animals
+﻿namespace ClassLibrary.Models
 {
     public interface IPlugin
     {
