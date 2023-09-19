@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibraryTests", "ClassL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalLibrary", "AnimalLibrary\AnimalLibrary.csproj", "{E230682B-380D-446A-AE3D-16137D9EF849}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavannaWebApplication", "SavannaWebApplication\SavannaWebApplication.csproj", "{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavannaWebAPI", "SavannaWebAPI\SavannaWebAPI.csproj", "{30C520F7-F9D7-465A-BA65-4206EFC840A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{E230682B-380D-446A-AE3D-16137D9EF849}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E230682B-380D-446A-AE3D-16137D9EF849}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E230682B-380D-446A-AE3D-16137D9EF849}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30C520F7-F9D7-465A-BA65-4206EFC840A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30C520F7-F9D7-465A-BA65-4206EFC840A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30C520F7-F9D7-465A-BA65-4206EFC840A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30C520F7-F9D7-465A-BA65-4206EFC840A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
