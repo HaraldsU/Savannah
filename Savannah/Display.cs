@@ -1,7 +1,6 @@
 ﻿using AnimalLibrary.Models;
-using AnimalLibrary;
+using Figgle;
 using System.Text;
-using AnimalLibrary.Models.Animals;
 using System.Text.RegularExpressions;
 
 namespace Savannah
@@ -10,7 +9,9 @@ namespace Savannah
     {
         public void DisplayAnimalCount()
         {
-            Console.WriteLine($"{Program.Plugins.Count} plugin(s) found\n");
+            var files = Directory.GetFiles("C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\AnimalLibrary\\Models\\Animals\\");
+            Console.WriteLine($"{Program.Plugins.Count} Animal(s) found");
+            Console.WriteLine($"{Program.Plugins.Count - files.Length} plugin(s) found\n");
         }
         public void DisplayGridSizeInputPrompt()
         {

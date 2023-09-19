@@ -1,5 +1,5 @@
-﻿using ClassLibrary;
-using ClassLibrary.Models;
+﻿using AnimalLibrary.Models;
+using ClassLibrary;
 using Savannah;
 
 namespace Savanna.cons
@@ -7,8 +7,8 @@ namespace Savanna.cons
     public class Input
     {
         private Display _display;
-        public Input() 
-        { 
+        public Input()
+        {
             _display = new();
         }
         public int GridSizeInput()

@@ -1,8 +1,5 @@
 ﻿using ClassLibrary;
-using AnimalLibrary.Models;
-using Figgle;
-using AnimalLibrary.Models.Animals;
-using System.Text.RegularExpressions;
+using Savanna.cons;
 
 namespace Savannah
 {

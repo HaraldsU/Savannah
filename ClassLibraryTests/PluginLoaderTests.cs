@@ -1,4 +1,4 @@
-﻿using ClassLibrary.Models;
+﻿using AnimalLibrary.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassLibrary.Tests

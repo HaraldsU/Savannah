@@ -1,4 +1,5 @@
-﻿using AnimalLibrary.Models.Animals;
+﻿using AnimalLibrary.Models;
+using ClassLibrary;
 
 namespace Savannah;
 class Program

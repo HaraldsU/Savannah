@@ -1,5 +1,5 @@
 ﻿using AnimalLibrary.Models;
-using AnimalLibrary.Models.Animals;
+using ClassLibrary.Constants;
 
 namespace ClassLibrary
 {

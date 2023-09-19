@@ -1,7 +1,7 @@
-﻿using AnimalLibrary.Models.Animals;
+﻿using AnimalLibrary.Models;
+using ClassLibrary.Constants;
 using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Savannah;
 
 namespace ClassLibrary.Tests
 {

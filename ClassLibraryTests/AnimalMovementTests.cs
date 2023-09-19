@@ -1,7 +1,5 @@
-﻿using ClassLibrary.Models;
-using ClassLibraryTests;
+﻿using AnimalLibrary.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace ClassLibrary.Tests
 {

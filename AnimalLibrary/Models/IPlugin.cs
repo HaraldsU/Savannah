@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:AnimalLibrary/Models/Animals/IPlugin.cs
-﻿namespace AnimalLibrary.Models.Animals
-========
-﻿namespace ClassLibrary.Models
->>>>>>>> Iter-2:ClassLibrary/Models/IPlugin.cs
+﻿namespace AnimalLibrary.Models
 {
     public interface IPlugin
     {
