@@ -3,13 +3,13 @@
 namespace ClassLibrary.Tests
 {
     [TestClass()]
-    public class InitializeGridTests
+    public class GridServiceTests
     {
-        public InitializeGrid _grid;
+        private GridService _grid;
         [TestInitialize()]
         public void Initialize()
         {
-            _grid = new InitializeGrid();
+            _grid = new GridService();
         }
         [TestMethod()]
         public void InitializeTest()

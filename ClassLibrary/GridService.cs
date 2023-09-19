@@ -2,7 +2,7 @@
 
 namespace ClassLibrary
 {
-    public class InitializeGrid
+    public class GridService
     {
         public List<GridCellModel> Initialize(int dimension)
         {

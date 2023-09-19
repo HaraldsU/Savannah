@@ -8,59 +8,42 @@ namespace Savannah
 {
     public class Display
     {
-        public void DisplayGrid(List<GridCellModel> grid, int dimension, int cursorTop)
+        public void DisplayAnimalCount()
+        {
+            Console.WriteLine($"{Program.Plugins.Count} plugin(s) found\n");
+        }
+        public void DisplayGridSizeInputPrompt()
+        {
+            Console.SetCursorPosition(0, 0);
+            Console.Write("Enter Grid Size (int 4 to 10): ");
+        }
+        public void DisplayGameTitle()
+        {
+            Console.WriteLine(FiggleFonts.MaxFour.Render("Savannah!"));
+        }
+        public void DisplayGameplayInfo()
+        {
+            string article;
+            string pattern = @"[AEIOU]";
+            bool isVowel;
+            foreach (var plugin in Program.Plugins)
+            {
+                isVowel = Regex.IsMatch(plugin.FirstLetter.ToString(), pattern);
+                if (isVowel)
+                    article = "an";
+                else
+                    article = "a";
+                Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + plugin.Type + ")");
+            }
+            Console.WriteLine("Press 'Q' to quit ...");
+        }
+        public void DisplayGrid(List<GridCellModel> grid, int cursorTop, int dimension)
         {
             Console.CursorVisible = false;
             Console.SetCursorPosition(0, cursorTop - 1);
             StringBuilder gridStringBuilder = new();
-            int height = (dimension * 2) + 1;
-            int width = (dimension * 3) + 2;
-            int count = 0;
-            int listIndex = 0;
+            gridStringBuilder = MakeGrid(grid, gridStringBuilder, dimension);
 
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    if (i % 2 == 0)
-                    {
-                        if (j != width - 1)
-                            gridStringBuilder.Append('-');
-                    }
-                    else
-                    {
-                        if (j % 3 == 0)
-                        {
-                            gridStringBuilder.Append('|');
-                            count++;
-                        }
-                        else if (j + 1 != width)
-                        {
-                            if (count == 2)
-                            {
-                                listIndex++;
-                                count = 1;
-                            }
-                            if (grid[listIndex].Animal != null)
-                            {
-                                if (grid[listIndex].Animal.Predator != null)
-                                    gridStringBuilder.Append(grid[listIndex].Animal.Predator.FirstLetter);
-                                else if (grid[listIndex].Animal.Prey != null)
-                                    gridStringBuilder.Append(grid[listIndex].Animal.Prey.FirstLetter);
-                                else
-                                    gridStringBuilder.Append(' ');
-                            }
-                            else
-                                gridStringBuilder.Append(' ');
-                        }
-                    }
-                }
-                count = 0;
-                if (i != 0 && i % 2 == 0)
-                    listIndex++;
-                gridStringBuilder.Append('\n');
-            }
-            gridStringBuilder.Append('\n');
             string pattern = @"^[A-Z]$";
             for (int i = 0; i < gridStringBuilder.Length; i++)
             {
@@ -71,16 +54,7 @@ namespace Savannah
                     ChangeColor(gridStringBuilder[i].ToString(), "Red");
             }
         }
-        private string GetColor(char firstLetter)
-        {
-            foreach (IPlugin plugin in Program._plugins)
-            {
-                if (plugin.FirstLetter == firstLetter)
-                    return plugin.Color;
-            }
-            return string.Empty;
-        }
-        private void ChangeColor(string text, string color)
+        public void ChangeColor(string text, string color)
         {
             if (color == "Yellow")
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -114,6 +88,62 @@ namespace Savannah
                 Console.ForegroundColor = ConsoleColor.White;
             Console.Write(text);
             Console.ResetColor();
+        }
+        private string GetColor(char firstLetter)
+        {
+            foreach (var plugin in Program.Plugins)
+            {
+                if (plugin.FirstLetter == firstLetter)
+                    return plugin.Color;
+            }
+            return string.Empty;
+        }
+        private StringBuilder MakeGrid(List<GridCellModel> grid, StringBuilder gridStringBuilder, int dimension)
+        {
+            int height = (dimension * 2) + 1;
+            int width = (dimension * 3) + 2;
+            int count = 0;
+            int listIndex = 0;
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    if (i % 2 == 0)
+                    {
+                        if (j != width - 1)
+                            gridStringBuilder.Append('-');
+                    }
+                    else
+                    {
+                        if (j % 3 == 0)
+                        {
+                            gridStringBuilder.Append('|');
+                            count++;
+                        }
+                        else if (j + 1 != width)
+                        {
+                            if (count == 2)
+                            {
+                                listIndex++;
+                                count = 1;
+                            }
+                            if (grid[listIndex].Animal?.Predator != null)
+                                gridStringBuilder.Append(grid[listIndex].Animal?.Predator.FirstLetter);
+                            else if (grid[listIndex].Animal?.Prey != null)
+                                gridStringBuilder.Append(grid[listIndex].Animal?.Prey.FirstLetter);
+                            else
+                                gridStringBuilder.Append(' ');
+                        }
+                    }
+                }
+                count = 0;
+                if (i != 0 && i % 2 == 0)
+                    listIndex++;
+                gridStringBuilder.Append('\n');
+            }
+            gridStringBuilder.Append('\n');
+            return gridStringBuilder;
         }
     }
 }
