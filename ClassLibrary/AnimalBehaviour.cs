@@ -46,7 +46,7 @@ namespace ClassLibrary
         {
             var animalCount = _updateGame.GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animal.Type == (int)AnimalTypeEnums.prey ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
+            var currentAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey) ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
 
             if (currentAnimal != null)
             {
@@ -68,7 +68,7 @@ namespace ClassLibrary
                 else if (target.Item3 == (int)AnimalTargetEnums.breed) // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                    var targetAnimal = animal.Type == (int)AnimalTypeEnums.prey ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
+                    var targetAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey) ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                     var directionXSign = directionSigns.Item1;
                     var directionYSign = directionSigns.Item2;
@@ -108,7 +108,7 @@ namespace ClassLibrary
                 {
                     updates.Add(coordinatesOld, coordinates);
                 }
-                RemoveAnimalHealth(grid[coordinatesOld].Animal, animal.Type);
+                RemoveAnimalHealth(grid[coordinatesOld].Animal, animal.IsPrey);
             }
         }
         // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
@@ -453,9 +453,9 @@ namespace ClassLibrary
                 }
             }
         }
-        private void RemoveAnimalHealth(AnimalsModel currentAnimal, int animalType)
+        private void RemoveAnimalHealth(AnimalsModel currentAnimal, bool animalType)
         {
-            if (animalType == (int)AnimalTypeEnums.predator)
+            if (animalType == Convert.ToBoolean(AnimalTypeEnums.predator))
                 currentAnimal.Predator.Health -= .5f;
             else
                 currentAnimal.Prey.Health -= .5f;

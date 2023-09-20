@@ -39,9 +39,9 @@ namespace Savannah
                 else
                     article = "a";
                 string animalType = string.Empty;
-                if (plugin.Type == 0)
+                if (plugin.IsPrey == Convert.ToBoolean(0))
                     animalType = "Predator";
-                else if (plugin.Type == 1)
+                else if (plugin.IsPrey == Convert.ToBoolean(1))
                     animalType = "Prey";
 
                 Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + animalType + ")");

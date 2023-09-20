@@ -7,8 +7,7 @@ namespace ClassLibrary.Models
         string Name { get; set; }
         char FirstLetter { get; set; }
         ConsoleKey KeyBind { get; set; }
-        [Range(0, 1)]
-        int Type { get; set; } // 0 for predator 1 for prey
+        bool IsPrey { get; set; }
         string Color { get; set; }
         int Speed { get; set; }
         int Range { get; set; }
