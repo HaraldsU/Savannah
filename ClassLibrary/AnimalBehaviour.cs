@@ -3,8 +3,13 @@ using ClassLibrary.Constants;
 
 namespace ClassLibrary
 {
-    public class AnimalMovement
+    public class AnimalBehaviour
     {
+        private UpdateGame _updateGame;
+        public AnimalBehaviour(UpdateGame updateGame)
+        {
+            _updateGame = updateGame;
+        }
         public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, bool turn, Dictionary<int, int> updates)
         {
             for (int i = 0; i < dimension; i++)
@@ -21,7 +26,7 @@ namespace ClassLibrary
                         {
                             if (grid[coordinates].Animal.Predator != null)
                             {
-                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, grid[coordinates].Animal.Predator.FirstLetter, grid[coordinates].Animal.Predator.Type, updates);
+                                GetAnimalNewPosition(dimension, grid, grid[coordinates].Animal.Predator, coordinates, coordinatesOld, updates);
                             }
                         }
                         // Prey moving
@@ -29,7 +34,7 @@ namespace ClassLibrary
                         {
                             if (grid[coordinates].Animal.Prey != null)
                             {
-                                GetAnimalNewPosition(dimension, grid, coordinates, coordinatesOld, grid[coordinates].Animal.Prey.FirstLetter, grid[coordinates].Animal.Prey.Type, updates);
+                                GetAnimalNewPosition(dimension, grid, grid[coordinates].Animal.Prey, coordinates, coordinatesOld, updates);
                             }
                         }
                     }
@@ -37,11 +42,11 @@ namespace ClassLibrary
             }
         }
         // Gets one animal new position
-        private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, int coordinates, int coordinatesOld, char animal, string animalType, Dictionary<int, int> updates)
+        private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, IPlugin animal, int coordinates, int coordinatesOld, Dictionary<int, int> updates)
         {
-            var animalCount = UpdateGame.GetAnimalCount(grid);
+            var animalCount = _updateGame.GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animalType == AnimalTypeConstants.prey ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
+            var currentAnimal = animal.Type == (int)AnimalTypeEnums.prey ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
 
             if (currentAnimal != null)
             {
@@ -60,16 +65,16 @@ namespace ClassLibrary
                     var directionYSign = directionSigns.Item2;
                     MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign);
                 }
-                else if (target.Item3 == AnimalTargetConstants.breed) // Other animal of same type in range
+                else if (target.Item3 == (int)AnimalTargetEnums.breed) // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                    var targetAnimal = animalType == AnimalTypeConstants.prey ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
+                    var targetAnimal = animal.Type == (int)AnimalTypeEnums.prey ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                     var directionXSign = directionSigns.Item1;
                     var directionYSign = directionSigns.Item2;
                     var x = grid[coordinates];
                     // Animal breeds animal
-                    if (directionXSign == DirectionConstants.noDirectionSign && directionYSign == DirectionConstants.noDirectionSign
+                    if (directionXSign == (int)DirectionEnums.noDirectionSign && directionYSign == (int)DirectionEnums.noDirectionSign
                         && (currentAnimal.ActiveBreedingCooldown == 0 && targetAnimal.ActiveBreedingCooldown == 0))
                     {
                         currentAnimal.ActiveBreedingCooldown = currentAnimal.BreedingTime + currentAnimal.BreedingCooldown;
@@ -85,7 +90,7 @@ namespace ClassLibrary
                             updates.Add(updatesElement.Key, updatesElement.Key);
                         }
                         ClearGridAnimals(grid);
-                        UpdateGame.AddAnimal(animal, grid, true, updates);
+                        _updateGame.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
                         directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                         directionXSign = directionSigns.Item1;
                         directionXSign = directionSigns.Item2;
@@ -103,11 +108,11 @@ namespace ClassLibrary
                 {
                     updates.Add(coordinatesOld, coordinates);
                 }
-                RemoveAnimalHealth(grid[coordinatesOld].Animal, animalType);
+                RemoveAnimalHealth(grid[coordinatesOld].Animal, animal.Type);
             }
         }
         // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
-        private Tuple<int, int, string> GetTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid)
+        private Tuple<int, int, int> GetTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid)
         {
             dimension--;
             int range = 0;
@@ -137,12 +142,12 @@ namespace ClassLibrary
                                            );
             }
             else
-                return Tuple.Create(-1, -1, string.Empty);
+                return Tuple.Create(-1, -1, -1);
 
-            return Tuple.Create(-1, -1, string.Empty);
+            return Tuple.Create(-1, -1, -1);
         }
         // Finds the "Target"
-        private Tuple<int, int, string> GetTargetForLoop(
+        private Tuple<int, int, int> GetTargetForLoop(
                                                  int dimension, GridCellModel gridItem, List<GridCellModel> grid,
                                                  int heightStart, int heightEnd, int widthStart, int widthEnd
                                                 )
@@ -160,32 +165,32 @@ namespace ClassLibrary
                         if (gridItem.Animal.Predator != null && grid[coordinates].Animal.Prey != null) // Predator catching prey
                         {
                             gridItem.Animal.Predator.Health += 2;
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.enemy);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.enemy);
                         }
                         else if (gridItem.Animal.Prey != null && grid[coordinates].Animal.Predator != null) // Prey fleeing predator
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.enemy);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.enemy);
                         else if (gridItem.Animal.Predator != null // Predator breeding predator
                                  && grid[coordinates].Animal.Predator != null
                                  && (gridItem.Animal.Predator.ActiveBreedingCooldown == 0 || gridItem.Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
                                  && (grid[coordinates].Animal.Predator.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
                                  && (gridItem.Animal.Predator.FirstLetter == grid[coordinates].Animal.Predator.FirstLetter)
                                 )
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.breed);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.breed);
                         else if (gridItem.Animal.Prey != null  // Prey breeding prey
                                  && grid[coordinates].Animal.Prey != null
                                  && (gridItem.Animal.Prey.ActiveBreedingCooldown == 0 || gridItem.Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
                                  && (grid[coordinates].Animal.Prey.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
                                  && (gridItem.Animal.Prey.FirstLetter == grid[coordinates].Animal.Prey.FirstLetter)
                                 )
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetConstants.breed);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.breed);
                     }
                 }
             }
-            return Tuple.Create(-1, -1, string.Empty);
+            return Tuple.Create(-1, -1, -1);
         }
         // Gets the new coordinates
-        private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, char directionXSign, char directionYSign,
-                                        GridCellModel? gridItem = null, Tuple<int, int, string>? target = null)
+        private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, int directionXSign, int directionYSign,
+                                        GridCellModel? gridItem = null, Tuple<int, int, int>? target = null)
         {
             int steps;
             int coordinatesOld = coordinates;
@@ -203,27 +208,27 @@ namespace ClassLibrary
             {
                 if (animalTmp.Predator != null)
                 {
-                    if (target.Item3 == AnimalTargetConstants.breed)
+                    if (target.Item3 == (int)AnimalTargetEnums.breed)
                     {
-                        if (gridItem.X + steps >= target.Item1 && directionXSign == DirectionConstants.positiveDirectionSign)
+                        if (gridItem.X + steps >= target.Item1 && directionXSign == (int)DirectionEnums.positiveDirectionSign)
                             steps--;
-                        else if (gridItem.X - steps <= target.Item1 && directionXSign == DirectionConstants.negativeDirectionSign)
+                        else if (gridItem.X - steps <= target.Item1 && directionXSign == (int)DirectionEnums.negativeDirectionSign)
                             steps--;
                     }
                     else
                     {
-                        if (gridItem.X + steps > target.Item1 && directionXSign == DirectionConstants.positiveDirectionSign)
+                        if (gridItem.X + steps > target.Item1 && directionXSign == (int)DirectionEnums.positiveDirectionSign)
                             steps--;
-                        else if (gridItem.X - steps < target.Item1 && directionXSign == DirectionConstants.negativeDirectionSign)
+                        else if (gridItem.X - steps < target.Item1 && directionXSign == (int)DirectionEnums.negativeDirectionSign)
                             steps--;
                     }
 
                 }
             }
 
-            if (directionXSign == DirectionConstants.negativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
+            if (directionXSign == (int)DirectionEnums.negativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
                 coordinates -= steps;
-            else if (directionXSign == DirectionConstants.positiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
+            else if (directionXSign == (int)DirectionEnums.positiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
                 coordinates += steps;
 
             // y abscissa 
@@ -234,37 +239,37 @@ namespace ClassLibrary
             {
                 if (animalTmp.Predator != null)
                 {
-                    if (target.Item3 == AnimalTargetConstants.breed)
+                    if (target.Item3 == (int)AnimalTargetEnums.breed)
                     {
-                        if (gridItem.Y + steps >= target.Item2 && directionYSign == DirectionConstants.positiveDirectionSign)
+                        if (gridItem.Y + steps >= target.Item2 && directionYSign == (int)DirectionEnums.positiveDirectionSign)
                             steps--;
-                        else if (gridItem.Y - steps <= target.Item2 && directionYSign == DirectionConstants.negativeDirectionSign)
+                        else if (gridItem.Y - steps <= target.Item2 && directionYSign == (int)DirectionEnums.negativeDirectionSign)
                             steps--;
                     }
                     else
                     {
-                        if (gridItem.Y + steps > target.Item2 && directionYSign == DirectionConstants.positiveDirectionSign)
+                        if (gridItem.Y + steps > target.Item2 && directionYSign == (int)DirectionEnums.positiveDirectionSign)
                             steps--;
-                        else if (gridItem.Y - steps < target.Item2 && directionYSign == DirectionConstants.negativeDirectionSign)
+                        else if (gridItem.Y - steps < target.Item2 && directionYSign == (int)DirectionEnums.negativeDirectionSign)
                             steps--;
                     }
                 }
             }
 
-            if (directionYSign == DirectionConstants.negativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
+            if (directionYSign == (int)DirectionEnums.negativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
                 coordinates -= dimension * steps;
-            else if (directionYSign == DirectionConstants.positiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
+            else if (directionYSign == (int)DirectionEnums.positiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
                 coordinates += dimension * steps;
         }
         // Generates a random directional sign: "-", "+" or 'n' (no sign). Defaults as 'n' if fails after 8 tries
-        private Tuple<char, char> GetRandomDirectionSigns(int dimension, List<GridCellModel> grid, int coordinates, Dictionary<int, int> updates)
+        private Tuple<int, int> GetRandomDirectionSigns(int dimension, List<GridCellModel> grid, int coordinates, Dictionary<int, int> updates)
         {
             int count = 0;
             int coordinatesOld = coordinates;
             int coordinatesTmp = coordinates;
             var gridTmp = grid;
-            char directionXSign = '\0';
-            char directionYSign = '\0';
+            int directionXSign = 0;
+            int directionYSign = 0;
 
             GenerateRandomSign(ref directionXSign, ref directionYSign);
             MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign);
@@ -280,8 +285,8 @@ namespace ClassLibrary
                          || updates.ContainsValue(coordinatesTmp)) && count <= 8);
                 if (count >= 8)
                 {
-                    directionXSign = DirectionConstants.noDirectionSign;
-                    directionYSign = DirectionConstants.noDirectionSign;
+                    directionXSign = (int)DirectionEnums.noDirectionSign;
+                    directionYSign = (int)DirectionEnums.noDirectionSign;
                 }
             }
             var returnData = Tuple.Create(directionXSign, directionYSign);
@@ -289,40 +294,40 @@ namespace ClassLibrary
             return returnData;
         }
         // Generates a random sign: "-", "+" or 'n' (no sign)
-        private void GenerateRandomSign(ref char directionXSign, ref char directionYSign)
+        private void GenerateRandomSign(ref int directionXSign, ref int directionYSign)
         {
             int directionX = RandomGenerator.Next(3);
-            if (directionX == 0) directionXSign = DirectionConstants.negativeDirectionSign;
-            else if (directionX == 1) directionXSign = DirectionConstants.positiveDirectionSign;
-            else directionXSign = DirectionConstants.noDirectionSign;
+            if (directionX == 0) directionXSign = (int)DirectionEnums.negativeDirectionSign;
+            else if (directionX == 1) directionXSign = (int)DirectionEnums.positiveDirectionSign;
+            else directionXSign = (int)DirectionEnums.noDirectionSign;
 
-            if (directionXSign == DirectionConstants.noDirectionSign)
+            if (directionXSign == (int)DirectionEnums.noDirectionSign)
             {
                 int directionY = RandomGenerator.Next(2);
-                if (directionY == 0) directionYSign = DirectionConstants.negativeDirectionSign;
-                else directionYSign = DirectionConstants.positiveDirectionSign;
+                if (directionY == 0) directionYSign = (int)DirectionEnums.negativeDirectionSign;
+                else directionYSign = (int)DirectionEnums.positiveDirectionSign;
             }
             else
             {
                 int directionY = RandomGenerator.Next(3);
-                if (directionY == 0) directionYSign = DirectionConstants.negativeDirectionSign;
-                else if (directionY == 1) directionYSign = DirectionConstants.positiveDirectionSign;
-                else directionYSign = DirectionConstants.noDirectionSign;
+                if (directionY == 0) directionYSign = (int)DirectionEnums.negativeDirectionSign;
+                else if (directionY == 1) directionYSign = (int)DirectionEnums.positiveDirectionSign;
+                else directionYSign = (int)DirectionEnums.noDirectionSign;
 
-                if (directionYSign == DirectionConstants.noDirectionSign)
+                if (directionYSign == (int)DirectionEnums.noDirectionSign)
                 {
                     directionX = RandomGenerator.Next(2);
-                    if (directionX == 0) directionXSign = DirectionConstants.negativeDirectionSign;
-                    else if (directionX == 1) directionXSign = DirectionConstants.positiveDirectionSign;
+                    if (directionX == 0) directionXSign = (int)DirectionEnums.negativeDirectionSign;
+                    else if (directionX == 1) directionXSign = (int)DirectionEnums.positiveDirectionSign;
                 }
             }
         }
-        // Generates a directional sign depending on the direction of the target: "-", "+" or DirectionConstants.noDirectionSign (no sign)
-        private Tuple<char, char> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, string> target,
+        // Generates a directional sign depending on the direction of the target: "-", "+" or DirectionEnums.noDirectionSign (no sign)
+        private Tuple<int, int> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, int> target,
                                                           GridCellModel gridItem, Dictionary<int, int> updates)
         {
-            char directionXSign = DirectionConstants.noDirectionSign;
-            char directionYSign = DirectionConstants.noDirectionSign;
+            int directionXSign = (int)DirectionEnums.noDirectionSign;
+            int directionYSign = (int)DirectionEnums.noDirectionSign;
             // Subject animal coordinates
             int subjectX = gridItem.X;
             int subjectY = gridItem.Y;
@@ -336,26 +341,26 @@ namespace ClassLibrary
 
             if (gridItem.Animal.Predator != null)   // Predators
             {
-                if (target.Item3 == AnimalTargetConstants.enemy) // Attacking
+                if (target.Item3 == (int)AnimalTargetEnums.enemy) // Attacking
                 {
                     if (subjectX != targetX)
                     {
                         if (subjectX > targetX)
-                            directionXSign = DirectionConstants.negativeDirectionSign;
+                            directionXSign = (int)DirectionEnums.negativeDirectionSign;
                         else
-                            directionXSign = DirectionConstants.positiveDirectionSign;
+                            directionXSign = (int)DirectionEnums.positiveDirectionSign;
                     }
                     else
-                        directionXSign = DirectionConstants.noDirectionSign;
+                        directionXSign = (int)DirectionEnums.noDirectionSign;
                     if (subjectY != targetY)
                     {
                         if (subjectY > targetY)
-                            directionYSign = DirectionConstants.negativeDirectionSign;
+                            directionYSign = (int)DirectionEnums.negativeDirectionSign;
                         else
-                            directionYSign = DirectionConstants.positiveDirectionSign;
+                            directionYSign = (int)DirectionEnums.positiveDirectionSign;
                     }
                     else
-                        directionYSign = DirectionConstants.noDirectionSign;
+                        directionYSign = (int)DirectionEnums.noDirectionSign;
                 }
                 else // Breeding
                 {
@@ -364,26 +369,26 @@ namespace ClassLibrary
             }
             else // Preys
             {
-                if (target.Item3 == AnimalTargetConstants.enemy) // Fleeing
+                if (target.Item3 == (int)AnimalTargetEnums.enemy) // Fleeing
                 {
                     if (subjectX != targetX)
                     {
                         if (subjectX > targetX)
-                            directionXSign = DirectionConstants.positiveDirectionSign;
+                            directionXSign = (int)DirectionEnums.positiveDirectionSign;
                         else
-                            directionXSign = DirectionConstants.negativeDirectionSign;
+                            directionXSign = (int)DirectionEnums.negativeDirectionSign;
                     }
                     else
-                        directionXSign = DirectionConstants.noDirectionSign;
+                        directionXSign = (int)DirectionEnums.noDirectionSign;
                     if (subjectY != targetY)
                     {
                         if (subjectY > targetY)
-                            directionYSign = DirectionConstants.positiveDirectionSign;
+                            directionYSign = (int)DirectionEnums.positiveDirectionSign;
                         else
-                            directionYSign = DirectionConstants.negativeDirectionSign;
+                            directionYSign = (int)DirectionEnums.negativeDirectionSign;
                     }
                     else
-                        directionYSign = DirectionConstants.noDirectionSign;
+                        directionYSign = (int)DirectionEnums.noDirectionSign;
                 }
                 else // Breeding
                 {
@@ -399,39 +404,39 @@ namespace ClassLibrary
                 }
                 if ((gridTmp[coordinatesTmp].Animal.Prey != null && gridTmp[coordinates].Animal.Prey != null) || (gridTmp[coordinatesTmp].Animal.Predator != null && gridTmp[coordinates].Animal.Predator != null))
                 {
-                    directionXSign = DirectionConstants.noDirectionSign;
-                    directionYSign = DirectionConstants.noDirectionSign;
+                    directionXSign = (int)DirectionEnums.noDirectionSign;
+                    directionYSign = (int)DirectionEnums.noDirectionSign;
                 }
             }
             var returnData = Tuple.Create(directionXSign, directionYSign);
 
             return returnData;
         }
-        private void SetTargetBreedingDirectionSigns(int subjectX, int targetX, int subjectY, int targetY, ref char directionXSign, ref char directionYSign)
+        private void SetTargetBreedingDirectionSigns(int subjectX, int targetX, int subjectY, int targetY, ref int directionXSign, ref int directionYSign)
         {
             if (Math.Abs(subjectX - targetX) != 1 && Math.Abs(subjectX + targetX) != 1)
             {
                 if (subjectX != targetX)    // x cords
                 {
                     if (subjectX - 1 >= targetX)
-                        directionXSign = DirectionConstants.negativeDirectionSign;
+                        directionXSign = (int)DirectionEnums.negativeDirectionSign;
                     else if (subjectX + 1 <= targetX)
-                        directionXSign = DirectionConstants.positiveDirectionSign;
+                        directionXSign = (int)DirectionEnums.positiveDirectionSign;
                 }
                 else
-                    directionXSign = DirectionConstants.noDirectionSign;
+                    directionXSign = (int)DirectionEnums.noDirectionSign;
             }
             if (Math.Abs(subjectY - targetY) != 1 && Math.Abs(subjectY + targetY) != 1)
             {
                 if (subjectY != targetY)    // y cords
                 {
                     if (subjectY - 1 >= targetY)
-                        directionYSign = DirectionConstants.negativeDirectionSign;
+                        directionYSign = (int)DirectionEnums.negativeDirectionSign;
                     else if (subjectY + 1 <= targetY)
-                        directionYSign = DirectionConstants.positiveDirectionSign;
+                        directionYSign = (int)DirectionEnums.positiveDirectionSign;
                 }
                 else
-                    directionYSign = DirectionConstants.noDirectionSign;
+                    directionYSign = (int)DirectionEnums.noDirectionSign;
             }
         }
         // Sets empty animals to null
@@ -448,9 +453,9 @@ namespace ClassLibrary
                 }
             }
         }
-        private void RemoveAnimalHealth(AnimalsModel currentAnimal, string animalType)
+        private void RemoveAnimalHealth(AnimalsModel currentAnimal, int animalType)
         {
-            if (animalType == AnimalTypeConstants.predator)
+            if (animalType == (int)AnimalTypeEnums.predator)
                 currentAnimal.Predator.Health -= .5f;
             else
                 currentAnimal.Prey.Health -= .5f;

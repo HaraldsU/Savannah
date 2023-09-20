@@ -7,11 +7,18 @@ namespace Savannah
 {
     public class Display
     {
+        private List<IPlugin>? Animals;
+        public Display(List<IPlugin> plugins)
+        {
+            Animals = plugins;
+        }
+
         public void DisplayAnimalCount()
         {
             var files = Directory.GetFiles("C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\AnimalLibrary\\Models\\Animals\\");
             Console.WriteLine($"{Program.Plugins.Count} Animal(s) found");
             Console.WriteLine($"{Program.Plugins.Count - files.Length} plugin(s) found\n");
+            Console.WriteLine($"{Animals.Count} animal(s) found\n");
         }
         public void DisplayGridSizeInputPrompt()
         {
@@ -27,14 +34,20 @@ namespace Savannah
             string article;
             string pattern = @"[AEIOU]";
             bool isVowel;
-            foreach (var plugin in Program.Plugins)
+            foreach (var plugin in Animals)
             {
                 isVowel = Regex.IsMatch(plugin.FirstLetter.ToString(), pattern);
                 if (isVowel)
                     article = "an";
                 else
                     article = "a";
-                Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + plugin.Type + ")");
+                string animalType = string.Empty;
+                if (plugin.Type == 0)
+                    animalType = "Predator";
+                else if (plugin.Type == 1)
+                    animalType = "Prey";
+
+                Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + animalType + ")");
             }
             Console.WriteLine("Press 'Q' to quit ...");
         }
@@ -92,7 +105,7 @@ namespace Savannah
         }
         private string GetColor(char firstLetter)
         {
-            foreach (var plugin in Program.Plugins)
+            foreach (var plugin in Animals)
             {
                 if (plugin.FirstLetter == firstLetter)
                     return plugin.Color;
