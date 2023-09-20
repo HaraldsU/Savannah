@@ -1,6 +1,4 @@
-﻿using ClassLibrary;
-using ClassLibrary.Constants;
-using ClassLibrary.Models;
+﻿using ClassLibrary.Constants;
 using ClassLibrary.Models.Animals;
 using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -47,7 +45,7 @@ namespace ClassLibrary.Tests
             var grid = _grid.Initialize(dimensions);
             var animalLionModel = new LionModel();
             bool isChild = false;
-            _updateGame.AddAnimal(animalLionModel, pressedKey : ConsoleKey.NoName, grid, isChild);
+            _updateGame.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
             bool isPredatorTurn = true;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 

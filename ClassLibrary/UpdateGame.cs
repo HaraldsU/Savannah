@@ -1,13 +1,12 @@
 ﻿using ClassLibrary.Constants;
 using ClassLibrary.Models;
-using System.Formats.Asn1;
 
 namespace ClassLibrary
 {
     public class UpdateGame
     {
         public List<IPlugin>? Animals { get; private set; }
-        public List<GridCellModel> Grid {  get; private set; }
+        public List<GridCellModel> Grid { get; private set; }
         private PluginLoader _pluginLoader;
         private GridService _gridService;
         private AnimalBehaviour _animalMovement;
@@ -26,7 +25,7 @@ namespace ClassLibrary
         /// <param name="grid"></param>
         /// <param name="isChild"></param>
         /// <param name="updates"></param>
-        public void AddAnimal(IPlugin animal, ConsoleKey pressedKey, List < GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
+        public void AddAnimal(IPlugin animal, ConsoleKey pressedKey, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
             var cellIndex = RandomGenerator.Next(grid.Count);
             var animalCount = GetAnimalCount(grid);

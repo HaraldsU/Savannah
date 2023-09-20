@@ -1,7 +1,4 @@
-﻿using ClassLibrary;
-using ClassLibrary.Models;
-
-namespace Savannah;
+﻿namespace Savannah;
 class Program
 {
     static void Main(string[] args)

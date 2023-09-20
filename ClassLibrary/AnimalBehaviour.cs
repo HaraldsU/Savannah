@@ -90,7 +90,7 @@ namespace ClassLibrary
                             updates.Add(updatesElement.Key, updatesElement.Key);
                         }
                         ClearGridAnimals(grid);
-                        _updateGame.AddAnimal(animal, pressedKey : ConsoleKey.NoName, grid, isChild : true, updates);
+                        _updateGame.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
                         directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                         directionXSign = directionSigns.Item1;
                         directionXSign = directionSigns.Item2;

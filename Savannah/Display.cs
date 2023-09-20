@@ -1,5 +1,4 @@
 ﻿using ClassLibrary.Models;
-using ClassLibrary.Models.Animals;
 using Figgle;
 using System.Text;
 using System.Text.RegularExpressions;

@@ -1,8 +1,5 @@
-﻿using ClassLibrary.Models;
-using ClassLibrary.Models.Animals;
-using ClassLibraryTests;
+﻿using ClassLibrary.Models.Animals;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace ClassLibrary.Tests
 {
@@ -33,7 +30,7 @@ namespace ClassLibrary.Tests
             Dictionary<int, int> updates = new();
 
             // Act
-            _updateGame.AddAnimal(animalAntelope, pressedKey : ConsoleKey.NoName, grid, isChild);
+            _updateGame.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
             _animalMovement.GetAnimalsNewPositions(Dimensions, grid, isPredatorTurn, updates);
 
             // Assert

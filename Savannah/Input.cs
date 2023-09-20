@@ -8,8 +8,8 @@ namespace Savanna.cons
     {
         private UpdateGame _updateGame;
         private Display _display;
-        public Input(int dimensions) 
-        { 
+        public Input(int dimensions)
+        {
             _updateGame = new(dimensions);
             _display = new(_updateGame.Animals);
         }
@@ -56,7 +56,7 @@ namespace Savanna.cons
                     Environment.Exit(0);
                 else
                 {
-                    _updateGame.AddAnimal(animal : null, click.Key, grid, isChild : false, updates : null);
+                    _updateGame.AddAnimal(animal: null, click.Key, grid, isChild: false, updates: null);
                 }
             }
         }
