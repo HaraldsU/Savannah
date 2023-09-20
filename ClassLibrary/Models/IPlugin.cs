@@ -1,10 +1,14 @@
-﻿namespace ClassLibrary.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ClassLibrary.Models
 {
     public interface IPlugin
     {
         string Name { get; set; }
         char FirstLetter { get; set; }
-        string Type { get; set; }
+        ConsoleKey KeyBind { get; set; }
+        [Range(0, 1)]
+        int Type { get; set; } // 0 for predator 1 for prey
         string Color { get; set; }
         int Speed { get; set; }
         int Range { get; set; }

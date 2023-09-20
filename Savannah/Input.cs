@@ -6,10 +6,12 @@ namespace Savanna.cons
 {
     public class Input
     {
+        private UpdateGame _updateGame;
         private Display _display;
-        public Input() 
+        public Input(int dimensions) 
         { 
-            _display = new();
+            _updateGame = new(dimensions);
+            _display = new(_updateGame.Animals);
         }
         public int GridSizeInput()
         {
@@ -54,46 +56,9 @@ namespace Savanna.cons
                     Environment.Exit(0);
                 else
                 {
-                    Dictionary<char, ConsoleKey> dictionary = new Dictionary<char, ConsoleKey>();
-                    KeyMappings(dictionary);
-                    foreach (var plugin in Program.Plugins)
-                    {
-                        if (click.Key == dictionary.GetValueOrDefault(plugin.FirstLetter))
-                        {
-                            UpdateGame.AddAnimal(plugin.FirstLetter, grid, false);
-                        }
-                    }
+                    _updateGame.AddAnimal(animal : null, click.Key, grid, isChild : false, updates : null);
                 }
             }
-        }
-        private void KeyMappings(Dictionary<char, ConsoleKey> dictionary)
-        {
-            dictionary['A'] = ConsoleKey.A;
-            dictionary['B'] = ConsoleKey.B;
-            dictionary['C'] = ConsoleKey.C;
-            dictionary['D'] = ConsoleKey.D;
-            dictionary['E'] = ConsoleKey.E;
-            dictionary['F'] = ConsoleKey.F;
-            dictionary['G'] = ConsoleKey.G;
-            dictionary['H'] = ConsoleKey.H;
-            dictionary['I'] = ConsoleKey.I;
-            dictionary['J'] = ConsoleKey.J;
-            dictionary['K'] = ConsoleKey.K;
-            dictionary['L'] = ConsoleKey.L;
-            dictionary['M'] = ConsoleKey.M;
-            dictionary['N'] = ConsoleKey.N;
-            dictionary['O'] = ConsoleKey.O;
-            dictionary['P'] = ConsoleKey.P;
-            dictionary['Q'] = ConsoleKey.Q;
-            dictionary['R'] = ConsoleKey.R;
-            dictionary['S'] = ConsoleKey.S;
-            dictionary['T'] = ConsoleKey.T;
-            dictionary['U'] = ConsoleKey.L;
-            dictionary['V'] = ConsoleKey.V;
-            dictionary['W'] = ConsoleKey.W;
-            dictionary['X'] = ConsoleKey.X;
-            dictionary['Y'] = ConsoleKey.Y;
-            dictionary['Z'] = ConsoleKey.Z;
         }
     }
 }

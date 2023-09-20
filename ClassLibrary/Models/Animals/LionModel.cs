@@ -4,7 +4,8 @@
     {
         public string Name { get; set; } = "Lion";
         public char FirstLetter { get; set; } = 'L';
-        public string Type { get; set; } = "Predator";
+        public ConsoleKey KeyBind { get; set; } = ConsoleKey.L;
+        public int Type { get; set; } = 0;
         public string Color { get; set; } = "Yellow";
         public int Speed { get; set; } = 2;
         public int Range { get; set; } = 3;
