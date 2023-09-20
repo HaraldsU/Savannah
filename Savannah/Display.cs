@@ -16,9 +16,8 @@ namespace Savannah
         public void DisplayAnimalCount()
         {
             var files = Directory.GetFiles("C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\AnimalLibrary\\Models\\Animals\\");
-            Console.WriteLine($"{Program.Plugins.Count} Animal(s) found");
-            Console.WriteLine($"{Program.Plugins.Count - files.Length} plugin(s) found\n");
-            Console.WriteLine($"{Animals.Count} animal(s) found\n");
+            Console.WriteLine($"{Animals.Count} Animal(s) found");
+            Console.WriteLine($"{Animals.Count - files.Length} Plugin(s) found\n");
         }
         public void DisplayGridSizeInputPrompt()
         {
@@ -42,9 +41,9 @@ namespace Savannah
                 else
                     article = "a";
                 string animalType = string.Empty;
-                if (plugin.Type == 0)
+                if (plugin.IsPrey == Convert.ToBoolean(0))
                     animalType = "Predator";
-                else if (plugin.Type == 1)
+                else if (plugin.IsPrey == Convert.ToBoolean(1))
                     animalType = "Prey";
 
                 Console.WriteLine("Press " + "'" + plugin.FirstLetter + "'" + " to add " + article + " " + plugin.Name + " (" + animalType + ")");

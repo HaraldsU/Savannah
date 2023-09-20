@@ -71,11 +71,11 @@ namespace ClassLibrary
                 if (isChild)
                     animal.ActiveBreedingCooldown = animal.BreedingCooldown;
 
-                if (animal.Type == (int)AnimalTypeEnums.prey)
+                if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey))
                 {
                     animalModel.Prey = animal.CreateNewAnimal();
                 }
-                else if (animal.Type == (int)AnimalTypeEnums.predator)
+                else if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.predator))
                 {
                     animalModel.Predator = animal.CreateNewAnimal(); ;
                 }

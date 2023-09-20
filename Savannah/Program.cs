@@ -1,7 +1,4 @@
-﻿using AnimalLibrary.Models;
-using ClassLibrary;
-
-namespace Savannah;
+﻿namespace Savannah;
 class Program
 {
     static void Main(string[] args)
