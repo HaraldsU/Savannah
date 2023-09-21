@@ -13,6 +13,10 @@ namespace Savanna.cons
             _updateGame = new(dimensions);
             _display = new(_updateGame.Animals);
         }
+        /// <summary>
+        /// Gets grid dimension size from the user.
+        /// </summary>
+        /// <returns></returns>
         public int GridSizeInput()
         {
             string warningWrongType = "Size needs to be an integer";
