@@ -41,7 +41,15 @@ namespace ClassLibrary
                 }
             }
         }
-        // Gets one animal new position
+        /// <summary>
+        /// Gets one animal new position
+        /// </summary>
+        /// <param name="dimension"></param>
+        /// <param name="grid"></param>
+        /// <param name="animal"></param>
+        /// <param name="coordinates"></param>
+        /// <param name="coordinatesOld"></param>
+        /// <param name="updates"></param>
         private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, IPlugin animal, int coordinates, int coordinatesOld, Dictionary<int, int> updates)
         {
             var animalCount = _updateGame.GetAnimalCount(grid);
@@ -111,7 +119,13 @@ namespace ClassLibrary
                 RemoveAnimalHealth(grid[coordinatesOld].Animal, animal.IsPrey);
             }
         }
-        // Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
+        /// <summary>
+        /// Calls "GetTargetForLoop" with the appropriate variables or returns Tuple(-1, -1, string.Empty)
+        /// </summary>
+        /// <param name="dimension"></param>
+        /// <param name="gridItem"></param>
+        /// <param name="grid"></param>
+        /// <returns></returns>
         private Tuple<int, int, int> GetTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid)
         {
             dimension--;
@@ -146,7 +160,17 @@ namespace ClassLibrary
 
             return Tuple.Create(-1, -1, -1);
         }
-        // Finds the "Target"
+        /// <summary>
+        /// Finds the animal "Target"
+        /// </summary>
+        /// <param name="dimension"></param>
+        /// <param name="gridItem"></param>
+        /// <param name="grid"></param>
+        /// <param name="heightStart"></param>
+        /// <param name="heightEnd"></param>
+        /// <param name="widthStart"></param>
+        /// <param name="widthEnd"></param>
+        /// <returns></returns>
         private Tuple<int, int, int> GetTargetForLoop(
                                                  int dimension, GridCellModel gridItem, List<GridCellModel> grid,
                                                  int heightStart, int heightEnd, int widthStart, int widthEnd
@@ -188,7 +212,16 @@ namespace ClassLibrary
             }
             return Tuple.Create(-1, -1, -1);
         }
-        // Gets the new coordinates
+        /// <summary>
+        /// Gets the new animal coordinates
+        /// </summary>
+        /// <param name="dimension"></param>
+        /// <param name="grid"></param>
+        /// <param name="coordinates"></param>
+        /// <param name="directionXSign"></param>
+        /// <param name="directionYSign"></param>
+        /// <param name="gridItem"></param>
+        /// <param name="target"></param>
         private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, int directionXSign, int directionYSign,
                                         GridCellModel? gridItem = null, Tuple<int, int, int>? target = null)
         {
@@ -261,7 +294,14 @@ namespace ClassLibrary
             else if (directionYSign == (int)DirectionEnums.positiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
                 coordinates += dimension * steps;
         }
-        // Generates a random directional sign: "-", "+" or 'n' (no sign). Defaults as 'n' if fails after 8 tries
+        /// <summary>
+        /// Generates a random directional sign: "-", "+" or 'n' (no sign). Defaults as 'n' if fails after 8 tries
+        /// </summary>
+        /// <param name="dimension"></param>
+        /// <param name="grid"></param>
+        /// <param name="coordinates"></param>
+        /// <param name="updates"></param>
+        /// <returns></returns>
         private Tuple<int, int> GetRandomDirectionSigns(int dimension, List<GridCellModel> grid, int coordinates, Dictionary<int, int> updates)
         {
             int count = 0;
@@ -293,7 +333,11 @@ namespace ClassLibrary
 
             return returnData;
         }
-        // Generates a random sign: "-", "+" or 'n' (no sign)
+        /// <summary>
+        /// Generates a random sign: "-", "+" or 'n' (no sign)
+        /// </summary>
+        /// <param name="directionXSign"></param>
+        /// <param name="directionYSign"></param>
         private void GenerateRandomSign(ref int directionXSign, ref int directionYSign)
         {
             int directionX = RandomGenerator.Next(3);
@@ -322,7 +366,16 @@ namespace ClassLibrary
                 }
             }
         }
-        // Generates a directional sign depending on the direction of the target: "-", "+" or DirectionEnums.noDirectionSign (no sign)
+        /// <summary>
+        /// Generates a directional sign depending on the direction of the target: "-", "+" or DirectionEnums.noDirectionSign (no sign)
+        /// </summary>
+        /// <param name="dimension"></param>
+        /// <param name="coordinates"></param>
+        /// <param name="grid"></param>
+        /// <param name="target"></param>
+        /// <param name="gridItem"></param>
+        /// <param name="updates"></param>
+        /// <returns></returns>
         private Tuple<int, int> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, int> target,
                                                           GridCellModel gridItem, Dictionary<int, int> updates)
         {
@@ -439,7 +492,10 @@ namespace ClassLibrary
                     directionYSign = (int)DirectionEnums.noDirectionSign;
             }
         }
-        // Sets empty animals to null
+        /// <summary>
+        /// Sets empty animals to null
+        /// </summary>
+        /// <param name="grid"></param>
         private void ClearGridAnimals(List<GridCellModel> grid)
         {
             foreach (var cell in grid)
