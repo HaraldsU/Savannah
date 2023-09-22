@@ -5,10 +5,10 @@ namespace ClassLibrary
 {
     public class AnimalBehaviour
     {
-        private AnimalFinalizer _updateGame;
-        public AnimalBehaviour(AnimalFinalizer updateGame)
+        private AnimalFinalizer _animalFinalizer;
+        public AnimalBehaviour(AnimalFinalizer animalFinalizer)
         {
-            _updateGame = updateGame;
+            _animalFinalizer = animalFinalizer;
         }
         public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, bool turn, Dictionary<int, int> updates)
         {
@@ -52,7 +52,7 @@ namespace ClassLibrary
         /// <param name="updates"></param>
         private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, IPlugin animal, int coordinates, int coordinatesOld, Dictionary<int, int> updates)
         {
-            var animalCount = _updateGame.GetAnimalCount(grid);
+            var animalCount = _animalFinalizer.GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
             var currentAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey) ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
 
@@ -98,7 +98,7 @@ namespace ClassLibrary
                             updates.Add(updatesElement.Key, updatesElement.Key);
                         }
                         ClearGridAnimals(grid);
-                        _updateGame.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
+                        _animalFinalizer.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
                         directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                         directionXSign = directionSigns.Item1;
                         directionXSign = directionSigns.Item2;
