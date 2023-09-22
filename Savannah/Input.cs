@@ -6,7 +6,7 @@ namespace Savanna.cons
 {
     public class Input
     {
-        private UpdateGame _updateGame;
+        private AnimalFinalizer _updateGame;
         private Display _display;
         public Input(int dimensions)
         {

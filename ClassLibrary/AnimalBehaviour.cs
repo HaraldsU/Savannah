@@ -5,8 +5,8 @@ namespace ClassLibrary
 {
     public class AnimalBehaviour
     {
-        private UpdateGame _updateGame;
-        public AnimalBehaviour(UpdateGame updateGame)
+        private AnimalFinalizer _updateGame;
+        public AnimalBehaviour(AnimalFinalizer updateGame)
         {
             _updateGame = updateGame;
         }

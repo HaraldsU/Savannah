@@ -7,7 +7,7 @@ namespace ClassLibrary.Tests
     public class AnimalMovementTests
     {
         private int Dimensions = 8;
-        private UpdateGame _updateGame;
+        private AnimalFinalizer _updateGame;
         private GridService _grid;
         private AnimalBehaviour _animalMovement;
 

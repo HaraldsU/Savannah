@@ -6,16 +6,16 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ClassLibrary.Tests
 {
     [TestClass()]
-    public class UpdateGameTests
+    public class AnimalFinalizerTests
     {
         private int Dimensions = 8;
-        private UpdateGame _updateGame;
+        private AnimalFinalizer _updateGame;
         private GridService _grid;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _updateGame = new UpdateGame(Dimensions);
+            _updateGame = new AnimalFinalizer(Dimensions);
             _grid = new GridService();
         }
 

@@ -3,14 +3,14 @@ using ClassLibrary.Models;
 
 namespace ClassLibrary
 {
-    public class UpdateGame
+    public class AnimalFinalizer
     {
         public List<IPlugin>? Animals { get; private set; }
         public List<GridCellModel> Grid { get; private set; }
         private PluginLoader _pluginLoader;
         private GridService _gridService;
         private AnimalBehaviour _animalMovement;
-        public UpdateGame(int dimensions)
+        public AnimalFinalizer(int dimensions)
         {
             _pluginLoader = new();
             _gridService = new GridService();
@@ -83,35 +83,6 @@ namespace ClassLibrary
             }
         }
         /// <summary>
-        /// Gets the current animal count
-        /// </summary>
-        /// <param name="grid"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.all)
-        {
-            int count = 0;
-            foreach (var cell in grid)
-            {
-                if (type == AnimalTypeEnums.all)
-                {
-                    if (cell.Animal != null && (cell.Animal.Prey != null || cell.Animal.Predator != null))
-                        count++;
-                }
-                else if (type == AnimalTypeEnums.prey)
-                {
-                    if (cell.Animal != null && cell.Animal.Prey != null)
-                        count++;
-                }
-                else if (type == AnimalTypeEnums.predator)
-                {
-                    if (cell.Animal != null && cell.Animal.Predator != null)
-                        count++;
-                }
-            }
-            return count;
-        }
-        /// <summary>
         /// Sets the new animals positions and clears the old ones
         /// </summary>
         /// <param name="dimension"></param>
@@ -141,6 +112,35 @@ namespace ClassLibrary
                 isPredatorTurn = false;
             else
                 isPredatorTurn |= true;
+        }
+        /// <summary>
+        /// Gets the current animal count
+        /// </summary>
+        /// <param name="grid"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.all)
+        {
+            int count = 0;
+            foreach (var cell in grid)
+            {
+                if (type == AnimalTypeEnums.all)
+                {
+                    if (cell.Animal != null && (cell.Animal.Prey != null || cell.Animal.Predator != null))
+                        count++;
+                }
+                else if (type == AnimalTypeEnums.prey)
+                {
+                    if (cell.Animal != null && cell.Animal.Prey != null)
+                        count++;
+                }
+                else if (type == AnimalTypeEnums.predator)
+                {
+                    if (cell.Animal != null && cell.Animal.Predator != null)
+                        count++;
+                }
+            }
+            return count;
         }
         private void DeleteAnimalNoHealth(AnimalsModel keyAnimal)
         {
