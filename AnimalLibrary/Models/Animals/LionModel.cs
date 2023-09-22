@@ -1,25 +1,26 @@
-﻿namespace AnimalLibrary.Models.Animals
-{
-    public class LionModel : IPlugin
-    {
-        public string Name { get; set; } = "Lion";
-        public char FirstLetter { get; set; } = 'L';
-        public ConsoleKey KeyBind { get; set; } = ConsoleKey.L;
-        public bool IsPrey { get; set; } = false;
-        public string Color { get; set; } = "Yellow";
-        public int Speed { get; set; } = 2;
-        public int Range { get; set; } = 3;
-        public float Health { get; set; } = 4f;
-        public int BreedingCooldown { get; set; } = 4;
-        public int BreedingTime { get; set; } = 2;
-        public int ActiveBreedingCooldown { get; set; } = 0;
-        public bool IsBirthing { get; set; } = false;
-        public IPlugin CreateNewAnimal()
-        {
-            return new LionModel
-            {
+﻿using AnimalLibrary.CustomValidations;
+using System.ComponentModel.DataAnnotations;
 
-            };
+namespace AnimalLibrary.Models.Animals
+{
+    public class LionModel : PluginBase
+    {
+        public LionModel()
+        {
+            Name = "Lion";
+            FirstLetter = 'L';
+            KeyBind = ConsoleKey.L;
+            IsPrey = false;
+            Color = "Yellow";
+            Speed = 2;
+            Range = 3;
+            Health = 4f;
+            BreedingCooldown = 4;
+            BreedingTime = 2;
+        }
+        public override IPlugin CreateNewAnimal()
+        {
+            return new LionModel();
         }
     }
 }

@@ -68,18 +68,21 @@ namespace ClassLibrary
                     }
                 }
                 var animalModel = new AnimalsModel();
-                if (isChild)
-                    animal.ActiveBreedingCooldown = animal.BreedingCooldown;
 
-                if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey))
+                if (animal != null)
                 {
-                    animalModel.Prey = animal.CreateNewAnimal();
+                    if (isChild)
+                        animal.ActiveBreedingCooldown = animal.BreedingCooldown;
+                    if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey))
+                    {
+                        animalModel.Prey = animal.CreateNewAnimal();
+                    }
+                    else if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.predator))
+                    {
+                        animalModel.Predator = animal.CreateNewAnimal(); ;
+                    }
+                    grid[cellIndex].Animal = animalModel;
                 }
-                else if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.predator))
-                {
-                    animalModel.Predator = animal.CreateNewAnimal(); ;
-                }
-                grid[cellIndex].Animal = animalModel;
             }
         }
         /// <summary>

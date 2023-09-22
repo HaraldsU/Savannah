@@ -1,25 +1,23 @@
 ﻿namespace AnimalLibrary.Models.Animals
 {
-    public class AntelopeModel : IPlugin
+    public class AntelopeModel : PluginBase
     {
-        public string Name { get; set; } = "Antelope";
-        public char FirstLetter { get; set; } = 'A';
-        public ConsoleKey KeyBind { get; set; } = ConsoleKey.A;
-        public bool IsPrey { get; set; } = true;
-        public string Color { get; set; } = "Grey";
-        public int Speed { get; set; } = 1;
-        public int Range { get; set; } = 2;
-        public float Health { get; set; } = 6f;
-        public int BreedingCooldown { get; set; } = 4;
-        public int BreedingTime { get; set; } = 2;
-        public int ActiveBreedingCooldown { get; set; } = 0;
-        public bool IsBirthing { get; set; } = false;
-        public IPlugin CreateNewAnimal()
+        public AntelopeModel()
         {
-            return new AntelopeModel
-            {
-
-            };
+            Name = "Antelope";
+            FirstLetter = 'A';
+            KeyBind = ConsoleKey.A;
+            IsPrey = true;
+            Color = "Gray";
+            Speed = 1;
+            Range = 2;
+            Health = 6f;
+            BreedingCooldown = 4;
+            BreedingTime = 2;
+        }
+        public override IPlugin CreateNewAnimal()
+        {
+            return new AntelopeModel();
         }
     }
 }

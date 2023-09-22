@@ -30,11 +30,25 @@ namespace ClassLibrary
             var types = animalLibraryAssembly.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface);
             foreach (var type in types)
             {
-                var instance = Activator.CreateInstance(type) as IPlugin;
-                pluginsLists.Add(instance);
+                if (type != typeof(PluginBase))
+                {
+                    var instance = Activator.CreateInstance(type) as IPlugin;
+                    pluginsLists.Add(instance);
+                }
             }
 
             pluginsLists.Sort((plugin1, plugin2) => plugin1.FirstLetter.CompareTo(plugin2.FirstLetter));
+
+            foreach (var plugin in pluginsLists.ToList())
+            {
+                var isValidated = PluginValidator.ValidatePlugin(plugin);
+                if (!isValidated.Item1)
+                {
+                    pluginsLists.Remove(plugin);
+                    PluginValidator.FailedValidationMessage(isValidated.Item2, plugin);
+                }
+            }
+
             return pluginsLists;
         }
     }
