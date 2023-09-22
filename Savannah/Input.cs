@@ -6,12 +6,12 @@ namespace Savanna.cons
 {
     public class Input
     {
-        private UpdateGame _updateGame;
+        private AnimalFinalizer _animalFinalizer;
         private Display _display;
         public Input(int dimensions)
         {
-            _updateGame = new(dimensions);
-            _display = new(_updateGame.Animals);
+            _animalFinalizer = new(dimensions);
+            _display = new(_animalFinalizer.Animals);
         }
         /// <summary>
         /// Gets grid dimension size from the user.
@@ -60,7 +60,7 @@ namespace Savanna.cons
                     Environment.Exit(0);
                 else
                 {
-                    _updateGame.AddAnimal(animal: null, click.Key, grid, isChild: false, updates: null);
+                    _animalFinalizer.AddAnimal(animal: null, click.Key, grid, isChild: false, updates: null);
                 }
             }
         }

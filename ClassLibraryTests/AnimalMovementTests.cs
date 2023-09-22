@@ -7,16 +7,16 @@ namespace ClassLibrary.Tests
     public class AnimalMovementTests
     {
         private int Dimensions = 8;
-        private UpdateGame _updateGame;
+        private AnimalFinalizer _animalFinalizer;
         private GridService _grid;
         private AnimalBehaviour _animalMovement;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _updateGame = new(Dimensions);
+            _animalFinalizer = new(Dimensions);
             _grid = new();
-            _animalMovement = new(_updateGame);
+            _animalMovement = new(_animalFinalizer);
         }
         [TestMethod()]
         public void GetAnimalsNewPositionsTest()
@@ -30,7 +30,7 @@ namespace ClassLibrary.Tests
             Dictionary<int, int> updates = new();
 
             // Act
-            _updateGame.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
             _animalMovement.GetAnimalsNewPositions(Dimensions, grid, isPredatorTurn, updates);
 
             // Assert

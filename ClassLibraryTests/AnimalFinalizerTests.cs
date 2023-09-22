@@ -6,16 +6,16 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ClassLibrary.Tests
 {
     [TestClass()]
-    public class UpdateGameTests
+    public class AnimalFinalizerTests
     {
         private int Dimensions = 8;
-        private UpdateGame _updateGame;
+        private AnimalFinalizer _animalFinalizer;
         private GridService _grid;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _updateGame = new UpdateGame(Dimensions);
+            _animalFinalizer = new AnimalFinalizer(Dimensions);
             _grid = new GridService();
         }
 
@@ -30,12 +30,12 @@ namespace ClassLibrary.Tests
             bool isChild = false;
 
             // Act
-            _updateGame.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
-            _updateGame.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
 
             // Assert
-            Assert.AreEqual(1, _updateGame.GetAnimalCount(grid, AnimalTypeEnums.prey));
-            Assert.AreEqual(1, _updateGame.GetAnimalCount(grid, AnimalTypeEnums.predator));
+            Assert.AreEqual(1, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.prey));
+            Assert.AreEqual(1, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.predator));
         }
 
         [TestMethod()]
@@ -46,12 +46,12 @@ namespace ClassLibrary.Tests
             var grid = _grid.Initialize(dimensions);
             var animalLionModel = new LionModel();
             bool isChild = false;
-            _updateGame.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
             bool isPredatorTurn = true;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
             // Act
-            _updateGame.MoveAnimals(dimensions, grid, ref isPredatorTurn);
+            _animalFinalizer.MoveAnimals(dimensions, grid, ref isPredatorTurn);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -64,12 +64,12 @@ namespace ClassLibrary.Tests
             var grid = _grid.Initialize(dimensions);
             var animalAntelopeModel = new AntelopeModel();
             bool isChild = false;
-            _updateGame.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
             bool isPredatorTurn = false;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
             // Act
-            _updateGame.MoveAnimals(dimensions, grid, ref isPredatorTurn);
+            _animalFinalizer.MoveAnimals(dimensions, grid, ref isPredatorTurn);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -85,11 +85,11 @@ namespace ClassLibrary.Tests
             bool isChild = false;
 
             // Act
-            _updateGame.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
-            _updateGame.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalFinalizer.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
 
             // Assert
-            Assert.AreEqual(2, _updateGame.GetAnimalCount(grid, AnimalTypeEnums.all));
+            Assert.AreEqual(2, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.all));
         }
     }
 }
