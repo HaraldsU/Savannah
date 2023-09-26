@@ -1,5 +1,4 @@
 ﻿using AnimalLibrary.CustomValidations;
-using AnimalLibrary.Models.Animals;
 using System.ComponentModel.DataAnnotations;
 
 namespace AnimalLibrary.Models

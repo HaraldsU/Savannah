@@ -1,7 +1,4 @@
-﻿using AnimalLibrary.CustomValidations;
-using System.ComponentModel.DataAnnotations;
-
-namespace AnimalLibrary.Models
+﻿namespace AnimalLibrary.Models
 {
     public interface IPlugin
     {

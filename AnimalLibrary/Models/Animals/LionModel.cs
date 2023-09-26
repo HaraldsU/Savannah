@@ -1,7 +1,4 @@
-﻿using AnimalLibrary.CustomValidations;
-using System.ComponentModel.DataAnnotations;
-
-namespace AnimalLibrary.Models.Animals
+﻿namespace AnimalLibrary.Models.Animals
 {
     public class LionModel : PluginBase
     {
