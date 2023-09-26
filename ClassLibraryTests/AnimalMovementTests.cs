@@ -1,4 +1,4 @@
-﻿using AnimalLibrary.Models;
+﻿using AnimalLibrary.Models.Animals;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassLibrary.Tests
@@ -6,36 +6,32 @@ namespace ClassLibrary.Tests
     [TestClass()]
     public class AnimalMovementTests
     {
-        private UpdateGame _updateGame;
+        private int Dimensions = 8;
+        private AnimalFinalizer _animalFinalizer;
         private GridService _grid;
-        private AnimalMovement _animalMovement;
-        private PluginLoader _pluginLoader;
-        private static List<IPlugin> Plugins;
+        private AnimalBehaviour _animalMovement;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _pluginLoader = new();
-            Plugins = _pluginLoader.LoadPlugins();
-            _updateGame = new(Plugins);
+            _animalFinalizer = new(Dimensions);
             _grid = new();
-            _animalMovement = new();
+            _animalMovement = new(_animalFinalizer);
         }
         [TestMethod()]
         public void GetAnimalsNewPositionsTest()
         {
             // Arrange
-            int dimensions = 8;
-            char animalAntelope = 'A';
-            var grid = _grid.Initialize(dimensions);
+            var animalAntelope = new AntelopeModel();
+            var grid = _grid.Initialize(Dimensions);
             bool isChild = false;
-            bool turn = false;
+            bool isPredatorTurn = false;
             Dictionary<int, int> updatesOld = new();
             Dictionary<int, int> updates = new();
 
             // Act
-            UpdateGame.AddAnimal(animalAntelope, grid, isChild);
-            _animalMovement.GetAnimalsNewPositions(dimensions, grid, turn, updates);
+            _animalFinalizer.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _animalMovement.GetAnimalsNewPositions(Dimensions, grid, isPredatorTurn, updates);
 
             // Assert
             Assert.AreNotEqual(updatesOld, updates);

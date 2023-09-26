@@ -4,7 +4,8 @@
     {
         string Name { get; set; }
         char FirstLetter { get; set; }
-        string Type { get; set; }
+        ConsoleKey KeyBind { get; set; }
+        bool IsPrey { get; set; }
         string Color { get; set; }
         int Speed { get; set; }
         int Range { get; set; }
