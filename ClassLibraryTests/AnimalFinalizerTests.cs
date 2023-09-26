@@ -1,4 +1,5 @@
-﻿using ClassLibrary.Constants;
+﻿using AnimalLibrary.Models.Animals;
+using ClassLibrary.Constants;
 using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
