@@ -1,7 +1,8 @@
 ﻿using AnimalLibrary.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
-namespace ClassLibrary
+namespace ClassLibrary.PluginHandlers
 {
     public static class PluginValidator
     {
@@ -17,14 +18,15 @@ namespace ClassLibrary
             }
             return Tuple.Create(true, validationResults);
         }
-        public static void FailedValidationMessage(List<ValidationResult> validationResults, IPlugin plugin)
+        public static StringBuilder FailedValidationMessage(List<ValidationResult> validationResults, IPlugin plugin)
         {
-            Console.WriteLine("Error importing plugin: " + plugin.Name);
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine("Error importing plugin: " + plugin.Name);
             foreach (var validationResult in validationResults)
             {
-                Console.WriteLine(validationResult.ErrorMessage);
+                stringBuilder.AppendLine(validationResult.ErrorMessage);
             }
-            Environment.Exit(0);
+            return stringBuilder;
         }
     }
 }

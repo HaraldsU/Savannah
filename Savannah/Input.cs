@@ -6,11 +6,11 @@ namespace Savanna.cons
 {
     public class Input
     {
-        private AnimalFinalizer _animalFinalizer;
+        private GameService _animalFinalizer;
         private Display _display;
-        public Input(int dimensions)
+        public Input(int dimensions, List<IPlugin> animals)
         {
-            _animalFinalizer = new(dimensions);
+            _animalFinalizer = new(dimensions, animals);
             _display = new(_animalFinalizer.Animals);
         }
         /// <summary>

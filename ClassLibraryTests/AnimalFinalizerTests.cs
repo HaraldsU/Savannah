@@ -1,5 +1,6 @@
 ﻿using AnimalLibrary.Models.Animals;
 using ClassLibrary.Constants;
+using ClassLibrary.PluginHandlers;
 using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,13 +10,15 @@ namespace ClassLibrary.Tests
     public class AnimalFinalizerTests
     {
         private int Dimensions = 8;
-        private AnimalFinalizer _animalFinalizer;
+        private GameService _animalFinalizer;
         private GridService _grid;
+        private PluginLoader _pluginLoader;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _animalFinalizer = new AnimalFinalizer(Dimensions);
+            _pluginLoader = new PluginLoader();
+            _animalFinalizer = new GameService(Dimensions, _pluginLoader.LoadPlugins().Item1);
             _grid = new GridService();
         }
 
@@ -34,8 +37,8 @@ namespace ClassLibrary.Tests
             _animalFinalizer.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
 
             // Assert
-            Assert.AreEqual(1, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.prey));
-            Assert.AreEqual(1, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.predator));
+            Assert.AreEqual(1, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.Prey));
+            Assert.AreEqual(1, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.Predator));
         }
 
         [TestMethod()]
@@ -89,7 +92,7 @@ namespace ClassLibrary.Tests
             _animalFinalizer.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
 
             // Assert
-            Assert.AreEqual(2, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.all));
+            Assert.AreEqual(2, _animalFinalizer.GetAnimalCount(grid, AnimalTypeEnums.All));
         }
     }
 }

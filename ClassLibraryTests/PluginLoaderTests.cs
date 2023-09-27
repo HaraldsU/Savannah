@@ -1,4 +1,5 @@
 ﻿using AnimalLibrary.Models;
+using ClassLibrary.PluginHandlers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassLibrary.Tests
@@ -15,7 +16,7 @@ namespace ClassLibrary.Tests
         public void LoadPluginsTest()
         {
             var plugins = _pluginLoader.LoadPlugins();
-            Assert.IsInstanceOfType(plugins, typeof(List<IPlugin>));
+            Assert.IsInstanceOfType(plugins.Item1, typeof(List<IPlugin>));
         }
     }
 }

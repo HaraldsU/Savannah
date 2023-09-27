@@ -1,21 +1,22 @@
 ﻿using AnimalLibrary.Models;
 using ClassLibrary.Constants;
+using ClassLibrary.PluginHandlers;
 
 namespace ClassLibrary
 {
-    public class AnimalFinalizer
+    public class GameService
     {
         public List<IPlugin>? Animals { get; private set; }
         public List<GridCellModel> Grid { get; private set; }
         private PluginLoader _pluginLoader;
         private GridService _gridService;
         private AnimalBehaviour _animalMovement;
-        public AnimalFinalizer(int dimensions)
+        public GameService(int dimensions, List<IPlugin> animals)
         {
             _pluginLoader = new();
             _gridService = new GridService();
             _animalMovement = new(this);
-            Animals = _pluginLoader.LoadPlugins();
+            Animals = animals;
             Grid = _gridService.Initialize(dimensions);
         }
         /// <summary>
@@ -73,11 +74,11 @@ namespace ClassLibrary
                 {
                     if (isChild)
                         animal.ActiveBreedingCooldown = animal.BreedingCooldown;
-                    if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey))
+                    if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.Prey))
                     {
                         animalModel.Prey = animal.CreateNewAnimal();
                     }
-                    else if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.predator))
+                    else if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.Predator))
                     {
                         animalModel.Predator = animal.CreateNewAnimal(); ;
                     }
@@ -122,22 +123,22 @@ namespace ClassLibrary
         /// <param name="grid"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.all)
+        public int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.All)
         {
             int count = 0;
             foreach (var cell in grid)
             {
-                if (type == AnimalTypeEnums.all)
+                if (type == AnimalTypeEnums.All)
                 {
                     if (cell.Animal != null && (cell.Animal.Prey != null || cell.Animal.Predator != null))
                         count++;
                 }
-                else if (type == AnimalTypeEnums.prey)
+                else if (type == AnimalTypeEnums.Prey)
                 {
                     if (cell.Animal != null && cell.Animal.Prey != null)
                         count++;
                 }
-                else if (type == AnimalTypeEnums.predator)
+                else if (type == AnimalTypeEnums.Predator)
                 {
                     if (cell.Animal != null && cell.Animal.Predator != null)
                         count++;
