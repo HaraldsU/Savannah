@@ -2,7 +2,7 @@
 using ClassLibrary.PluginHandlers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace ClassLibrary.Tests
+namespace ClassLibraryTests.PluginHandlers
 {
     [TestClass()]
     public class PluginLoaderTests

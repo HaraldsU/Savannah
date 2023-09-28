@@ -9,7 +9,7 @@ namespace Savannah
         public int Dimension;
         private readonly GridService _initializeGrid;
         private Input _input;
-        private GameService _animalFinalizer;
+        private GameService _gameService;
         private Display _display;
         private readonly PluginLoader _pluginLoader;
         public GameFlow()
@@ -28,7 +28,7 @@ namespace Savannah
             }
             else
             {
-                _animalFinalizer = new(Dimension, pluginList.Item1);
+                _gameService = new(Dimension, pluginList.Item1);
                 _input = new(Dimension, pluginList.Item1);
                 _display = new(pluginList.Item1);
             }
@@ -43,7 +43,7 @@ namespace Savannah
             while (isGameRunning)
             {
                 _display.DisplayGrid(grid, cursorTop, Dimension);
-                _animalFinalizer.MoveAnimals(Dimension, grid, ref isPredatorTurn);
+                _gameService.MoveAnimals(Dimension, grid, ref isPredatorTurn);
                 Thread.Sleep(250);
 
                 _input.ButtonListener(grid);

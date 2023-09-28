@@ -8,12 +8,10 @@ namespace ClassLibrary
     {
         public List<IPlugin>? Animals { get; private set; }
         public List<GridCellModel> Grid { get; private set; }
-        private PluginLoader _pluginLoader;
         private GridService _gridService;
         private AnimalBehaviour _animalMovement;
         public GameService(int dimensions, List<IPlugin> animals)
         {
-            _pluginLoader = new();
             _gridService = new GridService();
             _animalMovement = new(this);
             Animals = animals;

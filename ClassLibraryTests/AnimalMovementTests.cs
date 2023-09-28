@@ -8,7 +8,7 @@ namespace ClassLibrary.Tests
     public class AnimalMovementTests
     {
         private int Dimensions = 8;
-        private GameService _animalFinalizer;
+        private GameService _gameService;
         private GridService _grid;
         private AnimalBehaviour _animalMovement;
         private PluginLoader _pluginLoader;
@@ -17,9 +17,9 @@ namespace ClassLibrary.Tests
         public void Initialize()
         {
             _pluginLoader = new();
-            _animalFinalizer = new(Dimensions, _pluginLoader.LoadPlugins().Item1);
+            _gameService = new(Dimensions, _pluginLoader.LoadPlugins().Item1);
             _grid = new();
-            _animalMovement = new(_animalFinalizer);
+            _animalMovement = new(_gameService);
         }
         [TestMethod()]
         public void GetAnimalsNewPositionsTest()
@@ -33,7 +33,7 @@ namespace ClassLibrary.Tests
             Dictionary<int, int> updates = new();
 
             // Act
-            _animalFinalizer.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _gameService.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
             _animalMovement.GetAnimalsNewPositions(Dimensions, grid, isPredatorTurn, updates);
 
             // Assert
