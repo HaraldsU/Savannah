@@ -1,7 +1,13 @@
+using Microsoft.Net.Http.Headers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddHttpClient("Grid", httpClient =>
+{
+    httpClient.BaseAddress = new Uri("http://localhost:5266");
+});
 
 var app = builder.Build();
 

@@ -2,7 +2,7 @@
 {
     public class AnimalsModel
     {
-        public IPlugin? Predator { get; set; } = null;
-        public IPlugin? Prey { get; set; } = null;
+        public PluginBase? Predator { get; set; } = null;
+        public PluginBase? Prey { get; set; } = null;
     }
 }

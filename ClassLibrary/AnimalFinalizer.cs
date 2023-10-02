@@ -75,11 +75,11 @@ namespace ClassLibrary
                         animal.ActiveBreedingCooldown = animal.BreedingCooldown;
                     if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey))
                     {
-                        animalModel.Prey = animal.CreateNewAnimal();
+                        animalModel.Prey = (PluginBase?)animal.CreateNewAnimal();
                     }
                     else if (animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.predator))
                     {
-                        animalModel.Predator = animal.CreateNewAnimal(); ;
+                        animalModel.Predator = (PluginBase?)animal.CreateNewAnimal(); ;
                     }
                     grid[cellIndex].Animal = animalModel;
                 }

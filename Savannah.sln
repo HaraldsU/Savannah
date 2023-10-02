@@ -9,11 +9,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "ClassLibrar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibraryTests", "ClassLibraryTests\ClassLibraryTests.csproj", "{FA977DE7-B233-403A-974A-3CF99F3B3488}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalLibrary", "AnimalLibrary\AnimalLibrary.csproj", "{E230682B-380D-446A-AE3D-16137D9EF849}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnimalLibrary", "AnimalLibrary\AnimalLibrary.csproj", "{E230682B-380D-446A-AE3D-16137D9EF849}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavannaWebApplication", "SavannaWebApplication\SavannaWebApplication.csproj", "{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SavannaWebApplication", "SavannaWebApplication\SavannaWebApplication.csproj", "{5729902D-02C3-4036-A1A7-EACBEE1FDF1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavannaWebAPI", "SavannaWebAPI\SavannaWebAPI.csproj", "{30C520F7-F9D7-465A-BA65-4206EFC840A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SavannaWebAPI", "SavannaWebAPI\SavannaWebAPI.csproj", "{30C520F7-F9D7-465A-BA65-4206EFC840A7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{B6424BC6-106B-4E61-8E72-E692C2681C28}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{9161D82E-FC9A-4AF8-AF12-0F5786150E95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebAPI", "WebAPI", "{6A0536C1-01F3-4B5A-A7A3-5DDA4746BB61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +54,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{45318587-7017-4B81-9413-3435DD148F51} = {B6424BC6-106B-4E61-8E72-E692C2681C28}
+		{FEDBFD92-79A6-41BC-AE0D-51CFB8F78487} = {B6424BC6-106B-4E61-8E72-E692C2681C28}
+		{FA977DE7-B233-403A-974A-3CF99F3B3488} = {B6424BC6-106B-4E61-8E72-E692C2681C28}
+		{E230682B-380D-446A-AE3D-16137D9EF849} = {B6424BC6-106B-4E61-8E72-E692C2681C28}
+		{5729902D-02C3-4036-A1A7-EACBEE1FDF1C} = {9161D82E-FC9A-4AF8-AF12-0F5786150E95}
+		{30C520F7-F9D7-465A-BA65-4206EFC840A7} = {6A0536C1-01F3-4B5A-A7A3-5DDA4746BB61}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5C4DECF9-D054-4ED1-BF8D-B27910D84C71}
