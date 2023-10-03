@@ -3,6 +3,7 @@ using SavannaWebAPI.Models;
 using ClassLibrary;
 using ClassLibrary.PluginHandlers;
 using AnimalLibrary.Models;
+using SavannaWebApplication.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -30,34 +31,9 @@ namespace SavannaWebAPI.Controllers
         [HttpGet("GetGameService")]
         public async Task<IActionResult> GetGameService()
         {
-            _gameServiceDTO = new GameServiceDTO(dimensions, _animals.Item1);
+            var pluginDTOs = _animals.Item1.Select(plugin => new PluginBaseDTO(plugin)).ToList();
+            _gameServiceDTO = new GameServiceDTO(dimensions, pluginDTOs);
             return Ok(_gameServiceDTO);
         }
-
-
-        //// GET api/<GridModelController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
-        //// POST api/<GridModelController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<GridModelController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<GridModelController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

@@ -1,10 +1,15 @@
 ﻿using AnimalLibrary.CustomValidations;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AnimalLibrary.Models
 {
     public abstract class PluginBase : IPlugin
     {
+        [JsonConstructor]
+        public PluginBase()
+        {
+        }
         [Required]
         public string Name { get; set; }
 
@@ -51,7 +56,6 @@ namespace AnimalLibrary.Models
 
         [Required]
         public bool IsBirthing { get; set; } = false;
-
         public abstract IPlugin CreateNewAnimal();
     }
 }

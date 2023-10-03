@@ -1,15 +1,23 @@
-﻿using AnimalLibrary.Models;
+﻿using SavannaWebAPI.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace SavannaWebApplication.Models
 {
     public class GameServiceDTO
     {
-        public GameServiceDTO(int dimensions, List<IPlugin> animals)
+        public GameServiceDTO()
         {
-            this.Dimensions = dimensions;
-            this.Animals = animals;
         }
-        public int Dimensions { get; }
-        public List<IPlugin> Animals { get; }
+
+        public GameServiceDTO(int dimensions, List<PluginBaseDTO> animals)
+        {
+            Dimensions = dimensions;
+            Animals = animals;
+        }
+
+        public int Dimensions { get; set; }
+        public List<PluginBaseDTO> Animals { get; set; }
     }
 }
