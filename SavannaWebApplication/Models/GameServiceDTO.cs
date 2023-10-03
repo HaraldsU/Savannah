@@ -1,6 +1,6 @@
 ﻿using AnimalLibrary.Models;
 
-namespace SavannaWebAPI.Models
+namespace SavannaWebApplication.Models
 {
     public class GameServiceDTO
     {

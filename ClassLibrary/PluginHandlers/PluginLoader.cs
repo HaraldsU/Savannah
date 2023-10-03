@@ -8,7 +8,7 @@ namespace ClassLibrary.PluginHandlers
         public Tuple<List<IPlugin>, string> LoadPlugins()
         {
             var pluginsLists = new List<IPlugin>();
-            LoadImportedPlugins(pluginsLists);
+            //LoadImportedPlugins(pluginsLists);
             LoadExistingPlugins(pluginsLists);
             var validation = ValidatePlugins(pluginsLists);
             pluginsLists.Sort((plugin1, plugin2) => plugin1.FirstLetter.CompareTo(plugin2.FirstLetter));
@@ -20,13 +20,13 @@ namespace ClassLibrary.PluginHandlers
             // Read the dll files from the extensions folder
             var files = Directory.GetFiles(pluginDirectory, "*.dll");
 
-            //// Read the assembly from files 
-            //foreach (var file in files)
-            //{
-            //    var assembly = Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), file));
+            // Read the assembly from files 
+            foreach (var file in files)
+            {
+                var assembly = Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), file));
 
-            //    // Exteract all the types that implements IPlugin 
-            //    var pluginTypes = assembly.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface).ToArray();
+                // Exteract all the types that implements IPlugin 
+                var pluginTypes = assembly.GetTypes().Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface).ToArray();
 
                 foreach (var pluginType in pluginTypes)
                 {
@@ -34,8 +34,8 @@ namespace ClassLibrary.PluginHandlers
                     var pluginInstance = Activator.CreateInstance(pluginType) as IPlugin;
                     pluginsLists.Add(pluginInstance);
                 }
-            }
         }
+    }
         private void LoadExistingPlugins(List<IPlugin> pluginsLists)
         {
             var animalLibraryAssembly = Assembly.Load("AnimalLibrary");

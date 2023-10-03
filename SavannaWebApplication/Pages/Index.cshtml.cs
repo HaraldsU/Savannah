@@ -1,7 +1,9 @@
 ﻿using AnimalLibrary.Models;
 using Azure;
+using ClassLibrary;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SavannaWebApplication.Models;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace SavannaWebApplication.Pages
@@ -11,6 +13,7 @@ namespace SavannaWebApplication.Pages
         private readonly ILogger<IndexModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         public List<GridCellModel> Grid { get; set; }
+        public GameService GameService { get; set; }
 
         public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory httpClientFactory)
         {
@@ -21,13 +24,13 @@ namespace SavannaWebApplication.Pages
         public async Task OnGet()
         {
             var httpClient = _httpClientFactory.CreateClient("Grid"); // Create HttpClient
-            
-            var httpResponse = await httpClient.GetAsync("api/GridModel"); // Make GET request to the API
+            var httpResponseGrid = await httpClient.GetAsync("api/GridModel/GetGrid"); // Make GET request to the API
+            var httpResponseGameService = await httpClient.GetAsync("api/GridModel/GetGameService"); // Make GET request to the API
 
-            if (httpResponse.IsSuccessStatusCode)
+            if (httpResponseGrid.IsSuccessStatusCode)
             {
                 // Read the response content as a string
-                var jsonContent = await httpResponse.Content.ReadAsStringAsync();
+                var jsonContent = await httpResponseGrid.Content.ReadAsStringAsync();
 
                 var options = new JsonSerializerOptions
                 {
@@ -42,7 +45,24 @@ namespace SavannaWebApplication.Pages
                     Grid = gridModelDTO.Grid;
                 }
             }
+            if (httpResponseGameService.IsSuccessStatusCode)
+            {
+                // Read the response content as a string
+                var jsonContent = await httpResponseGameService.Content.ReadAsStringAsync();
 
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true // Ignore case when mapping JSON to properties
+                };
+
+                var gameServiceDTO = JsonSerializer.Deserialize<GameServiceDTO> (jsonContent, options);
+
+
+                if (gameServiceDTO != null)
+                {
+                    //GameService = gameServiceDTO;
+                }
+            }
         }
     }
 }
