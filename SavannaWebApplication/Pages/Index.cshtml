@@ -7,5 +7,12 @@
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    @for (int i = 0; i < Model.Grid.Count; i++)
+    {
+        <div>@Model.Grid[i].X</div>
+        <div>@Model.Grid[i].Y</div>
+        <div>@Model.Grid[i].Animal</div>
+        <br />
+    }
     @Model.Grid
 </div>

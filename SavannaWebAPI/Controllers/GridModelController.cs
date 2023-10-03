@@ -16,7 +16,7 @@ namespace SavannaWebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            _gridModelDTO.Grid = _initializeGrid.Initialize(10);
+            _gridModelDTO.Grid = _initializeGrid.Initialize(5);
 
             return Ok(_gridModelDTO);
         }
