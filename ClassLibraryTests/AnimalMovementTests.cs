@@ -1,4 +1,5 @@
 ﻿using AnimalLibrary.Models.Animals;
+using ClassLibrary.PluginHandlers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassLibrary.Tests
@@ -7,16 +8,18 @@ namespace ClassLibrary.Tests
     public class AnimalMovementTests
     {
         private int Dimensions = 8;
-        private AnimalFinalizer _animalFinalizer;
+        private GameService _gameService;
         private GridService _grid;
         private AnimalBehaviour _animalMovement;
+        private PluginLoader _pluginLoader;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _animalFinalizer = new(Dimensions);
+            _pluginLoader = new();
+            _gameService = new(Dimensions, _pluginLoader.LoadPlugins().Item1);
             _grid = new();
-            _animalMovement = new(_animalFinalizer);
+            _animalMovement = new(_gameService);
         }
         [TestMethod()]
         public void GetAnimalsNewPositionsTest()
@@ -30,7 +33,7 @@ namespace ClassLibrary.Tests
             Dictionary<int, int> updates = new();
 
             // Act
-            _animalFinalizer.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _gameService.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
             _animalMovement.GetAnimalsNewPositions(Dimensions, grid, isPredatorTurn, updates);
 
             // Assert

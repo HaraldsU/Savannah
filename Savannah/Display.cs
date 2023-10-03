@@ -13,6 +13,10 @@ namespace Savannah
             Animals = plugins;
         }
 
+        public void DisplayPluginLoadValidationError(string validationError)
+        {
+            Console.WriteLine(validationError);
+        }
         public void DisplayAnimalCount()
         {
             var files = Directory.GetFiles("C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\AnimalLibrary\\Models\\Animals\\");

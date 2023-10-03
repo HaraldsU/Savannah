@@ -5,10 +5,10 @@ namespace ClassLibrary
 {
     public class AnimalBehaviour
     {
-        private AnimalFinalizer _animalFinalizer;
-        public AnimalBehaviour(AnimalFinalizer animalFinalizer)
+        private GameService _gameService;
+        public AnimalBehaviour(GameService animalFinalizer)
         {
-            _animalFinalizer = animalFinalizer;
+            _gameService = animalFinalizer;
         }
         public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, bool turn, Dictionary<int, int> updates)
         {
@@ -52,9 +52,9 @@ namespace ClassLibrary
         /// <param name="updates"></param>
         private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, IPlugin animal, int coordinates, int coordinatesOld, Dictionary<int, int> updates)
         {
-            var animalCount = _animalFinalizer.GetAnimalCount(grid);
+            var animalCount = _gameService.GetAnimalCount(grid);
             var target = GetTarget(dimension, grid[coordinates], grid);
-            var currentAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey) ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
+            var currentAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.Prey) ? grid[coordinates].Animal.Prey : grid[coordinates].Animal.Predator;
 
             if (currentAnimal != null)
             {
@@ -73,16 +73,16 @@ namespace ClassLibrary
                     var directionYSign = directionSigns.Item2;
                     MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign);
                 }
-                else if (target.Item3 == (int)AnimalTargetEnums.breed) // Other animal of same type in range
+                else if (target.Item3 == (int)AnimalTargetEnums.MatingPartner) // Other animal of same type in range
                 {
                     var targetIndex = ((target.Item2 + 1) * dimension) - (dimension - target.Item1);
-                    var targetAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.prey) ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
+                    var targetAnimal = animal.IsPrey == Convert.ToBoolean(AnimalTypeEnums.Prey) ? grid[targetIndex].Animal.Prey : grid[targetIndex].Animal.Predator;
                     var directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                     var directionXSign = directionSigns.Item1;
                     var directionYSign = directionSigns.Item2;
                     var x = grid[coordinates];
                     // Animal breeds animal
-                    if (directionXSign == (int)DirectionEnums.noDirectionSign && directionYSign == (int)DirectionEnums.noDirectionSign
+                    if (directionXSign == (int)DirectionEnums.NoDirectionSign && directionYSign == (int)DirectionEnums.NoDirectionSign
                         && (currentAnimal.ActiveBreedingCooldown == 0 && targetAnimal.ActiveBreedingCooldown == 0))
                     {
                         currentAnimal.ActiveBreedingCooldown = currentAnimal.BreedingTime + currentAnimal.BreedingCooldown;
@@ -98,7 +98,7 @@ namespace ClassLibrary
                             updates.Add(updatesElement.Key, updatesElement.Key);
                         }
                         ClearGridAnimals(grid);
-                        _animalFinalizer.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
+                        _gameService.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
                         directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                         directionXSign = directionSigns.Item1;
                         directionXSign = directionSigns.Item2;
@@ -189,24 +189,24 @@ namespace ClassLibrary
                         if (gridItem.Animal.Predator != null && grid[coordinates].Animal.Prey != null) // Predator catching prey
                         {
                             gridItem.Animal.Predator.Health += 2;
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.enemy);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.Enemy);
                         }
                         else if (gridItem.Animal.Prey != null && grid[coordinates].Animal.Predator != null) // Prey fleeing predator
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.enemy);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.Enemy);
                         else if (gridItem.Animal.Predator != null // Predator breeding predator
                                  && grid[coordinates].Animal.Predator != null
                                  && (gridItem.Animal.Predator.ActiveBreedingCooldown == 0 || gridItem.Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
                                  && (grid[coordinates].Animal.Predator.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Predator.ActiveBreedingCooldown > gridItem.Animal.Predator.BreedingCooldown)
                                  && (gridItem.Animal.Predator.FirstLetter == grid[coordinates].Animal.Predator.FirstLetter)
                                 )
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.breed);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.MatingPartner);
                         else if (gridItem.Animal.Prey != null  // Prey breeding prey
                                  && grid[coordinates].Animal.Prey != null
                                  && (gridItem.Animal.Prey.ActiveBreedingCooldown == 0 || gridItem.Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
                                  && (grid[coordinates].Animal.Prey.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.Prey.ActiveBreedingCooldown > gridItem.Animal.Prey.BreedingCooldown)
                                  && (gridItem.Animal.Prey.FirstLetter == grid[coordinates].Animal.Prey.FirstLetter)
                                 )
-                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.breed);
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, (int)AnimalTargetEnums.MatingPartner);
                     }
                 }
             }
@@ -241,27 +241,27 @@ namespace ClassLibrary
             {
                 if (animalTmp.Predator != null)
                 {
-                    if (target.Item3 == (int)AnimalTargetEnums.breed)
+                    if (target.Item3 == (int)AnimalTargetEnums.MatingPartner)
                     {
-                        if (gridItem.X + steps >= target.Item1 && directionXSign == (int)DirectionEnums.positiveDirectionSign)
+                        if (gridItem.X + steps >= target.Item1 && directionXSign == (int)DirectionEnums.PositiveDirectionSign)
                             steps--;
-                        else if (gridItem.X - steps <= target.Item1 && directionXSign == (int)DirectionEnums.negativeDirectionSign)
+                        else if (gridItem.X - steps <= target.Item1 && directionXSign == (int)DirectionEnums.NegativeDirectionSign)
                             steps--;
                     }
                     else
                     {
-                        if (gridItem.X + steps > target.Item1 && directionXSign == (int)DirectionEnums.positiveDirectionSign)
+                        if (gridItem.X + steps > target.Item1 && directionXSign == (int)DirectionEnums.PositiveDirectionSign)
                             steps--;
-                        else if (gridItem.X - steps < target.Item1 && directionXSign == (int)DirectionEnums.negativeDirectionSign)
+                        else if (gridItem.X - steps < target.Item1 && directionXSign == (int)DirectionEnums.NegativeDirectionSign)
                             steps--;
                     }
 
                 }
             }
 
-            if (directionXSign == (int)DirectionEnums.negativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
+            if (directionXSign == (int)DirectionEnums.NegativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y) // Move left
                 coordinates -= steps;
-            else if (directionXSign == (int)DirectionEnums.positiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
+            else if (directionXSign == (int)DirectionEnums.PositiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)   // Move right
                 coordinates += steps;
 
             // y abscissa 
@@ -272,26 +272,26 @@ namespace ClassLibrary
             {
                 if (animalTmp.Predator != null)
                 {
-                    if (target.Item3 == (int)AnimalTargetEnums.breed)
+                    if (target.Item3 == (int)AnimalTargetEnums.MatingPartner)
                     {
-                        if (gridItem.Y + steps >= target.Item2 && directionYSign == (int)DirectionEnums.positiveDirectionSign)
+                        if (gridItem.Y + steps >= target.Item2 && directionYSign == (int)DirectionEnums.PositiveDirectionSign)
                             steps--;
-                        else if (gridItem.Y - steps <= target.Item2 && directionYSign == (int)DirectionEnums.negativeDirectionSign)
+                        else if (gridItem.Y - steps <= target.Item2 && directionYSign == (int)DirectionEnums.NegativeDirectionSign)
                             steps--;
                     }
                     else
                     {
-                        if (gridItem.Y + steps > target.Item2 && directionYSign == (int)DirectionEnums.positiveDirectionSign)
+                        if (gridItem.Y + steps > target.Item2 && directionYSign == (int)DirectionEnums.PositiveDirectionSign)
                             steps--;
-                        else if (gridItem.Y - steps < target.Item2 && directionYSign == (int)DirectionEnums.negativeDirectionSign)
+                        else if (gridItem.Y - steps < target.Item2 && directionYSign == (int)DirectionEnums.NegativeDirectionSign)
                             steps--;
                     }
                 }
             }
 
-            if (directionYSign == (int)DirectionEnums.negativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
+            if (directionYSign == (int)DirectionEnums.NegativeDirectionSign && (coordinates - (dimension * steps)) >= 0) // Move up
                 coordinates -= dimension * steps;
-            else if (directionYSign == (int)DirectionEnums.positiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
+            else if (directionYSign == (int)DirectionEnums.PositiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)    // Move down
                 coordinates += dimension * steps;
         }
         /// <summary>
@@ -325,8 +325,8 @@ namespace ClassLibrary
                          || updates.ContainsValue(coordinatesTmp)) && count <= 8);
                 if (count >= 8)
                 {
-                    directionXSign = (int)DirectionEnums.noDirectionSign;
-                    directionYSign = (int)DirectionEnums.noDirectionSign;
+                    directionXSign = (int)DirectionEnums.NoDirectionSign;
+                    directionYSign = (int)DirectionEnums.NoDirectionSign;
                 }
             }
             var returnData = Tuple.Create(directionXSign, directionYSign);
@@ -341,28 +341,28 @@ namespace ClassLibrary
         private void GenerateRandomSign(ref int directionXSign, ref int directionYSign)
         {
             int directionX = RandomGenerator.Next(3);
-            if (directionX == 0) directionXSign = (int)DirectionEnums.negativeDirectionSign;
-            else if (directionX == 1) directionXSign = (int)DirectionEnums.positiveDirectionSign;
-            else directionXSign = (int)DirectionEnums.noDirectionSign;
+            if (directionX == 0) directionXSign = (int)DirectionEnums.NegativeDirectionSign;
+            else if (directionX == 1) directionXSign = (int)DirectionEnums.PositiveDirectionSign;
+            else directionXSign = (int)DirectionEnums.NoDirectionSign;
 
-            if (directionXSign == (int)DirectionEnums.noDirectionSign)
+            if (directionXSign == (int)DirectionEnums.NoDirectionSign)
             {
                 int directionY = RandomGenerator.Next(2);
-                if (directionY == 0) directionYSign = (int)DirectionEnums.negativeDirectionSign;
-                else directionYSign = (int)DirectionEnums.positiveDirectionSign;
+                if (directionY == 0) directionYSign = (int)DirectionEnums.NegativeDirectionSign;
+                else directionYSign = (int)DirectionEnums.PositiveDirectionSign;
             }
             else
             {
                 int directionY = RandomGenerator.Next(3);
-                if (directionY == 0) directionYSign = (int)DirectionEnums.negativeDirectionSign;
-                else if (directionY == 1) directionYSign = (int)DirectionEnums.positiveDirectionSign;
-                else directionYSign = (int)DirectionEnums.noDirectionSign;
+                if (directionY == 0) directionYSign = (int)DirectionEnums.NegativeDirectionSign;
+                else if (directionY == 1) directionYSign = (int)DirectionEnums.PositiveDirectionSign;
+                else directionYSign = (int)DirectionEnums.NoDirectionSign;
 
-                if (directionYSign == (int)DirectionEnums.noDirectionSign)
+                if (directionYSign == (int)DirectionEnums.NoDirectionSign)
                 {
                     directionX = RandomGenerator.Next(2);
-                    if (directionX == 0) directionXSign = (int)DirectionEnums.negativeDirectionSign;
-                    else if (directionX == 1) directionXSign = (int)DirectionEnums.positiveDirectionSign;
+                    if (directionX == 0) directionXSign = (int)DirectionEnums.NegativeDirectionSign;
+                    else if (directionX == 1) directionXSign = (int)DirectionEnums.PositiveDirectionSign;
                 }
             }
         }
@@ -379,8 +379,8 @@ namespace ClassLibrary
         private Tuple<int, int> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, int> target,
                                                           GridCellModel gridItem, Dictionary<int, int> updates)
         {
-            int directionXSign = (int)DirectionEnums.noDirectionSign;
-            int directionYSign = (int)DirectionEnums.noDirectionSign;
+            int directionXSign = (int)DirectionEnums.NoDirectionSign;
+            int directionYSign = (int)DirectionEnums.NoDirectionSign;
             // Subject animal coordinates
             int subjectX = gridItem.X;
             int subjectY = gridItem.Y;
@@ -394,26 +394,26 @@ namespace ClassLibrary
 
             if (gridItem.Animal.Predator != null)   // Predators
             {
-                if (target.Item3 == (int)AnimalTargetEnums.enemy) // Attacking
+                if (target.Item3 == (int)AnimalTargetEnums.Enemy) // Attacking
                 {
                     if (subjectX != targetX)
                     {
                         if (subjectX > targetX)
-                            directionXSign = (int)DirectionEnums.negativeDirectionSign;
+                            directionXSign = (int)DirectionEnums.NegativeDirectionSign;
                         else
-                            directionXSign = (int)DirectionEnums.positiveDirectionSign;
+                            directionXSign = (int)DirectionEnums.PositiveDirectionSign;
                     }
                     else
-                        directionXSign = (int)DirectionEnums.noDirectionSign;
+                        directionXSign = (int)DirectionEnums.NoDirectionSign;
                     if (subjectY != targetY)
                     {
                         if (subjectY > targetY)
-                            directionYSign = (int)DirectionEnums.negativeDirectionSign;
+                            directionYSign = (int)DirectionEnums.NegativeDirectionSign;
                         else
-                            directionYSign = (int)DirectionEnums.positiveDirectionSign;
+                            directionYSign = (int)DirectionEnums.PositiveDirectionSign;
                     }
                     else
-                        directionYSign = (int)DirectionEnums.noDirectionSign;
+                        directionYSign = (int)DirectionEnums.NoDirectionSign;
                 }
                 else // Breeding
                 {
@@ -422,26 +422,26 @@ namespace ClassLibrary
             }
             else // Preys
             {
-                if (target.Item3 == (int)AnimalTargetEnums.enemy) // Fleeing
+                if (target.Item3 == (int)AnimalTargetEnums.Enemy) // Fleeing
                 {
                     if (subjectX != targetX)
                     {
                         if (subjectX > targetX)
-                            directionXSign = (int)DirectionEnums.positiveDirectionSign;
+                            directionXSign = (int)DirectionEnums.PositiveDirectionSign;
                         else
-                            directionXSign = (int)DirectionEnums.negativeDirectionSign;
+                            directionXSign = (int)DirectionEnums.NegativeDirectionSign;
                     }
                     else
-                        directionXSign = (int)DirectionEnums.noDirectionSign;
+                        directionXSign = (int)DirectionEnums.NoDirectionSign;
                     if (subjectY != targetY)
                     {
                         if (subjectY > targetY)
-                            directionYSign = (int)DirectionEnums.positiveDirectionSign;
+                            directionYSign = (int)DirectionEnums.PositiveDirectionSign;
                         else
-                            directionYSign = (int)DirectionEnums.negativeDirectionSign;
+                            directionYSign = (int)DirectionEnums.NegativeDirectionSign;
                     }
                     else
-                        directionYSign = (int)DirectionEnums.noDirectionSign;
+                        directionYSign = (int)DirectionEnums.NoDirectionSign;
                 }
                 else // Breeding
                 {
@@ -457,8 +457,8 @@ namespace ClassLibrary
                 }
                 if ((gridTmp[coordinatesTmp].Animal.Prey != null && gridTmp[coordinates].Animal.Prey != null) || (gridTmp[coordinatesTmp].Animal.Predator != null && gridTmp[coordinates].Animal.Predator != null))
                 {
-                    directionXSign = (int)DirectionEnums.noDirectionSign;
-                    directionYSign = (int)DirectionEnums.noDirectionSign;
+                    directionXSign = (int)DirectionEnums.NoDirectionSign;
+                    directionYSign = (int)DirectionEnums.NoDirectionSign;
                 }
             }
             var returnData = Tuple.Create(directionXSign, directionYSign);
@@ -472,24 +472,24 @@ namespace ClassLibrary
                 if (subjectX != targetX)    // x cords
                 {
                     if (subjectX - 1 >= targetX)
-                        directionXSign = (int)DirectionEnums.negativeDirectionSign;
+                        directionXSign = (int)DirectionEnums.NegativeDirectionSign;
                     else if (subjectX + 1 <= targetX)
-                        directionXSign = (int)DirectionEnums.positiveDirectionSign;
+                        directionXSign = (int)DirectionEnums.PositiveDirectionSign;
                 }
                 else
-                    directionXSign = (int)DirectionEnums.noDirectionSign;
+                    directionXSign = (int)DirectionEnums.NoDirectionSign;
             }
             if (Math.Abs(subjectY - targetY) != 1 && Math.Abs(subjectY + targetY) != 1)
             {
                 if (subjectY != targetY)    // y cords
                 {
                     if (subjectY - 1 >= targetY)
-                        directionYSign = (int)DirectionEnums.negativeDirectionSign;
+                        directionYSign = (int)DirectionEnums.NegativeDirectionSign;
                     else if (subjectY + 1 <= targetY)
-                        directionYSign = (int)DirectionEnums.positiveDirectionSign;
+                        directionYSign = (int)DirectionEnums.PositiveDirectionSign;
                 }
                 else
-                    directionYSign = (int)DirectionEnums.noDirectionSign;
+                    directionYSign = (int)DirectionEnums.NoDirectionSign;
             }
         }
         /// <summary>
@@ -511,7 +511,7 @@ namespace ClassLibrary
         }
         private void RemoveAnimalHealth(AnimalsModel currentAnimal, bool animalType)
         {
-            if (animalType == Convert.ToBoolean(AnimalTypeEnums.predator))
+            if (animalType == Convert.ToBoolean(AnimalTypeEnums.Predator))
                 currentAnimal.Predator.Health -= .5f;
             else
                 currentAnimal.Prey.Health -= .5f;

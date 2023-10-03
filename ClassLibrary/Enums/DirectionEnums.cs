@@ -2,8 +2,8 @@
 {
     public enum DirectionEnums
     {
-        positiveDirectionSign = 1,
-        negativeDirectionSign = -1,
-        noDirectionSign = 0
+        PositiveDirectionSign = 1,
+        NegativeDirectionSign = -1,
+        NoDirectionSign = 0
     }
 }

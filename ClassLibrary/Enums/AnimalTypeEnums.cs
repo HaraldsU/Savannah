@@ -2,8 +2,8 @@
 {
     public enum AnimalTypeEnums
     {
-        predator = 0,
-        prey = 1,
-        all = 2
+        Predator = 0,
+        Prey = 1,
+        All = 2
     }
 }
