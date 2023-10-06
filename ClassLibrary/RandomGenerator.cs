@@ -2,7 +2,7 @@
 {
     public class RandomGenerator
     {
-        private static Random _global = new Random();
+        private static Random _global = new();
         [ThreadStatic]
         private static Random _local;
 

@@ -11,7 +11,7 @@
             Color = "Gray";
             Speed = 1;
             Range = 2;
-            Health = 6f;
+            Health = 10;
             BreedingCooldown = 4;
             BreedingTime = 2;
         }

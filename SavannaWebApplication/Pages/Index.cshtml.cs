@@ -1,66 +1,150 @@
-﻿using AnimalLibrary.Models;
-using Azure;
-using ClassLibrary;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
 using SavannaWebApplication.Models;
-using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 
 namespace SavannaWebApplication.Pages
 {
     public class IndexModel : PageModel
     {
+        public static GridModelDTO Grid { get; set; }
+        public List<PluginBaseDTO> Animals { get; set; } = new List<PluginBaseDTO>();
+        private static bool GridDataRetrieved = false;
+        private static bool IsPredatorTurn = true;
         private readonly ILogger<IndexModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
-        public List<GridCellModel> Grid { get; set; }
-        public GameService GameService { get; set; }
+        private readonly HttpClient _httpClient;
 
         public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
+            _httpClient = _httpClientFactory.CreateClient("Grid");
         }
 
         public async Task OnGet()
         {
-            var httpClient = _httpClientFactory.CreateClient("Grid"); // Create HttpClient
-            var httpResponseGrid = await httpClient.GetAsync("api/GridModel/GetGrid"); // Make GET request to the API
-            var httpResponseGameService = await httpClient.GetAsync("api/GridModel/GetGameService"); // Make GET request to the API
-
-            if (httpResponseGrid.IsSuccessStatusCode)
+            await InitializeGrid();
+            await GetAnimalPluginList();
+        }
+        public async Task<IActionResult> OnPostMoveAnimalsAsync()
+        {
+            var url = _httpClient.BaseAddress.AbsoluteUri + "api/Game/MoveAnimals";
+            var isPredatorTurn = IsPredatorTurn == true ? "true" : "false";
+            var jsonData = JsonConvert.SerializeObject(new
             {
-                // Read the response content as a string
-                var jsonContent = await httpResponseGrid.Content.ReadAsStringAsync();
+                Grid,
+                isPredatorTurn
+            });
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content);
 
-                var options = new JsonSerializerOptions
+            if (IsPredatorTurn == true)
+            {
+                IsPredatorTurn = false;
+            }
+            else
+            {
+                IsPredatorTurn = true;
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseData = await response.Content.ReadAsStringAsync();
+                GridModelDTO gridData = JsonConvert.DeserializeObject<GridModelDTO>(responseData);
+                Grid = gridData;
+                return new JsonResult(Grid.Grid);
+            }
+            else
+            {
+                var errorMessage = "Move Animals Failed !!!";
+                return new JsonResult(new { success = false, message = errorMessage })
                 {
-                    PropertyNameCaseInsensitive = true // Ignore case when mapping JSON to properties
+                    StatusCode = 400
                 };
-
-                var gridModelDTO = JsonSerializer.Deserialize<GridModelDTO>(jsonContent, options);
-
-
-                if (gridModelDTO != null)
+            }
+        }
+        public async Task<IActionResult> OnPostAddAnimalAsync(string animalName)
+        {
+            var url = _httpClient.BaseAddress.AbsoluteUri + "api/Game/AddAnimal";
+            var jsonData = JsonConvert.SerializeObject(new
+            {
+                animalName,
+                Grid
+            });
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseData = await response.Content.ReadAsStringAsync();
+                GridModelDTO gridData = JsonConvert.DeserializeObject<GridModelDTO>(responseData);
+                Grid = gridData;
+                return new JsonResult(Grid.Grid);
+            }
+            else
+            {
+                var errorMessage = "Add Animals Failed !!!";
+                return new JsonResult(new { success = false, message = errorMessage })
                 {
-                    Grid = gridModelDTO.Grid;
+                    StatusCode = 400
+                };
+            }
+        }
+        private async Task InitializeGrid()
+        {
+            if (!GridDataRetrieved)
+            {
+                var response = await _httpClient.GetAsync("api/Game/GetGrid");
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var gridModelDTO = System.Text.Json.JsonSerializer.Deserialize<GridModelDTO>(responseData, options);
+                    if (gridModelDTO != null)
+                    {
+                        Grid = gridModelDTO;
+                        GridDataRetrieved = true;
+                    }
                 }
             }
-            if (httpResponseGameService.IsSuccessStatusCode)
+        }
+        private async Task GetAnimalPluginList()
+        {
+            var response = await _httpClient.GetAsync("api/Game/GetGameService"); // Make GET request to the API
+            if (response.IsSuccessStatusCode)
             {
                 // Read the response content as a string
-                var jsonContent = await httpResponseGameService.Content.ReadAsStringAsync();
-
+                var responseData = await response.Content.ReadAsStringAsync();
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true // Ignore case when mapping JSON to properties
+                    PropertyNameCaseInsensitive = true
                 };
 
-                var gameServiceDTO = JsonSerializer.Deserialize<GameServiceDTO> (jsonContent, options);
-
-
-                if (gameServiceDTO != null)
+                var pluginBaseDTOList = System.Text.Json.JsonSerializer.Deserialize<List<PluginBaseDTO>>(responseData, options);
+                foreach (var dto in pluginBaseDTOList)
                 {
-                    //GameService = gameServiceDTO;
+                    var animal = new PluginBaseDTO
+                    {
+                        Name = dto.Name,
+                        FirstLetter = dto.FirstLetter,
+                        KeyBind = dto.KeyBind,
+                        IsPrey = dto.IsPrey,
+                        Color = dto.Color,
+                        Speed = dto.Speed,
+                        Range = dto.Range,
+                        Health = dto.Health,
+                        BreedingCooldown = dto.BreedingCooldown,
+                        BreedingTime = dto.BreedingTime,
+                        ActiveBreedingCooldown = dto.ActiveBreedingCooldown,
+                        IsBirthing = dto.IsBirthing
+                    };
+                    Animals.Add(animal);
                 }
             }
         }

@@ -99,6 +99,7 @@ namespace ClassLibrary
                 var oldValue = grid[update.Value].Animal;
                 // Moving of the animal
                 grid[update.Value].Animal = grid[update.Key].Animal;
+                // Delete animal if health <= 0
                 if (grid[update.Key].Animal != null)
                 {
                     DeleteAnimalNoHealth(grid[update.Key].Animal);
@@ -112,7 +113,7 @@ namespace ClassLibrary
             if (isPredatorTurn)
                 isPredatorTurn = false;
             else
-                isPredatorTurn |= true;
+                isPredatorTurn = true;
         }
         /// <summary>
         /// Gets the current animal count
@@ -147,14 +148,14 @@ namespace ClassLibrary
         {
             if (keyAnimal.Predator != null)
             {
-                if (keyAnimal.Predator.Health == 0)
+                if (keyAnimal.Predator.Health <= 0)
                 {
                     keyAnimal.Predator = null;
                 }
             }
             else if (keyAnimal.Prey != null)
             {
-                if (keyAnimal.Prey.Health == 0)
+                if (keyAnimal.Prey.Health <= 0)
                 {
                     keyAnimal.Prey = null;
                 }

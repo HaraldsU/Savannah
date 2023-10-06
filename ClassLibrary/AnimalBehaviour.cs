@@ -6,9 +6,9 @@ namespace ClassLibrary
     public class AnimalBehaviour
     {
         private GameService _gameService;
-        public AnimalBehaviour(GameService animalFinalizer)
+        public AnimalBehaviour(GameService gameService)
         {
-            _gameService = animalFinalizer;
+            _gameService = gameService;
         }
         public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, bool turn, Dictionary<int, int> updates)
         {
@@ -512,9 +512,9 @@ namespace ClassLibrary
         private void RemoveAnimalHealth(AnimalsModel currentAnimal, bool animalType)
         {
             if (animalType == Convert.ToBoolean(AnimalTypeEnums.Predator))
-                currentAnimal.Predator.Health -= .5f;
+                currentAnimal.Predator.Health -= 1;
             else
-                currentAnimal.Prey.Health -= .5f;
+                currentAnimal.Prey.Health -= 1;
         }
     }
 }

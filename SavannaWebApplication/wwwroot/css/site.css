@@ -1,18 +1,29 @@
-html {
-  font-size: 14px;
-}
-
 @media (min-width: 768px) {
   html {
     font-size: 16px;
   }
 }
-
 html {
-  position: relative;
-  min-height: 100%;
+    font-size: 14px;
 }
 
 body {
-  margin-bottom: 60px;
+    position: relative;
+    margin-bottom: 0px;
+    height: 100vh;
+}
+.box {
+    background: #fff;
+    border-radius: 4px;
+    padding-bottom: 1%;
+    max-width : 5%;
+}
+#footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+.dark-theme{
+    background: black;
+    filter: invert(100%);
 }

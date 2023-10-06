@@ -1,9 +1,14 @@
-using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+});
+
 builder.Services.AddHttpClient("Grid", httpClient =>
 {
     httpClient.BaseAddress = new Uri("http://localhost:5266");
@@ -21,11 +26,25 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapRazorPages();
+var antiforgery = app.Services.GetRequiredService<IAntiforgery>();
 
+app.Use((context, next) =>
+{
+    var requestPath = context.Request.Path.Value;
+
+    if (string.Equals(requestPath, "/", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(requestPath, "/index.html", StringComparison.OrdinalIgnoreCase))
+    {
+        var tokenSet = antiforgery.GetAndStoreTokens(context);
+        context.Response.Cookies.Append("XSRF-TOKEN", tokenSet.RequestToken!,
+            new CookieOptions { HttpOnly = false });
+    }
+
+    return next(context);
+});
+
+app.MapRazorPages();
 app.Run();

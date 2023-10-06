@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AnimalLibrary\AnimalLibrary.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0-rc.1.23419.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SavannaWebAPI\SavannaWebAPI.csproj" />
   </ItemGroup>
 

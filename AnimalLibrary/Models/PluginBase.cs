@@ -4,12 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace AnimalLibrary.Models
 {
-    public abstract class PluginBase : IPlugin
+    public class PluginBase : IPlugin
     {
-        [JsonConstructor]
-        public PluginBase()
-        {
-        }
         [Required]
         public string Name { get; set; }
 
@@ -41,11 +37,11 @@ namespace AnimalLibrary.Models
 
         [Required]
         [Range(1, 10, ErrorMessage = "Health must be between 1 and 10")]
-        public float Health { get; set; } = 6f;
+        public float Health { get; set; }
 
         [Required]
         [Range(1, 10, ErrorMessage = "BreedingCooldown must be between 1 and 10")]
-        public int BreedingCooldown { get; set; } = 4;
+        public int BreedingCooldown { get; set; }
 
         [Required]
         [Range(1, 5, ErrorMessage = "BreedingTime must be between 1 and 5")]
@@ -56,6 +52,10 @@ namespace AnimalLibrary.Models
 
         [Required]
         public bool IsBirthing { get; set; } = false;
-        public abstract IPlugin CreateNewAnimal();
+        //public abstract IPlugin CreateNewAnimal();
+        public virtual IPlugin CreateNewAnimal()
+        {
+            return (IPlugin)MemberwiseClone();
+        }
     }
 }

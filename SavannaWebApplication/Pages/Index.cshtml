@@ -1,18 +1,170 @@
 ﻿@page
+@using Newtonsoft.Json;
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+    var requestToken = Antiforgery.GetAndStoreTokens(PageContext.HttpContext).RequestToken;
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    @for (int i = 0; i < Model.Grid.Count; i++)
-    {
-        <div>@Model.Grid[i].X</div>
-        <div>@Model.Grid[i].Y</div>
-        <div>@Model.Grid[i].Animal</div>
-        <br />
-    }
-    @Model.GameService
+<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
+<div class="container text-center"">
+    <div class="row justify-content-md-center" style="margin-left: 18%; margin-top: 2.5%;">
+        <div id="heading" style="margin-right: 24%;">
+            <h1 class="display-4">Welcome to the Savanna!</h1>
+            <hr class="my-4">
+            <p>Click on the buttons below to add animals to the grid.</p>
+        </div>
+        <div id="buttons" class="col col-2" style="margin-top: 5%;">
+            @foreach (var animal in Model.Animals)
+            {
+                <div>
+                    <button class="btn btn-primary text-black row mt-3" onclick="addAnimal(this.getAttribute('value'))" value="@animal.Name">Add @animal.Name</button>
+                </div>
+            }
+        </div>
+        <div id="grid" class="col col-10 bd-example-row">
+            <div class="container text-center gridDivs" style="margin-top: 8%;">
+                @{
+                    int colId = 0;
+                }
+                @for (int i = 0; i < MathF.Sqrt(IndexModel.Grid.Grid.Count); i++)
+                {
+                    <div class="row">
+                        @for (int j = 0; j < MathF.Sqrt(IndexModel.Grid.Grid.Count); j++)
+                        {
+                            var animal = IndexModel.Grid.Grid[i * (int)MathF.Sqrt(IndexModel.Grid.Grid.Count) + j].Animal;
+                            char gridText = '\u00AD';
+                            @if (animal != null)
+                            {
+                                if (animal.Prey != null)
+                                {
+                                    gridText = animal.Prey.FirstLetter;
+                                }
+                                else if (animal.Predator != null)
+                                {
+                                    gridText = animal.Predator.FirstLetter;
+                                }
+                            }
+                            <div id="col @colId" class="col box bg-secondary border d-flex justify-content-center">
+                                <span style="margin-top: 50%; color: #00ffff;">@gridText</span>
+                            </div>
+                            colId++;
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+@section Scripts {
+    <script>
+        function upgradeGrid(grid) {
+            console.log("Started upgradeGrid method");
+            console.log("gridNotParsed = ", grid);
+            try {
+                // console.log("gridArray =", gridArray);
+                const colons = $('[id*="col"]');
+                let count = 0;
+                // console.log(colons);
+
+                colons.each(function () {
+                    const spanChild = $(this).children('span');
+                    const currentAnimal = grid[count].animal;
+                    // console.log("count =", count);
+                    // console.log("currentAnimal =", currentAnimal);
+                    let newText = '\u00AD'; // Use let to reassign newText
+
+                    if (currentAnimal && currentAnimal.prey) {
+                        newText = currentAnimal.prey.firstLetter; // Use lowercase for object properties
+                        // console.log("Added a Prey!");
+                    }
+                    else if (currentAnimal && currentAnimal.predator) {
+                        newText = currentAnimal.predator.firstLetter; // Use lowercase for object properties
+                        // console.log("Added a Predator!");
+                    }
+                    else {
+                        // console.log("Added nothing!");
+                    }
+                    spanChild.text(newText);
+                    count++;
+                });
+            } catch (error) {
+                console.error("Error parsing JSON:", error);
+            }
+        }
+
+        function addAnimal(animalName) {
+            // const token = $('[name="__RequestVerificationToken"]').val();
+            console.log("animalName = ", animalName);
+            $.ajax({
+                url: "Index?handler=AddAnimal",
+                method: "post",
+                headers: {
+                    RequestVerificationToken:
+                        document.getElementById("RequestVerificationToken").value
+                },
+                data: {
+                    animalName: animalName
+                },
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    upgradeGrid(data);
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        let isRequestInProgress = false;
+        function moveAnimals() {
+            if (isRequestInProgress) {
+                return;
+            }
+            isRequestInProgress = true;
+
+            $.ajax({
+                url: "Index?handler=MoveAnimals",
+                method: "post",
+                headers: {
+                    RequestVerificationToken:
+                        document.getElementById("RequestVerificationToken").value
+                },
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    // console.log(data);
+                    console.log("moveAnimals Successfull !!!");
+                    getTime();
+                    upgradeGrid(data);
+                },
+                error: function (error) {
+                    console.log("moveAnimals Error !!!");
+                    console.error(error);
+                    getTime();
+                },
+                complete: function () {
+                    console.log("moveAnimals Request Complete.");
+                    getTime();
+                    isRequestInProgress = false;
+                    setTimeout(moveAnimals, 500);
+                }
+            });
+        }
+        moveAnimals();
+
+        function getTime() {
+            const currentDate = new Date();
+            const hours = currentDate.getHours();
+            const minutes = currentDate.getMinutes();
+            const seconds = currentDate.getSeconds();
+
+            const formattedHours = hours.toString().padStart(2, '0');
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+            const formattedSeconds = seconds.toString().padStart(2, '0');
+
+            const currentTime = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+            console.log(currentTime);
+        }
+    </script>
+}

@@ -34,8 +34,8 @@ namespace ClassLibrary.PluginHandlers
                     var pluginInstance = Activator.CreateInstance(pluginType) as IPlugin;
                     pluginsLists.Add(pluginInstance);
                 }
+            }
         }
-    }
         private void LoadExistingPlugins(List<IPlugin> pluginsLists)
         {
             var animalLibraryAssembly = Assembly.Load("AnimalLibrary");

@@ -1,5 +1,4 @@
 ﻿using AnimalLibrary.Models;
-using System;
 
 namespace SavannaWebAPI.Models
 {
@@ -17,10 +16,6 @@ namespace SavannaWebAPI.Models
         public int BreedingTime { get; set; }
         public int ActiveBreedingCooldown { get; set; }
         public bool IsBirthing { get; set; }
-        public PluginBaseDTO()
-        {
-        }
-
         public PluginBaseDTO(IPlugin plugin)
         {
             // Map properties from IPlugin to PluginBaseDTO
