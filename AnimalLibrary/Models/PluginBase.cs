@@ -1,6 +1,5 @@
 ﻿using AnimalLibrary.CustomValidations;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace AnimalLibrary.Models
 {

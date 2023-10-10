@@ -1,5 +1,5 @@
 ﻿using ClassLibrary;
-using ClassLibrary.PluginHandlers;
+using ClassLibrary.Services;
 using Savanna.cons;
 
 namespace Savannah
@@ -8,45 +8,41 @@ namespace Savannah
     {
         public int Dimension;
         private readonly GridService _initializeGrid;
-        private Input _input;
-        private GameService _gameService;
-        private Display _display;
-        private readonly PluginLoader _pluginLoader;
+        private readonly Display _display;
+        private readonly Input _input;
+        private readonly ButtonListenerService? _buttonListener;
+        private readonly GameService? _gameService;
         public GameFlow()
         {
             _initializeGrid = new();
-            _pluginLoader = new();
+            _display = new();
+            _input = new();
+            _buttonListener = new();
+            _gameService = new();
         }
         public void Run()
         {
-            var pluginList = _pluginLoader.LoadPlugins();
-            if (pluginList.Item2 != String.Empty)
+            var validationErrorList = AnimalListSingleton.Instance.GetAnimalListValidationErrors();
+            if (validationErrorList != String.Empty)
             {
-                _display = new(pluginList.Item1);
-                _display.DisplayPluginLoadValidationError(pluginList.Item2);
+                _display.DisplayPluginLoadValidationError(validationErrorList);
                 Environment.Exit(0);
             }
-            else
-            {
-                _gameService = new(Dimension, pluginList.Item1);
-                _input = new(Dimension, pluginList.Item1);
-                _display = new(pluginList.Item1);
-            }
             Dimension = _input.GridSizeInput();
-            //_display.DisplayAnimalCount();
+
             _display.DisplayGameTitle();
+
             int cursorTop = Console.CursorTop;
             bool isGameRunning = true;
-            bool isPredatorTurn = true;
             var grid = _initializeGrid.Initialize(Dimension);
 
             while (isGameRunning)
             {
                 _display.DisplayGrid(grid, cursorTop, Dimension);
-                _gameService.MoveAnimals(Dimension, grid, ref isPredatorTurn);
+                _gameService.MoveAnimals(Dimension, grid);
                 Thread.Sleep(250);
 
-                _input.ButtonListener(grid);
+                _buttonListener.ButtonListener(grid);
                 _display.DisplayGameplayInfo();
             }
         }

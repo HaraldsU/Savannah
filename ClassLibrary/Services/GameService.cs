@@ -1,20 +1,16 @@
 ﻿using AnimalLibrary.Models;
 using ClassLibrary.Constants;
 
-namespace ClassLibrary
+namespace ClassLibrary.Services
 {
     public class GameService
     {
-        public List<IPlugin>? Animals { get; private set; }
-        public List<GridCellModel> Grid { get; private set; }
-        private GridService _gridService;
-        private AnimalBehaviour _animalMovement;
-        public GameService(int dimensions, List<IPlugin> animals)
+        private readonly AnimalBehaviour _animalMovement;
+        private readonly List<IPlugin> animals = AnimalListSingleton.Instance.GetAnimalList();
+        private static bool isPredatorTurn = true;
+        public GameService()
         {
-            _gridService = new GridService();
             _animalMovement = new(this);
-            Animals = animals;
-            Grid = _gridService.Initialize(dimensions);
         }
         /// <summary>
         /// Adds a new prey or predator depending on input
@@ -42,7 +38,7 @@ namespace ClassLibrary
                 }
                 else
                 {
-                    if ((grid[cellIndex].Animal != null) || updates.ContainsValue(cellIndex))
+                    if (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex))
                     {
                         do
                         {
@@ -51,13 +47,13 @@ namespace ClassLibrary
                             {
                                 break;
                             }
-                        } while ((grid[cellIndex].Animal != null) || updates.ContainsValue(cellIndex));
+                        } while (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex));
                     }
                 }
 
                 if (animal == null && pressedKey != ConsoleKey.NoName)
                 {
-                    foreach (IPlugin plugin in Animals)
+                    foreach (IPlugin plugin in animals)
                     {
                         if (plugin.KeyBind == pressedKey)
                         {
@@ -89,7 +85,7 @@ namespace ClassLibrary
         /// <param name="dimension"></param>
         /// <param name="grid"></param>
         /// <param name="isPredatorTurn"></param>
-        public void MoveAnimals(int dimension, List<GridCellModel> grid, ref bool isPredatorTurn)
+        public void MoveAnimals(int dimension, List<GridCellModel> grid)
         {
             var updates = new Dictionary<int, int>();
             _animalMovement.GetAnimalsNewPositions(dimension, grid, isPredatorTurn, updates);

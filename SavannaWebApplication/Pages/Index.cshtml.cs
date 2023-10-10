@@ -9,11 +9,9 @@ namespace SavannaWebApplication.Pages
 {
     public class IndexModel : PageModel
     {
-        public static GridModelDTO Grid { get; set; }
-        public List<PluginBaseDTO> Animals { get; set; } = new List<PluginBaseDTO>();
-        private static bool GridDataRetrieved = false;
-        private static bool IsPredatorTurn = true;
         private readonly ILogger<IndexModel> _logger;
+        public static GridModelDTO? Grid { get; set; } = null;
+        public List<PluginBaseDTO> Animals { get; set; } = new List<PluginBaseDTO>();
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly HttpClient _httpClient;
 
@@ -26,29 +24,18 @@ namespace SavannaWebApplication.Pages
 
         public async Task OnGet()
         {
-            await InitializeGrid();
+            await GetGrid();
             await GetAnimalPluginList();
         }
         public async Task<IActionResult> OnPostMoveAnimalsAsync()
         {
             var url = _httpClient.BaseAddress.AbsoluteUri + "api/Game/MoveAnimals";
-            var isPredatorTurn = IsPredatorTurn == true ? "true" : "false";
             var jsonData = JsonConvert.SerializeObject(new
             {
                 Grid,
-                isPredatorTurn
             });
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(url, content);
-
-            if (IsPredatorTurn == true)
-            {
-                IsPredatorTurn = false;
-            }
-            else
-            {
-                IsPredatorTurn = true;
-            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -92,9 +79,9 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
-        private async Task InitializeGrid()
+        private async Task GetGrid()
         {
-            if (!GridDataRetrieved)
+            if (Grid == null)
             {
                 var response = await _httpClient.GetAsync("api/Game/GetGrid");
                 if (response.IsSuccessStatusCode)
@@ -106,20 +93,19 @@ namespace SavannaWebApplication.Pages
                     };
 
                     var gridModelDTO = System.Text.Json.JsonSerializer.Deserialize<GridModelDTO>(responseData, options);
-                    if (gridModelDTO != null)
-                    {
-                        Grid = gridModelDTO;
-                        GridDataRetrieved = true;
-                    }
+                    Grid = gridModelDTO;
+                }
+                else
+                {
+
                 }
             }
         }
         private async Task GetAnimalPluginList()
         {
-            var response = await _httpClient.GetAsync("api/Game/GetGameService"); // Make GET request to the API
+            var response = await _httpClient.GetAsync("api/Game/GetAnimalPluginList"); // Make GET request to the API
             if (response.IsSuccessStatusCode)
             {
-                // Read the response content as a string
                 var responseData = await response.Content.ReadAsStringAsync();
                 var options = new JsonSerializerOptions
                 {
@@ -134,15 +120,7 @@ namespace SavannaWebApplication.Pages
                         Name = dto.Name,
                         FirstLetter = dto.FirstLetter,
                         KeyBind = dto.KeyBind,
-                        IsPrey = dto.IsPrey,
                         Color = dto.Color,
-                        Speed = dto.Speed,
-                        Range = dto.Range,
-                        Health = dto.Health,
-                        BreedingCooldown = dto.BreedingCooldown,
-                        BreedingTime = dto.BreedingTime,
-                        ActiveBreedingCooldown = dto.ActiveBreedingCooldown,
-                        IsBirthing = dto.IsBirthing
                     };
                     Animals.Add(animal);
                 }

@@ -1,11 +1,12 @@
 ﻿using AnimalLibrary.Models;
 using ClassLibrary.Constants;
+using ClassLibrary.Services;
 
 namespace ClassLibrary
 {
     public class AnimalBehaviour
     {
-        private GameService _gameService;
+        private readonly GameService _gameService;
         public AnimalBehaviour(GameService gameService)
         {
             _gameService = gameService;

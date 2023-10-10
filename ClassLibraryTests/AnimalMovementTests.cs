@@ -1,5 +1,5 @@
 ﻿using AnimalLibrary.Models.Animals;
-using ClassLibrary.PluginHandlers;
+using ClassLibrary.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassLibrary.Tests
@@ -7,17 +7,15 @@ namespace ClassLibrary.Tests
     [TestClass()]
     public class AnimalMovementTests
     {
-        private int Dimensions = 8;
-        private GameService _gameService;
-        private GridService _grid;
-        private AnimalBehaviour _animalMovement;
-        private PluginLoader _pluginLoader;
+        private readonly int dimensions = 8;
+        private GameService? _gameService;
+        private GridService? _grid;
+        private AnimalBehaviour? _animalMovement;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _pluginLoader = new();
-            _gameService = new(Dimensions, _pluginLoader.LoadPlugins().Item1);
+            _gameService = new();
             _grid = new();
             _animalMovement = new(_gameService);
         }
@@ -26,7 +24,7 @@ namespace ClassLibrary.Tests
         {
             // Arrange
             var animalAntelope = new AntelopeModel();
-            var grid = _grid.Initialize(Dimensions);
+            var grid = _grid.Initialize(dimensions);
             bool isChild = false;
             bool isPredatorTurn = false;
             Dictionary<int, int> updatesOld = new();
@@ -34,7 +32,7 @@ namespace ClassLibrary.Tests
 
             // Act
             _gameService.AddAnimal(animalAntelope, pressedKey: ConsoleKey.NoName, grid, isChild);
-            _animalMovement.GetAnimalsNewPositions(Dimensions, grid, isPredatorTurn, updates);
+            _animalMovement.GetAnimalsNewPositions(dimensions, grid, isPredatorTurn, updates);
 
             // Assert
             Assert.AreNotEqual(updatesOld, updates);

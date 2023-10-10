@@ -1,6 +1,6 @@
 ﻿using AnimalLibrary.Models.Animals;
 using ClassLibrary.Constants;
-using ClassLibrary.PluginHandlers;
+using ClassLibrary.Services;
 using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,17 +9,15 @@ namespace ClassLibrary.Tests
     [TestClass()]
     public class GameServiceTests
     {
-        private int Dimensions = 8;
-        private GameService _gameService;
-        private GridService _grid;
-        private PluginLoader _pluginLoader;
+        private readonly int dimensions = 8;
+        private GameService? _gameService;
+        private GridService? _grid;
 
         [TestInitialize()]
         public void Initialize()
         {
-            _pluginLoader = new PluginLoader();
-            _gameService = new GameService(Dimensions, _pluginLoader.LoadPlugins().Item1);
-            _grid = new GridService();
+            _gameService = new();
+            _grid = new();
         }
 
 
@@ -29,7 +27,7 @@ namespace ClassLibrary.Tests
             // Arrange
             var animalAntelopeModel = new AntelopeModel();
             var animalLionModel = new LionModel();
-            var grid = _grid.Initialize(8);
+            var grid = _grid.Initialize(dimensions);
             bool isChild = false;
 
             // Act
@@ -45,16 +43,14 @@ namespace ClassLibrary.Tests
         public void MoveAnimalLionTest()
         {
             // Arrange
-            int dimensions = 8;
             var grid = _grid.Initialize(dimensions);
             var animalLionModel = new LionModel();
             bool isChild = false;
             _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
-            bool isPredatorTurn = true;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
             // Act
-            _gameService.MoveAnimals(dimensions, grid, ref isPredatorTurn);
+            _gameService.MoveAnimals(dimensions, grid);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -63,16 +59,14 @@ namespace ClassLibrary.Tests
         public void MoveAnimalAntelopeTest()
         {
             // Arrange
-            int dimensions = 8;
             var grid = _grid.Initialize(dimensions);
             var animalAntelopeModel = new AntelopeModel();
             bool isChild = false;
             _gameService.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
-            bool isPredatorTurn = false;
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
             // Act
-            _gameService.MoveAnimals(dimensions, grid, ref isPredatorTurn);
+            _gameService.MoveAnimals(dimensions, grid);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -84,7 +78,7 @@ namespace ClassLibrary.Tests
             // Arrange
             var animalAntelopeModel = new AntelopeModel();
             var animalLionModel = new LionModel();
-            var grid = _grid.Initialize(8);
+            var grid = _grid.Initialize(dimensions);
             bool isChild = false;
 
             // Act

@@ -79,17 +79,14 @@ function moveAnimals() {
         success: function (data) {
             // console.log(data);
             console.log("moveAnimals Successfull !!!");
-            getTime();
             upgradeGrid(data);
         },
         error: function (error) {
             console.log("moveAnimals Error !!!");
             console.error(error);
-            getTime();
         },
         complete: function () {
             console.log("moveAnimals Request Complete.");
-            getTime();
             isRequestInProgress = false;
             setTimeout(moveAnimals, 500);
         }

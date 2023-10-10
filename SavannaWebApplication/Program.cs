@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
