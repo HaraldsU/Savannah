@@ -46,16 +46,24 @@ namespace SavannaWebAPI.Controllers
         {
             var animal = _animals.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
             var grid = requestData.Grid;
-            _gameService.AddAnimal(animal: null, animal.KeyBind, grid.Grid, false);
-            return Ok(grid);
+            if (animal != null && grid != null && _gameService != null)
+            {
+                _gameService.AddAnimal(animal: null, animal.KeyBind, grid.Grid, false);
+                return Ok(grid);
+            }
+            return BadRequest();
         }
         // POST: api/Game/MoveAnimals
         [HttpPost("MoveAnimals")]
         public IActionResult MoveAnimals(RequestsModel requestData)
         {
             var gridDTO = requestData.Grid;
-            _gameService.MoveAnimals(dimensions, gridDTO.Grid);
-            return Ok(gridDTO);
+            if (gridDTO != null && _gameService != null)
+            {
+                _gameService.MoveAnimals(dimensions, gridDTO.Grid);
+                return Ok(gridDTO);
+            }
+            return BadRequest();
         }
     }
 }

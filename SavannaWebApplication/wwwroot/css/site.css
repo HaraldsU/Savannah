@@ -33,3 +33,6 @@ body {
 .dark-theme #gridCells {
     color: #0200ff;
 }
+.dark-theme .box {
+    background: #aeaeae !important;
+}
