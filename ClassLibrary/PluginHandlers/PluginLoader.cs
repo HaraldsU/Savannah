@@ -8,7 +8,7 @@ namespace ClassLibrary.PluginHandlers
         public Tuple<List<IPlugin>, string> LoadPlugins()
         {
             var pluginsLists = new List<IPlugin>();
-            //LoadImportedPlugins(pluginsLists);
+            LoadImportedPlugins(pluginsLists);
             LoadExistingPlugins(pluginsLists);
             var validation = ValidatePlugins(pluginsLists);
             pluginsLists.Sort((plugin1, plugin2) => plugin1.FirstLetter.CompareTo(plugin2.FirstLetter));
