@@ -10,8 +10,10 @@ namespace ClassLibrary.PluginHandlers.Tests
         public void ValidatePluginTest()
         {
             // Arrange
-            var pluginValidationFailed = new AntelopeModel();
-            pluginValidationFailed.Color = "WrongColor";
+            var pluginValidationFailed = new AntelopeModel
+            {
+                Color = "WrongColor"
+            };
             var pluginValidationValid = new AntelopeModel();
 
             // Act
@@ -27,8 +29,10 @@ namespace ClassLibrary.PluginHandlers.Tests
         public void FailedValidationMessageTest()
         {
             // Arrange
-            var pluginValidationFailed = new AntelopeModel();
-            pluginValidationFailed.Color = "WrongColor";
+            var pluginValidationFailed = new AntelopeModel
+            {
+                Color = "WrongColor"
+            };
             var validationFailed = PluginValidator.ValidatePlugin(pluginValidationFailed);
 
             // Act

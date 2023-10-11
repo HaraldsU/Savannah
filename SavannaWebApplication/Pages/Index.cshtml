@@ -1,5 +1,6 @@
 ﻿@page
 @using Newtonsoft.Json;
+@using SavannaWebApplication.Constants;
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model IndexModel
 @{
@@ -15,7 +16,7 @@
             <p>Click on the buttons below to add animals to the grid.</p>
         </div>
         <div id="buttons" class="col col-2" style="margin-top: 5%;">
-            @foreach (var animal in Model.Animals)
+            @foreach (var animal in IndexModel.Animals)
             {
                 <div>
                     <button class="btn btn-primary text-black row mt-3" onclick="addAnimal(this.getAttribute('value'))" value="@animal.Name">Add @animal.Name</button>
@@ -32,27 +33,30 @@
                     <div class="row">
                         @for (int j = 0; j < MathF.Sqrt(IndexModel.Grid.Grid.Count); j++)
                         {
-                            var animal = IndexModel.Grid.Grid[i * (int)MathF.Sqrt(IndexModel.Grid.Grid.Count) + j].Animal;
-                            char gridText = '\u00AD';
-                            @if (animal != null)
-                            {
-                                if (animal.Prey != null)
-                                {
-                                    gridText = animal.Prey.FirstLetter;
-                                }
-                                else if (animal.Predator != null)
-                                {
-                                    gridText = animal.Predator.FirstLetter;
-                                }
-                            }
+                            char gridText = GridConstants.EmptyCell;
                             <div id="col @colId" class="col box bg-secondary border d-flex justify-content-center">
-                                <span style="margin-top: 50%; color: #00ffff;">@gridText</span>
+                                <span id="gridCells" style="margin-top: 50%;">@gridText</span>
                             </div>
                             colId++;
                         }
                     </div>
                 }
             </div>
+        </div>
+        <div id="gameInfo" style="width: 50%; margin-right: 22.5%; margin-top: 1.5%;">
+            @{
+                colId = 0;
+            }
+            @foreach(var info in Model.GameInfo)
+            {
+                var text = info;
+                if (info != Model.GameInfo.Last())
+                {
+                    text = info + GridConstants.GameInfoDividor;
+                }
+                <span id="info @colId">@text</span>
+                colId++;
+            }
         </div>
     </div>
 </div>

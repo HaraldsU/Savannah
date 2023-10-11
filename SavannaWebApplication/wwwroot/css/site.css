@@ -23,7 +23,16 @@ body {
     bottom: 0;
     left: 0;
 }
+#gridCells {
+    color: #00ffff;
+}
 .dark-theme{
     background: black;
     filter: invert(100%);
+}
+.dark-theme #gridCells {
+    color: #0200ff;
+}
+.dark-theme .box {
+    background: #aeaeae !important;
 }

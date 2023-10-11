@@ -4,6 +4,6 @@
     {
         public string? AnimalName { get; set; }
         public GridModelDTO? Grid { get; set; }
-        public string? IsPredatorTurn { get; set;}
+        public string? IsPredatorTurn { get; set; }
     }
 }

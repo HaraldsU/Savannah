@@ -1,6 +1,6 @@
 ﻿using AnimalLibrary.Models;
 
-namespace ClassLibrary
+namespace ClassLibrary.Services
 {
     public class GridService
     {

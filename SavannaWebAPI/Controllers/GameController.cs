@@ -1,6 +1,6 @@
 ﻿using AnimalLibrary.Models;
 using ClassLibrary;
-using ClassLibrary.PluginHandlers;
+using ClassLibrary.Services;
 using Microsoft.AspNetCore.Mvc;
 using SavannaWebAPI.Models;
 
@@ -12,12 +12,16 @@ namespace SavannaWebAPI.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
-        private static readonly PluginLoader _pluginLoader = new();
+        private readonly GameService? _gameService;
         private GridModelDTO? _gridModelDTO;
-        private GameService? _gameService;
-        private Tuple<List<IPlugin>, string> _animals = _pluginLoader.LoadPlugins();
+        private readonly List<IPlugin> _animals = AnimalListSingleton.Instance.GetAnimalList();
         private readonly GridService _initializeGrid = new();
         private readonly int dimensions = 10;
+
+        public GameController()
+        {
+            _gameService = new();
+        }
 
         // GET: api/Game/GetGrid
         [HttpGet("GetGrid")]
@@ -27,43 +31,39 @@ namespace SavannaWebAPI.Controllers
             {
                 Grid = _initializeGrid.Initialize(dimensions)
             };
-
             return Task.FromResult<IActionResult>(Ok(_gridModelDTO));
         }
         // GET: api/Game/GetGameService
-        [HttpGet("GetGameService")]
-        public Task<IActionResult> GetGameService()
+        [HttpGet("GetAnimalPluginList")]
+        public Task<IActionResult> GetAnimalPluginList()
         {
-            var pluginBaseDTOs = _animals.Item1.Select(plugin => new PluginBaseDTO(plugin)).ToList();
+            var pluginBaseDTOs = _animals.Select(plugin => new PluginBaseDTO(plugin)).ToList();
             return Task.FromResult<IActionResult>(Ok(pluginBaseDTOs));
         }
         // POST: api/Game/AddAnimal
         [HttpPost("AddAnimal")]
         public IActionResult AddAnimal(RequestsModel requestData)
         {
-            var animal = _animals.Item1.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
+            var animal = _animals.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
             var grid = requestData.Grid;
-            _gameService = new GameService(dimensions, _animals.Item1);
-            _gameService.AddAnimal(animal: null, animal.KeyBind, grid.Grid, false);
-            return Ok(grid);
+            if (animal != null && grid != null && _gameService != null)
+            {
+                _gameService.AddAnimal(animal: null, animal.KeyBind, grid.Grid, false);
+                return Ok(grid);
+            }
+            return BadRequest();
         }
         // POST: api/Game/MoveAnimals
         [HttpPost("MoveAnimals")]
         public IActionResult MoveAnimals(RequestsModel requestData)
         {
-            var isPredatorTurnString = requestData.IsPredatorTurn;
-            if (isPredatorTurnString == "false" || isPredatorTurnString == "true")
+            var gridDTO = requestData.Grid;
+            if (gridDTO != null && _gameService != null)
             {
-                bool isPredatorTurn = isPredatorTurnString == "true" ? true : false;
-                var gridDTO = requestData.Grid;
-                _gameService = new GameService(dimensions, _animals.Item1);
-                _gameService.MoveAnimals(dimensions, gridDTO.Grid, ref isPredatorTurn);
+                _gameService.MoveAnimals(dimensions, gridDTO.Grid);
                 return Ok(gridDTO);
             }
-            else
-            {
-                return BadRequest(123);
-            }
+            return BadRequest();
         }
     }
 }

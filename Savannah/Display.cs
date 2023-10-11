@@ -1,4 +1,5 @@
 ﻿using AnimalLibrary.Models;
+using ClassLibrary;
 using Figgle;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,11 +8,7 @@ namespace Savannah
 {
     public class Display
     {
-        private List<IPlugin>? Animals;
-        public Display(List<IPlugin> plugins)
-        {
-            Animals = plugins;
-        }
+        private readonly List<IPlugin>? animals = AnimalListSingleton.Instance.GetAnimalList();
 
         public void DisplayPluginLoadValidationError(string validationError)
         {
@@ -20,8 +17,8 @@ namespace Savannah
         public void DisplayAnimalCount()
         {
             var files = Directory.GetFiles("C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\AnimalLibrary\\Models\\Animals\\");
-            Console.WriteLine($"{Animals.Count} Animal(s) found");
-            Console.WriteLine($"{Animals.Count - files.Length} Plugin(s) found\n");
+            Console.WriteLine($"{animals.Count} Animal(s) found");
+            Console.WriteLine($"{animals.Count - files.Length} Plugin(s) found\n");
         }
         public void DisplayGridSizeInputPrompt()
         {
@@ -37,7 +34,7 @@ namespace Savannah
             string article;
             string pattern = @"[AEIOU]";
             bool isVowel;
-            foreach (var plugin in Animals)
+            foreach (var plugin in animals)
             {
                 isVowel = Regex.IsMatch(plugin.FirstLetter.ToString(), pattern);
                 if (isVowel)
@@ -108,7 +105,7 @@ namespace Savannah
         }
         private string GetColor(char firstLetter)
         {
-            foreach (var plugin in Animals)
+            foreach (var plugin in animals)
             {
                 if (plugin.FirstLetter == firstLetter)
                     return plugin.Color;

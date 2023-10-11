@@ -1,17 +1,13 @@
-﻿using AnimalLibrary.Models;
-using ClassLibrary;
-using Savannah;
+﻿using Savannah;
 
 namespace Savanna.cons
 {
     public class Input
     {
-        private GameService _gameService;
-        private Display _display;
-        public Input(int dimensions, List<IPlugin> animals)
+        private readonly Display _display;
+        public Input()
         {
-            _gameService = new(dimensions, animals);
-            _display = new(_gameService.Animals);
+            _display = new();
         }
         /// <summary>
         /// Gets grid dimension size from the user.
@@ -49,20 +45,6 @@ namespace Savanna.cons
                     }
                 }
             } while (true);
-        }
-        public void ButtonListener(List<GridCellModel> grid)
-        {
-            if (Console.KeyAvailable)
-            {
-                ConsoleKeyInfo click;
-                click = Console.ReadKey(true);
-                if ((click.Key == ConsoleKey.Q))
-                    Environment.Exit(0);
-                else
-                {
-                    _gameService.AddAnimal(animal: null, click.Key, grid, isChild: false, updates: null);
-                }
-            }
         }
     }
 }
