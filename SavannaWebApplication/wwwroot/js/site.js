@@ -25,6 +25,7 @@ function updateGameInfo(gameInfo) {
     });
 }
 function addAnimal(animalName) {
+    console.log("animalName = ", animalName);
     $.ajax({
         url: "Index?handler=AddAnimal",
         method: "post",

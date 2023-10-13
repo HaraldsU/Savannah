@@ -61,6 +61,7 @@ namespace ClassLibrary.Tests
             bool isChild = false;
             _gameService.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
+            _gameService.MoveAnimals(dimensions, grid);
 
             // Act
             _gameService.MoveAnimals(dimensions, grid);
