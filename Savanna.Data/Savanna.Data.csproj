@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>HU.$(AssemblyName).Savanna</PackageId>
+    <Title>NuGet package for creating plugins in my Savanna console game</Title>
+    <Description>NuGet package for creating plugins in my Savanna console game</Description>
+    <PackageReadmeFile>SavannaNuGet.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\..\Desktop\FOLDERS\Prakse\SavannaNuGet.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibrary\Savanna.Commons.csproj" />
+  </ItemGroup>
+
+</Project>

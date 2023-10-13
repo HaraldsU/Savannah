@@ -18,8 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AnimalLibrary\AnimalLibrary.csproj" />
-    <ProjectReference Include="..\ClassLibrary\ClassLibrary.csproj" />
+    <ProjectReference Include="..\ClassLibrary\Savanna.Services.csproj" />
   </ItemGroup>
 
 </Project>

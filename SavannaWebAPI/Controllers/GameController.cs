@@ -1,7 +1,4 @@
-﻿using AnimalLibrary.Models;
-using ClassLibrary;
-using ClassLibrary.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SavannaWebAPI.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,7 +11,6 @@ namespace SavannaWebAPI.Controllers
     {
         private readonly GameService? _gameService;
         private GridModelDTO? _gridModelDTO;
-        private readonly List<IPlugin> _animals = AnimalListSingleton.Instance.GetAnimalList();
         private readonly GridService _initializeGrid = new();
         private readonly int dimensions = 10;
 
@@ -37,14 +33,14 @@ namespace SavannaWebAPI.Controllers
         [HttpGet("GetAnimalPluginList")]
         public Task<IActionResult> GetAnimalPluginList()
         {
-            var pluginBaseDTOs = _animals.Select(plugin => new PluginBaseDTO(plugin)).ToList();
+            var pluginBaseDTOs = _gameService.Animals.Select(plugin => new PluginBaseDTO(plugin)).ToList();
             return Task.FromResult<IActionResult>(Ok(pluginBaseDTOs));
         }
         // POST: api/Game/AddAnimal
         [HttpPost("AddAnimal")]
         public IActionResult AddAnimal(RequestsModel requestData)
         {
-            var animal = _animals.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
+            var animal = _gameService.Animals.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
             var grid = requestData.Grid;
             if (animal != null && grid != null && _gameService != null)
             {

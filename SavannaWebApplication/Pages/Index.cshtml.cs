@@ -102,7 +102,7 @@ namespace SavannaWebApplication.Pages
                     {
                         formattedGrid.Add(cell.Animal.Predator.FirstLetter);
                     }
-                    else if (cell.Animal.Prey!= null)
+                    else if (cell.Animal.Prey != null)
                     {
                         formattedGrid.Add(cell.Animal.Prey.FirstLetter);
                     }
@@ -173,7 +173,7 @@ namespace SavannaWebApplication.Pages
             }
         }
         private async Task GetAnimalPluginListAsync()
-        { 
+        {
             if (Animals.Count == 0)
             {
                 var response = await _httpClient.GetAsync("api/Game/GetAnimalPluginList"); // Make GET request to the API

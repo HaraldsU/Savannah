@@ -1,6 +1,4 @@
-﻿using AnimalLibrary.Models;
-
-namespace SavannaWebAPI.Models
+﻿namespace SavannaWebAPI.Models
 {
     public class GridModelDTO
     {

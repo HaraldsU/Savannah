@@ -1,6 +1,4 @@
-﻿using AnimalLibrary.Models;
-
-namespace SavannaWebAPI.Models
+﻿namespace SavannaWebAPI.Models
 {
     public class PluginBaseDTO
     {
@@ -8,7 +6,7 @@ namespace SavannaWebAPI.Models
         public char FirstLetter { get; set; }
         public ConsoleKey KeyBind { get; set; }
         public string Color { get; set; }
-        public PluginBaseDTO(IPlugin plugin)
+        public PluginBaseDTO(IAnimal plugin)
         {
             // Map properties from IPlugin to PluginBaseDTO
             Name = plugin.Name;
