@@ -1,4 +1,4 @@
-﻿namespace Savanna.Services.Enums
+﻿namespace Savanna.Commons.Enums
 {
     public enum DirectionEnums
     {

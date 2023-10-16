@@ -1,5 +1,5 @@
 ﻿using Figgle;
-using Savanna.Commons;
+using Savanna.Commons.Enums;
 using Savanna.Data.Models;
 using Savanna.Services;
 using System.Text;

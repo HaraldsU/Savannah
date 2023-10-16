@@ -1,8 +1,10 @@
-﻿using Savanna.Commons;
+﻿using Savanna.Commons.Enums;
+using Savanna.Data.Base;
+using Savanna.Data.Interfaces;
 
 namespace Savanna.Data.Models.Animals
 {
-    public class AntelopeModel : AnimalBase
+    public class AntelopeModel : PreyBase
     {
         public AntelopeModel()
         {
@@ -17,7 +19,7 @@ namespace Savanna.Data.Models.Animals
             BreedingCooldown = 4;
             BreedingTime = 2;
         }
-        public override IAnimal CreateNewAnimal()
+        public override PreyBase CreateNewAnimal()
         {
             return new AntelopeModel();
         }

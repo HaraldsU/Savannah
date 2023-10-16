@@ -1,20 +1,21 @@
-﻿using Savanna.Data;
+﻿using Savanna.Data.Base;
+using Savanna.Data.Interfaces;
 using System.Reflection;
 
 namespace Savanna.Services.PluginHandlers
 {
     public class PluginLoader
     {
-        public Tuple<List<IAnimal>, string> LoadPlugins()
+        public Tuple<List<IAnimalProperties>, string> LoadPlugins()
         {
-            var pluginsLists = new List<IAnimal>();
+            var pluginsLists = new List<IAnimalProperties>();
             //LoadImportedPlugins(pluginsLists);
             LoadExistingPlugins(pluginsLists);
             var validation = ValidatePlugins(pluginsLists);
             pluginsLists.Sort((plugin1, plugin2) => plugin1.FirstLetter.CompareTo(plugin2.FirstLetter));
             return Tuple.Create(pluginsLists, validation.Item2);
         }
-        private void LoadImportedPlugins(List<IAnimal> pluginsLists)
+        private void LoadImportedPlugins(List<IAnimalProperties> pluginsLists)
         {
             string pluginDirectory = Environment.GetEnvironmentVariable("PLUGIN_DIRECTORY");
             // Read the dll files from the extensions folder
@@ -26,31 +27,39 @@ namespace Savanna.Services.PluginHandlers
                 var assembly = Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), file));
 
                 // Exteract all the types that implements IPlugin 
-                var pluginTypes = assembly.GetTypes().Where(t => typeof(IAnimal).IsAssignableFrom(t) && !t.IsInterface).ToArray();
+                var pluginTypes = assembly.GetTypes().Where(t => typeof(IAnimalProperties).IsAssignableFrom(t) && !t.IsInterface).ToArray();
 
                 foreach (var pluginType in pluginTypes)
                 {
                     // Create an instance from the extracted type 
-                    var pluginInstance = Activator.CreateInstance(pluginType) as IAnimal;
+                    var pluginInstance = Activator.CreateInstance(pluginType) as IAnimalProperties;
                     pluginsLists.Add(pluginInstance);
                 }
             }
         }
-        private void LoadExistingPlugins(List<IAnimal> pluginsLists)
+        private void LoadExistingPlugins(List<IAnimalProperties> pluginsLists)
         {
             var animalLibraryAssembly = Assembly.Load("Savanna.Data");
-            var types = animalLibraryAssembly.GetTypes().Where(t => typeof(IAnimal).IsAssignableFrom(t) && !t.IsInterface);
+
+            var baseClasses = new List<Type>
+            {
+                typeof(PreyBase),
+                typeof(PredatorBase)
+            };
+
+            var types = animalLibraryAssembly.GetTypes()
+                .Where(t => typeof(IAnimalProperties).IsAssignableFrom(t) && !t.IsInterface)
+                .Where(t => baseClasses.Any(baseType => t.IsSubclassOf(baseType)));
+
             foreach (var type in types)
             {
-                if (type != typeof(AnimalBase))
-                {
-                    var instance = Activator.CreateInstance(type) as IAnimal;
-                    pluginsLists.Add(instance);
-                }
+                var instance = Activator.CreateInstance(type) as IAnimalProperties;
+                pluginsLists.Add(instance);
             }
         }
 
-        private Tuple<bool, string> ValidatePlugins(List<IAnimal> pluginsLists)
+
+        private Tuple<bool, string> ValidatePlugins(List<IAnimalProperties> pluginsLists)
         {
             foreach (var plugin in pluginsLists.ToList())
             {

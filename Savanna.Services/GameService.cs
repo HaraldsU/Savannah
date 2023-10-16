@@ -1,5 +1,5 @@
-﻿using Savanna.Commons;
-using Savanna.Data;
+﻿using Savanna.Commons.Enums;
+using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
 using Savanna.Services.PluginHandlers;
 
@@ -14,8 +14,8 @@ namespace Savanna.Services
         private readonly AnimalBehaviour _animalMovement;
         private readonly PluginLoader _pluginLoader;
 
-        private readonly Tuple<List<IAnimal>, string> loadedPlugins;
-        public readonly List<IAnimal> Animals;
+        private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
+        public readonly List<IAnimalProperties> Animals;
         public readonly string ValidationErrors;
         public GameService()
         {
@@ -25,14 +25,7 @@ namespace Savanna.Services
             Animals = loadedPlugins.Item1;
             ValidationErrors = loadedPlugins.Item2;
         }
-        /// <summary>
-        /// Adds a new prey or predator depending on input
-        /// </summary>
-        /// <param name="animal"></param>
-        /// <param name="grid"></param>
-        /// <param name="isChild"></param>
-        /// <param name="updates"></param>
-        public void AddAnimal(IAnimal animal, ConsoleKey pressedKey, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
+        public void AddAnimal(IAnimalProperties animal, ConsoleKey pressedKey, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
             var cellIndex = RandomGenerator.Next(grid.Count);
             var animalCount = GetAnimalCount(grid);
@@ -66,7 +59,7 @@ namespace Savanna.Services
 
                 if (animal == null && pressedKey != ConsoleKey.NoName)
                 {
-                    foreach (IAnimal plugin in Animals)
+                    foreach (IAnimalProperties plugin in Animals)
                     {
                         if (plugin.KeyBind == pressedKey)
                         {
@@ -85,12 +78,6 @@ namespace Savanna.Services
                 }
             }
         }
-        /// <summary>
-        /// Sets the new animals positions and clears the old ones
-        /// </summary>
-        /// <param name="dimension"></param>
-        /// <param name="grid"></param>
-        /// <param name="isPredatorTurn"></param>
         public void MoveAnimals(int dimension, List<GridCellModel> grid)
         {
             var updates = new Dictionary<int, int>();
@@ -129,12 +116,6 @@ namespace Savanna.Services
             turn = nextType;
             currentTypeIndex = (currentTypeIndex + 1) % animalTypes.Length;
         }
-        /// <summary>
-        /// Gets the current animal count
-        /// </summary>
-        /// <param name="grid"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.All)
         {
             int count = 0;

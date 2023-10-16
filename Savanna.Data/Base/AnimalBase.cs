@@ -1,10 +1,12 @@
-﻿using Savanna.Commons;
+﻿using Savanna.Commons.Enums;
 using Savanna.Data.CustomValidations;
+using Savanna.Data.Interfaces;
+using Savanna.Data.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace Savanna.Data
+namespace Savanna.Data.Base
 {
-    public class AnimalBase : IAnimal
+    public class AnimalBase : IAnimalProperties, IAnimalType
     {
         [Required]
         public string Name { get; set; }
@@ -52,10 +54,18 @@ namespace Savanna.Data
 
         [Required]
         public bool IsBirthing { get; set; } = false;
-        //public abstract IPlugin CreateNewAnimal();
-        public virtual IAnimal CreateNewAnimal()
+        public virtual Tuple<int, int, AnimalTargetEnums> FindTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid, int heightStart,
+                                                      int heightEnd, int widthStart, int widthEnd)
+        { return Tuple.Create(-1, -1, AnimalTargetEnums.None);}
+        public virtual void CalculateSteps(IAnimalProperties animal, ref int steps, DirectionEnums directionSign, GridCellModel gridItem, Tuple<int, int, AnimalTargetEnums> target,
+                                            bool isXCoordinate)
+        { }
+        public virtual void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, ref DirectionEnums directionYSign,
+                                               Tuple<int, int, AnimalTargetEnums> target)
+        { }
+        public virtual AnimalBase CreateNewAnimal()
         {
-            return (IAnimal)MemberwiseClone();
+            return (AnimalBase)MemberwiseClone();
         }
     }
 }

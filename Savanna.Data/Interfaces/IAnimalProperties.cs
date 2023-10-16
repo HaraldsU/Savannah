@@ -1,8 +1,9 @@
-﻿using Savanna.Commons;
+﻿using Savanna.Commons.Enums;
+using Savanna.Data.Base;
 
-namespace Savanna.Data
+namespace Savanna.Data.Interfaces
 {
-    public interface IAnimal
+    public interface IAnimalProperties
     {
         string Name { get; set; }
         char FirstLetter { get; set; }
@@ -16,6 +17,6 @@ namespace Savanna.Data
         int BreedingTime { get; set; }
         int ActiveBreedingCooldown { get; set; }
         bool IsBirthing { get; set; }
-        IAnimal CreateNewAnimal();
+        AnimalBase CreateNewAnimal();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Savanna.Commons
+﻿namespace Savanna.Commons.Enums
 {
     public enum AnimalTypeEnums
     {

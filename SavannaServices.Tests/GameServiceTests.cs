@@ -1,5 +1,8 @@
 ﻿using ClassLibraryTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Savanna.Commons.Enums;
+using Savanna.Data.Models.Animals;
+using Savanna.Services;
 
 namespace ClassLibrary.Tests
 {
