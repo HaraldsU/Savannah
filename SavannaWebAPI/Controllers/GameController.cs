@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Savanna.Commons.Enums;
+using Savanna.Data.Models;
+using Savanna.Services;
+using SavannaWebAPI.Helper;
 using SavannaWebAPI.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace SavannaWebAPI.Controllers
 {
@@ -9,10 +12,12 @@ namespace SavannaWebAPI.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
+        private static List<GridCellModel> Grid { get; set; }
+        private AnimalTypeEnums turn;
+        private int currentTypeIndex;
         private readonly GameService? _gameService;
-        private GridModelDTO? _gridModelDTO;
         private readonly GridService _initializeGrid = new();
-        private readonly int dimensions = 10;
+        private readonly int dimensions = 4;
 
         public GameController()
         {
@@ -23,29 +28,34 @@ namespace SavannaWebAPI.Controllers
         [HttpGet("GetGrid")]
         public Task<IActionResult> GetGrid()
         {
-            _gridModelDTO = new GridModelDTO
+            Grid = _initializeGrid.Initialize(dimensions);
+            var gridCellModelDTO = ModelConverter.GridCellModelToGridCellModelDto(Grid);
+            var gridModelDTO = new GridModelDTO
             {
-                Grid = _initializeGrid.Initialize(dimensions)
+                Grid = gridCellModelDTO
             };
-            return Task.FromResult<IActionResult>(Ok(_gridModelDTO));
+            return Task.FromResult<IActionResult>(Ok(gridModelDTO));
         }
         // GET: api/Game/GetGameService
         [HttpGet("GetAnimalPluginList")]
         public Task<IActionResult> GetAnimalPluginList()
         {
-            var pluginBaseDTOs = _gameService.Animals.Select(plugin => new PluginBaseDTO(plugin)).ToList();
-            return Task.FromResult<IActionResult>(Ok(pluginBaseDTOs));
+            var animalBaseDTOs = _gameService.Animals.Select(animal => new AnimalBaseDTO(animal)).ToList();
+            return Task.FromResult<IActionResult>(Ok(animalBaseDTOs));
         }
         // POST: api/Game/AddAnimal
         [HttpPost("AddAnimal")]
         public IActionResult AddAnimal(RequestsModel requestData)
         {
             var animal = _gameService.Animals.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
-            var grid = requestData.Grid;
-            if (animal != null && grid != null && _gameService != null)
+            var gridString = requestData.Grid;
+            var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(gridString);
+            if (animal != null && gridString != null && _gameService != null)
             {
-                _gameService.AddAnimal(animal: null, animal.KeyBind, grid.Grid, false);
-                return Ok(grid);
+                Grid = ModelConverter.GridCellModelDtoToGridCellModel(gridDTO.Grid);
+                _gameService.AddAnimal(animal: null, animal.KeyBind, Grid, false);
+                gridDTO.Grid = ModelConverter.GridCellModelToGridCellModelDto(Grid);
+                return Ok(gridDTO);
             }
             return BadRequest();
         }
@@ -53,11 +63,24 @@ namespace SavannaWebAPI.Controllers
         [HttpPost("MoveAnimals")]
         public IActionResult MoveAnimals(RequestsModel requestData)
         {
-            var gridDTO = requestData.Grid;
-            if (gridDTO != null && _gameService != null)
+            var gridString = requestData.Grid;
+            var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(gridString);
+            turn = (AnimalTypeEnums)requestData.Turn;
+            currentTypeIndex = (int)requestData.CurrentTypeIndex;
+            if (gridString != null && _gameService != null)
             {
-                _gameService.MoveAnimals(dimensions, gridDTO.Grid);
-                return Ok(gridDTO);
+                Grid = ModelConverter.GridCellModelDtoToGridCellModel(gridDTO.Grid);
+                _gameService.MoveAnimals(dimensions, Grid, ref turn, ref currentTypeIndex);
+                gridDTO.Grid = ModelConverter.GridCellModelToGridCellModelDto(Grid);
+
+                var response = JsonConvert.SerializeObject(new
+                {
+                    Grid,
+                    Turn = (int)turn,
+                    CurrentTypeIndex = currentTypeIndex
+                });
+
+                return Ok(response);
             }
             return BadRequest();
         }

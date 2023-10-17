@@ -1,7 +1,6 @@
 ﻿using Savanna.Commons.Enums;
 using Savanna.Data.CustomValidations;
 using Savanna.Data.Interfaces;
-using Savanna.Data.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Savanna.Data.Base
@@ -54,15 +53,9 @@ namespace Savanna.Data.Base
 
         [Required]
         public bool IsBirthing { get; set; } = false;
-        public virtual Tuple<int, int, AnimalTargetEnums> FindTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid, int heightStart,
-                                                      int heightEnd, int widthStart, int widthEnd)
-        { return Tuple.Create(-1, -1, AnimalTargetEnums.None);}
-        public virtual void CalculateSteps(IAnimalProperties animal, ref int steps, DirectionEnums directionSign, GridCellModel gridItem, Tuple<int, int, AnimalTargetEnums> target,
-                                            bool isXCoordinate)
-        { }
-        public virtual void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, ref DirectionEnums directionYSign,
-                                               Tuple<int, int, AnimalTargetEnums> target)
-        { }
+        public virtual void AnimalEatsAnimal() { }
+        public virtual void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, 
+                                              ref DirectionEnums directionYSign) { }
         public virtual AnimalBase CreateNewAnimal()
         {
             return (AnimalBase)MemberwiseClone();

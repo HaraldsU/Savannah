@@ -2,6 +2,6 @@
 {
     public class GridModelDTO
     {
-        public List<GridCellModel> Grid { get; set; }
+        public List<GridCellModelDTO> Grid { get; set; }
     }
 }

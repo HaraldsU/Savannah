@@ -1,4 +1,5 @@
 ﻿using Savanna.Commons.Enums;
+using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
 using Savanna.Services.PluginHandlers;
@@ -7,16 +8,13 @@ namespace Savanna.Services
 {
     public class GameService
     {
-        private AnimalTypeEnums turn = AnimalTypeEnums.Predator;
         private readonly AnimalTypeEnums[] animalTypes = (AnimalTypeEnums[])Enum.GetValues(typeof(AnimalTypeEnums));
-        private int currentTypeIndex = 0;
-
         private readonly AnimalBehaviour _animalMovement;
         private readonly PluginLoader _pluginLoader;
-
         private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
         public readonly List<IAnimalProperties> Animals;
         public readonly string ValidationErrors;
+
         public GameService()
         {
             _pluginLoader = new();
@@ -25,6 +23,7 @@ namespace Savanna.Services
             Animals = loadedPlugins.Item1;
             ValidationErrors = loadedPlugins.Item2;
         }
+
         public void AddAnimal(IAnimalProperties animal, ConsoleKey pressedKey, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
         {
             var cellIndex = RandomGenerator.Next(grid.Count);
@@ -78,35 +77,18 @@ namespace Savanna.Services
                 }
             }
         }
-        public void MoveAnimals(int dimension, List<GridCellModel> grid)
+        public void MoveAnimals(int dimension, List<GridCellModel> grid, ref AnimalTypeEnums turn, ref int currentTypeIndex)
         {
-            var updates = new Dictionary<int, int>();
-            _animalMovement.GetAnimalsNewPositions(dimension, grid, turn, updates);
+            DetermineAnimalTypeTurn(ref turn, ref currentTypeIndex);
+            var updatedAnimalPositions = new Dictionary<int, int>();
+            _animalMovement.GetAnimalsNewPositions(dimension, grid, turn, updatedAnimalPositions);
 
-            foreach (var update in updates)
+            foreach (var update in updatedAnimalPositions)
             {
-                var oldValue = grid[update.Value].Animal;
-
-                // Delete animal if health <= 0
-                if (grid[update.Key].Animal.Health <= 0)
-                {
-                    DeleteAnimalNoHealth(grid, update.Key);
-                }
-                // Move the animal
-                else
-                {
-                    grid[update.Value].Animal = grid[update.Key].Animal;
-                }
-
-                // If animal moved, empty the previous cell 
-                if (grid[update.Value].Animal != oldValue)
-                {
-                    grid[update.Key].Animal = null;
-                }
+                MoveAnimal(grid, update);
             }
-            DetermineAnimalTypeTurn();
         }
-        private void DetermineAnimalTypeTurn()
+        private void DetermineAnimalTypeTurn(ref AnimalTypeEnums turn, ref int currentTypeIndex)
         {
             if (currentTypeIndex == animalTypes.Length - 1)
             {
@@ -116,24 +98,42 @@ namespace Savanna.Services
             turn = nextType;
             currentTypeIndex = (currentTypeIndex + 1) % animalTypes.Length;
         }
-        public int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.All)
+        private void MoveAnimal(List<GridCellModel> grid, KeyValuePair<int, int> update)
+        {
+            var oldPosition = grid[update.Value].Animal;
+
+            // Delete animal if health <= 0
+            if (grid[update.Key].Animal.Health <= 0)
+            {
+                DeleteAnimalNoHealth(grid, update.Key);
+            }
+            // Move the animal
+            else
+            {
+                if (grid[update.Value].Animal != null)
+                {
+                    if (grid[update.Key].Animal.AnimalType != grid[update.Value].Animal.AnimalType)
+                    {
+                        grid[update.Key].Animal.AnimalEatsAnimal();
+                    }
+                }
+                grid[update.Value].Animal = grid[update.Key].Animal;
+            }
+
+            // If animal moved, empty the previous cell 
+            if (grid[update.Value].Animal != oldPosition)
+            {
+                grid[update.Key].Animal = null;
+            }
+        }
+        public int GetAnimalCount(List<GridCellModel> grid)
         {
             int count = 0;
             foreach (var cell in grid)
             {
-                if (type == AnimalTypeEnums.Prey)
+                if (cell.Animal != null)
                 {
-                    if (cell.Animal != null && cell.Animal.AnimalType == AnimalTypeEnums.Prey)
-                    {
-                        count++;
-                    }
-                }
-                else if (type == AnimalTypeEnums.Predator)
-                {
-                    if (cell.Animal != null && cell.Animal.AnimalType == AnimalTypeEnums.Predator)
-                    {
-                        count++;
-                    }
+                    count++;
                 }
             }
             return count;

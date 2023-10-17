@@ -1,6 +1,5 @@
 ﻿using Savanna.Commons.Enums;
 using Savanna.Data.Base;
-using Savanna.Data.Interfaces;
 
 namespace Savanna.Data.Models.Animals
 {

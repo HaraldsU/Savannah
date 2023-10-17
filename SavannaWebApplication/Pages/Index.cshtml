@@ -28,10 +28,10 @@
                 @{
                     int colId = 0;
                 }
-                @for (int i = 0; i < MathF.Sqrt(IndexModel.Grid.Grid.Count); i++)
+                @for (int i = 0; i < MathF.Sqrt((float)HttpContext.Session.GetInt32(IndexModel.SessionGridDimensionKey)); i++)
                 {
                     <div class="row">
-                        @for (int j = 0; j < MathF.Sqrt(IndexModel.Grid.Grid.Count); j++)
+                        @for (int j = 0; j < MathF.Sqrt((float)HttpContext.Session.GetInt32(IndexModel.SessionGridDimensionKey)); j++)
                         {
                             char gridText = GridConstants.EmptyCell;
                             <div id="col @colId" class="col box bg-secondary border d-flex justify-content-center">

@@ -2,7 +2,7 @@
 {
     public enum AnimalTargetEnums
     {
-        None = -1,
+        NoTarget = -1,
         Enemy = 0,
         MatingPartner = 1
     }

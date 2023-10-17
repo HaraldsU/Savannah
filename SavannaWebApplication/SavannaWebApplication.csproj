@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AnimalLibrary\Savanna.Data.csproj" />
+    <ProjectReference Include="..\ClassLibrary\Savanna.Commons.csproj" />
   </ItemGroup>
 
 </Project>

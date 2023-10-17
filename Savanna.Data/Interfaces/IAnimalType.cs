@@ -1,15 +1,23 @@
 ﻿using Savanna.Commons.Enums;
-using Savanna.Data.Models;
 
 namespace Savanna.Data.Interfaces
 {
     public interface IAnimalType
     {
-        Tuple<int, int, AnimalTargetEnums> FindTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid, int heightStart, 
-                                                      int heightEnd, int widthStart, int widthEnd);
-        void CalculateSteps(IAnimalProperties animal, ref int steps, DirectionEnums directionSign, GridCellModel gridItem, Tuple<int, int, AnimalTargetEnums> target,
-                                            bool isXCoordinate);
-        void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, ref DirectionEnums directionYSign,
-                                               Tuple<int, int, AnimalTargetEnums> target);
+        /// <summary>
+        /// Handles the after effect of eating another animal, e.g., increasing health.
+        /// </summary>
+        void AnimalEatsAnimal();
+
+        /// <summary>
+        /// Determines the movement direction of the animal depending on the position of the target.
+        /// </summary>
+        /// <param name="subjectX"></param>
+        /// <param name="subjectY"></param>
+        /// <param name="targetX"></param>
+        /// <param name="targetY"></param>
+        /// <param name="directionXSign"></param>
+        /// <param name="directionYSign"></param>
+        void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, ref DirectionEnums directionYSign);
     }
 }

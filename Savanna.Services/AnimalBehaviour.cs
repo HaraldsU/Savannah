@@ -1,4 +1,6 @@
 ﻿using Savanna.Commons.Enums;
+using Savanna.Data;
+using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
 
@@ -7,10 +9,12 @@ namespace Savanna.Services
     public class AnimalBehaviour
     {
         private readonly GameService _gameService;
+
         public AnimalBehaviour(GameService gameService)
         {
             _gameService = gameService;
         }
+
         public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, AnimalTypeEnums turn, Dictionary<int, int> updates)
         {
             for (int i = 0; i < dimension; i++)
@@ -33,11 +37,11 @@ namespace Savanna.Services
         private void GetAnimalNewPosition(int dimension, List<GridCellModel> grid, IAnimalProperties animal, int coordinates, int coordinatesOld, Dictionary<int, int> updates)
         {
             var animalCount = _gameService.GetAnimalCount(grid);
-            var target = GetTarget(dimension, grid[coordinates], grid); // X, Y, target: (0 - Enemy, 1 - mating partner)
+            var target = GetTarget(dimension, grid[coordinates], grid); // X, Y, target: (Enemy, mating partner)
 
             ResetBreedingCooldown(animal);
             // No target animals in range
-            if (target.Item1 == -1)
+            if (target.Item3 == AnimalTargetEnums.NoTarget)
             {
                 GetAnimalNewPositionNoTarget(dimension, grid, ref coordinates, updates);
             }
@@ -51,11 +55,74 @@ namespace Savanna.Services
             {
                 GetAnimalNewPositionEnemy(dimension, grid, ref coordinates, updates, target);
             }
+
             if (!updates.ContainsKey(coordinatesOld))
             {
                 updates.Add(coordinatesOld, coordinates);
             }
             RemoveAnimalHealth(grid[coordinatesOld].Animal);
+        }
+        private Tuple<int, int, AnimalTargetEnums> GetTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid)
+        {
+            dimension--;
+            if (gridItem.Animal != null)
+            {
+                var range = gridItem.Animal.Range;
+                int widthStart = Math.Max(0, gridItem.X - range);
+                int heightStart = Math.Max(0, gridItem.Y - range);
+                int widthEnd = Math.Min(dimension, gridItem.X + range);
+                int heightEnd = Math.Min(dimension, gridItem.Y + range);
+
+                return FindTarget(dimension, gridItem, grid, heightStart, heightEnd, widthStart, widthEnd);
+            }
+            else
+            {
+                return Tuple.Create(-1, -1, AnimalTargetEnums.NoTarget);
+            }
+        }
+        private Tuple<int, int, AnimalTargetEnums> FindTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid, int heightStart,
+                                            int heightEnd, int widthStart, int widthEnd)
+        {
+            dimension++;
+            // Height (Y)
+            for (int i = heightStart; i < heightEnd + 1; i++)
+            {
+                // Width (X)
+                for (int j = widthStart; j < widthEnd + 1; j++)
+                {
+                    var coordinates = ((i + 1) * dimension) - (dimension - j);
+                    var gridItemCoordinates = ((gridItem.Y + 1) * dimension) - (dimension - gridItem.X);
+                    if (grid[coordinates].Animal != null && coordinates != gridItemCoordinates)
+                    {
+                        // Animal finding animal of different type
+                        if (gridItem.Animal.AnimalType != grid[coordinates].Animal.AnimalType)
+                        {
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetEnums.Enemy);
+                        }
+                        // Animal breeding animal
+                        else if (gridItem.Animal.AnimalType == grid[coordinates].Animal.AnimalType &&
+                                 (gridItem.Animal.ActiveBreedingCooldown == 0 || gridItem.Animal.ActiveBreedingCooldown > gridItem.Animal.BreedingCooldown) &&
+                                 (grid[coordinates].Animal.ActiveBreedingCooldown == 0 || grid[coordinates].Animal.ActiveBreedingCooldown > gridItem.Animal.BreedingCooldown) &&
+                                 (gridItem.Animal.Name == grid[coordinates].Animal.Name)
+                                )
+                        {
+                            return Tuple.Create(grid[coordinates].X, grid[coordinates].Y, AnimalTargetEnums.MatingPartner);
+                        }
+                    }
+                }
+            }
+            return Tuple.Create(-1, -1, AnimalTargetEnums.NoTarget);
+        }
+        private void ResetBreedingCooldown(IAnimalProperties animal)
+        {
+            if (animal.ActiveBreedingCooldown != 0)
+            {
+                animal.ActiveBreedingCooldown--;
+                if (animal.ActiveBreedingCooldown == animal.BreedingCooldown)
+                {
+                    animal.IsBirthing = false;
+                }
+            }
         }
         private void GetAnimalNewPositionNoTarget(int dimension, List<GridCellModel> grid, ref int coordinates, Dictionary<int, int> updates)
         {
@@ -104,84 +171,6 @@ namespace Savanna.Services
             var directionYSign = directionSigns.Item2;
             MoveAnimalPosition(dimension, grid, ref coordinates, directionXSign, directionYSign, grid[coordinates], target);
         }
-        private void ResetBreedingCooldown(IAnimalProperties animal)
-        {
-            if (animal.ActiveBreedingCooldown != 0)
-            {
-                animal.ActiveBreedingCooldown--;
-                if (animal.ActiveBreedingCooldown == animal.BreedingCooldown)
-                {
-                    animal.IsBirthing = false;
-                }
-            }
-        }
-        private Tuple<int, int, AnimalTargetEnums> GetTarget(int dimension, GridCellModel gridItem, List<GridCellModel> grid)
-        {
-            dimension--;
-            if (gridItem.Animal != null)
-            {
-                var range = gridItem.Animal.Range;
-                int widthStart = Math.Max(0, gridItem.X - range);
-                int heightStart = Math.Max(0, gridItem.Y - range);
-                int widthEnd = Math.Min(dimension, gridItem.X + range);
-                int heightEnd = Math.Min(dimension, gridItem.Y + range);
-
-                return gridItem.Animal.FindTarget(dimension, gridItem, grid, heightStart, heightEnd, widthStart, widthEnd);
-            }
-            else
-            {
-                return Tuple.Create(-1, -1, AnimalTargetEnums.None);
-            }
-        }
-        private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, DirectionEnums directionXSign, DirectionEnums directionYSign,
-                                         GridCellModel? gridItem = null, Tuple<int, int, AnimalTargetEnums>? target = null)
-        {
-            int coordinatesOld = coordinates;
-            var animal = grid[coordinatesOld].Animal;
-            int steps = animal.Speed;
-
-            // x abscissa 
-            if (target != null)
-            {
-                if (steps > 1)
-                {
-                    animal.CalculateSteps(animal, ref steps, directionXSign, gridItem, target, true);
-                }
-            }
-
-            // Move left
-            if (directionXSign == DirectionEnums.NegativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y)
-            {
-                coordinates -= steps;
-            }
-            // Move right
-            else if (directionXSign == DirectionEnums.PositiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)
-            {
-                coordinates += steps;
-            }
-
-            steps = animal.Speed;
-            // y abscissa 
-            // target is Tuple(x, y, action)
-            if (target != null)
-            {
-                if (steps > 1)
-                {
-                    animal.CalculateSteps(animal, ref steps, directionXSign, gridItem, target, true);
-                }
-            }
-
-            // Move up
-            if (directionYSign == DirectionEnums.NegativeDirectionSign && (coordinates - (dimension * steps)) >= 0)
-            {
-                coordinates -= dimension * steps;
-            }
-            // Move down
-            else if (directionYSign == DirectionEnums.PositiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)
-            {
-                coordinates += dimension * steps;
-            }
-        }
         private Tuple<DirectionEnums, DirectionEnums> GetRandomDirectionSigns(int dimension, List<GridCellModel> grid, int coordinates, Dictionary<int, int> updates)
         {
             int count = 0;
@@ -203,6 +192,50 @@ namespace Savanna.Services
                     count++;
                 } while ((coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null || updates.ContainsValue(coordinatesTmp)) && count <= 8);
                 if (count >= 8)
+                {
+                    directionXSign = DirectionEnums.NoDirectionSign;
+                    directionYSign = DirectionEnums.NoDirectionSign;
+                }
+            }
+            var returnData = Tuple.Create(directionXSign, directionYSign);
+
+            return returnData;
+        }
+        private Tuple<DirectionEnums, DirectionEnums> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, AnimalTargetEnums> target,
+                                                                              GridCellModel gridItem, Dictionary<int, int> updates)
+        {
+            DirectionEnums directionXSign = DirectionEnums.NoDirectionSign;
+            DirectionEnums directionYSign = DirectionEnums.NoDirectionSign;
+
+            // Subject animal coordinates
+            int subjectX = gridItem.X;
+            int subjectY = gridItem.Y;
+
+            // Target animal coordinates
+            int targetX = target.Item1;
+            int targetY = target.Item2;
+
+            int coordinatesOld = coordinates;
+            int coordinatesTmp = coordinates;
+            var gridTmp = grid;
+
+            if (target.Item3 == AnimalTargetEnums.Enemy)
+            {
+                AnimalBase animal = AnimalFactory.CreateAnimal(gridItem.Animal.AnimalType);
+                animal.SetDirectionSigns(subjectX, subjectY, targetX, targetY, ref directionXSign, ref directionYSign);
+            }
+            else
+            {
+                SetTargetBreedingDirectionSigns(subjectX, targetX, subjectY, targetY, ref directionXSign, ref directionYSign);
+            }
+            MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign, gridItem, target);
+            if (coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null || updates.ContainsValue(coordinatesTmp))
+            {
+                if (updates.ContainsValue(coordinatesTmp))
+                {
+                    coordinatesTmp = updates.First(x => x.Value == coordinatesTmp).Key;
+                }
+                if (gridTmp[coordinatesTmp].Animal.AnimalType == gridTmp[coordinates].Animal.AnimalType)
                 {
                     directionXSign = DirectionEnums.NoDirectionSign;
                     directionYSign = DirectionEnums.NoDirectionSign;
@@ -234,49 +267,6 @@ namespace Savanna.Services
                 directionYSign = DirectionEnums.PositiveDirectionSign;
             }
         }
-        private Tuple<DirectionEnums, DirectionEnums> GetTargetDirectionSigns(int dimension, int coordinates, List<GridCellModel> grid, Tuple<int, int, AnimalTargetEnums> target,
-                                                                              GridCellModel gridItem, Dictionary<int, int> updates)
-        {
-            DirectionEnums directionXSign = DirectionEnums.NoDirectionSign;
-            DirectionEnums directionYSign = DirectionEnums.NoDirectionSign;
-
-            // Subject animal coordinates
-            int subjectX = gridItem.X;
-            int subjectY = gridItem.Y;
-
-            // Target animal coordinates
-            int targetX = target.Item1;
-            int targetY = target.Item2;
-
-            int coordinatesOld = coordinates;
-            int coordinatesTmp = coordinates;
-            var gridTmp = grid;
-
-            if (target.Item3 == AnimalTargetEnums.Enemy)
-            {
-                gridItem.Animal.SetDirectionSigns(subjectX, subjectY, targetX, targetY, ref directionXSign, ref directionYSign, target);
-            }
-            else
-            {
-                SetTargetBreedingDirectionSigns(subjectX, targetX, subjectY, targetY, ref directionXSign, ref directionYSign);
-            }
-            MoveAnimalPosition(dimension, gridTmp, ref coordinatesTmp, directionXSign, directionYSign, gridItem, target);
-            if (coordinatesTmp == coordinatesOld || gridTmp[coordinatesTmp].Animal != null || updates.ContainsValue(coordinatesTmp))
-            {
-                if (updates.ContainsValue(coordinatesTmp))
-                {
-                    coordinatesTmp = updates.First(x => x.Value == coordinatesTmp).Key;
-                }
-                if (gridTmp[coordinatesTmp].Animal.AnimalType == gridTmp[coordinates].Animal.AnimalType)
-                {
-                    directionXSign = DirectionEnums.NoDirectionSign;
-                    directionYSign = DirectionEnums.NoDirectionSign;
-                }
-            }
-            var returnData = Tuple.Create(directionXSign, directionYSign);
-
-            return returnData;
-        }
         private void SetTargetBreedingDirectionSigns(int subjectX, int targetX, int subjectY, int targetY, ref DirectionEnums directionXSign, ref DirectionEnums directionYSign)
         {
             SetTargetBreedingDirectionSign(subjectX, targetX, ref directionXSign);
@@ -300,6 +290,82 @@ namespace Savanna.Services
                 else
                 {
                     directionSign = DirectionEnums.NoDirectionSign;
+                }
+            }
+        }
+        private void MoveAnimalPosition(int dimension, List<GridCellModel> grid, ref int coordinates, DirectionEnums directionXSign, DirectionEnums directionYSign,
+                                         GridCellModel? gridItem = null, Tuple<int, int, AnimalTargetEnums>? target = null)
+        {
+            int coordinatesOld = coordinates;
+            var animal = grid[coordinatesOld].Animal;
+            int steps = animal.Speed;
+
+            // x abscissa 
+            if (target != null)
+            {
+                if (steps > 1)
+                {
+                    CalculateSteps(ref steps, directionXSign, gridItem, target, true);
+                }
+            }
+
+            // Move left
+            if (directionXSign == DirectionEnums.NegativeDirectionSign && (coordinates - steps) >= 0 && grid[coordinates - steps].Y == grid[coordinates].Y)
+            {
+                coordinates -= steps;
+            }
+            // Move right
+            else if (directionXSign == DirectionEnums.PositiveDirectionSign && (coordinates + steps) <= grid.Count - 1 && grid[coordinates + steps].Y == grid[coordinates].Y)
+            {
+                coordinates += steps;
+            }
+
+            steps = animal.Speed;
+            // y abscissa 
+            // target is Tuple(x, y, action)
+            if (target != null)
+            {
+                if (steps > 1)
+                {
+                    CalculateSteps(ref steps, directionYSign, gridItem, target, false);
+                }
+            }
+
+            // Move up
+            if (directionYSign == DirectionEnums.NegativeDirectionSign && (coordinates - (dimension * steps)) >= 0)
+            {
+                coordinates -= dimension * steps;
+            }
+            // Move down
+            else if (directionYSign == DirectionEnums.PositiveDirectionSign && (coordinates + (dimension * steps)) <= grid.Count - 1)
+            {
+                coordinates += dimension * steps;
+            }
+        }
+        private void CalculateSteps(ref int steps, DirectionEnums directionSign, GridCellModel gridItem, Tuple<int, int, AnimalTargetEnums> target, bool isXCoordinate)
+        {
+            var subjectCoordinate = isXCoordinate == true ? gridItem.X : gridItem.Y;
+            var targetCoordinate = isXCoordinate == true ? target.Item1 : target.Item2;
+            if (target.Item3 == AnimalTargetEnums.MatingPartner)
+            {
+                if (subjectCoordinate + steps >= targetCoordinate && directionSign == DirectionEnums.PositiveDirectionSign)
+                {
+                    steps--;
+                }
+                else if (subjectCoordinate - steps <= targetCoordinate && directionSign == DirectionEnums.NegativeDirectionSign)
+                {
+                    steps--;
+                }
+            }
+            else
+            {
+                if (subjectCoordinate + steps > targetCoordinate && directionSign == DirectionEnums.PositiveDirectionSign)
+                {
+                    steps--;
+                }
+                else if (subjectCoordinate - steps < targetCoordinate && directionSign == DirectionEnums.NegativeDirectionSign)
+                {
+                    steps--;
                 }
             }
         }
