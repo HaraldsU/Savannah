@@ -20,7 +20,8 @@ body {
 }
 #footer {
     position: absolute;
-    bottom: 0;
+    width: 100%;
+    bottom: 20px;
     left: 0;
 }
 #gridCells {

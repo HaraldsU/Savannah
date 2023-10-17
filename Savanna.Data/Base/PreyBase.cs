@@ -5,10 +5,6 @@ namespace Savanna.Data.Base
 {
     public class PreyBase : AnimalBase
     {
-        public override void AnimalEatsAnimal()
-        {
-
-        }
         public override void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign,
                                                ref DirectionEnums directionYSign)
         {

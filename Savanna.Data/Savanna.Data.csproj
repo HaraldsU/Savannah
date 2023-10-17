@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary\Savanna.Commons.csproj" />
+    <ProjectReference Include="..\Savanna.Commons\Savanna.Commons.csproj" />
   </ItemGroup>
 
 </Project>

@@ -53,6 +53,9 @@ namespace Savanna.Data.Base
 
         [Required]
         public bool IsBirthing { get; set; } = false;
+        /// <summary>
+        /// Handles the after effect of eating another animal, e.g., increasing health.
+        /// </summary>
         public virtual void AnimalEatsAnimal() { }
         public virtual void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, 
                                               ref DirectionEnums directionYSign) { }

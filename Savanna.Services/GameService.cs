@@ -1,4 +1,5 @@
 ﻿using Savanna.Commons.Enums;
+using Savanna.Data;
 using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
@@ -113,7 +114,8 @@ namespace Savanna.Services
                 {
                     if (grid[update.Key].Animal.AnimalType != grid[update.Value].Animal.AnimalType)
                     {
-                        grid[update.Key].Animal.AnimalEatsAnimal();
+                        AnimalBase animal = AnimalFactory.CreateAnimal(grid[update.Key].Animal.AnimalType);
+                        animal.AnimalEatsAnimal();
                     }
                 }
                 grid[update.Value].Animal = grid[update.Key].Animal;

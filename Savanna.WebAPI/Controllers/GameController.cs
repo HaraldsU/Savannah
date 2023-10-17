@@ -12,16 +12,17 @@ namespace SavannaWebAPI.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
-        private static List<GridCellModel> Grid { get; set; }
+        private List<GridCellModel> Grid;
         private AnimalTypeEnums turn;
         private int currentTypeIndex;
         private readonly GameService? _gameService;
-        private readonly GridService _initializeGrid = new();
-        private readonly int dimensions = 4;
+        private readonly GridService _initializeGrid;
+        private readonly int dimensions = 10;
 
         public GameController()
         {
             _gameService = new();
+            _initializeGrid = new();
         }
 
         // GET: api/Game/GetGrid
@@ -36,6 +37,7 @@ namespace SavannaWebAPI.Controllers
             };
             return Task.FromResult<IActionResult>(Ok(gridModelDTO));
         }
+
         // GET: api/Game/GetGameService
         [HttpGet("GetAnimalPluginList")]
         public Task<IActionResult> GetAnimalPluginList()
@@ -43,6 +45,7 @@ namespace SavannaWebAPI.Controllers
             var animalBaseDTOs = _gameService.Animals.Select(animal => new AnimalBaseDTO(animal)).ToList();
             return Task.FromResult<IActionResult>(Ok(animalBaseDTOs));
         }
+
         // POST: api/Game/AddAnimal
         [HttpPost("AddAnimal")]
         public IActionResult AddAnimal(RequestsModel requestData)
@@ -59,6 +62,7 @@ namespace SavannaWebAPI.Controllers
             }
             return BadRequest();
         }
+
         // POST: api/Game/MoveAnimals
         [HttpPost("MoveAnimals")]
         public IActionResult MoveAnimals(RequestsModel requestData)

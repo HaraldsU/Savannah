@@ -5,11 +5,6 @@ namespace Savanna.Data.Interfaces
     public interface IAnimalType
     {
         /// <summary>
-        /// Handles the after effect of eating another animal, e.g., increasing health.
-        /// </summary>
-        void AnimalEatsAnimal();
-
-        /// <summary>
         /// Determines the movement direction of the animal depending on the position of the target.
         /// </summary>
         /// <param name="subjectX"></param>
