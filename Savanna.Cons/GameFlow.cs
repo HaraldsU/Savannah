@@ -36,7 +36,7 @@ namespace Savanna.Cons
             while (isGameRunning)
             {
                 _display.DisplayGrid(grid, cursorTop, Dimension);
-                _gameService.MoveAnimals(Dimension, grid);
+                //_gameService.MoveAnimals(Dimension, grid);
                 Thread.Sleep(500);
 
                 _input.ButtonListener(grid);

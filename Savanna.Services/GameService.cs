@@ -14,7 +14,6 @@ namespace Savanna.Services
         private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
         public readonly List<IAnimalProperties> Animals;
         public readonly string ValidationErrors;
-
         public GameService()
         {
             _pluginLoader = new();

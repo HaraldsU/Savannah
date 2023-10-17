@@ -1,22 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using Savanna.Commons.Constants;
 using Savanna.Commons.Enums;
 using SavannaWebApplication.Constants;
 using SavannaWebApplication.Models;
 using System.Text;
-using System.Text.Json;
 
 namespace SavannaWebApplication.Pages
 {
     public class IndexModel : PageModel
     {
-        public const string SessionGridKey = "_Grid";
-        public const string SessionGridDimensionKey = "_GridDimension";
-        public const string SessionGridTurnKey = "_GridTurn";
-        public const string SessionGridCurrentTypeIndexKey = "_GridCurrentTypeIndex";
-
-        public static List<AnimalBaseDTO> Animals { get; set; } = new();
         public List<string> GameInfo { get; set; } = new();
         private readonly ILogger<IndexModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -38,9 +32,9 @@ namespace SavannaWebApplication.Pages
         {
             var jsonData = JsonConvert.SerializeObject(new
             {
-                Grid = HttpContext.Session.GetString(SessionGridKey),
-                Turn = HttpContext.Session.GetInt32(SessionGridTurnKey),
-                CurrentTypeIndex = HttpContext.Session.GetInt32(SessionGridCurrentTypeIndexKey)
+                Grid = HttpContext.Session.GetString(SessionConstants.Grid),
+                Turn = HttpContext.Session.GetInt32(SessionConstants.GridTurn),
+                CurrentTypeIndex = HttpContext.Session.GetInt32(SessionConstants.GridCurrentTypeIndex)
             });
 
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -62,9 +56,9 @@ namespace SavannaWebApplication.Pages
 
                 string gridModelJson = JsonConvert.SerializeObject(gridModelDTO);
 
-                HttpContext.Session.SetString(SessionGridKey, gridModelJson);
-                HttpContext.Session.SetInt32(SessionGridTurnKey, (int)turn);
-                HttpContext.Session.SetInt32(SessionGridCurrentTypeIndexKey, (int)currentTypeIndex);
+                HttpContext.Session.SetString(SessionConstants.Grid, gridModelJson);
+                HttpContext.Session.SetInt32(SessionConstants.GridTurn, (int)turn);
+                HttpContext.Session.SetInt32(SessionConstants.GridCurrentTypeIndex, (int)currentTypeIndex);
 
                 var formattedGrid = FormatGridForDisplay();
                 UpdateGameInfo();
@@ -74,6 +68,7 @@ namespace SavannaWebApplication.Pages
                     formattedGrid,
                     GameInfo
                 };
+
                 return new JsonResult(resultData);
             }
             else
@@ -84,20 +79,21 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
-
         public async Task<IActionResult> OnPostAddAnimalAsync(string animalName)
         {
             var jsonData = JsonConvert.SerializeObject(new
             {
                 animalName,
-                Grid = HttpContext.Session.GetString(SessionGridKey)
+                Grid = HttpContext.Session.GetString(SessionConstants.Grid)
             });
+
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("api/Game/AddAnimal", content);
+
             if (response.IsSuccessStatusCode)
             {
                 var responseData = await response.Content.ReadAsStringAsync();
-                HttpContext.Session.SetString(SessionGridKey, responseData);
+                HttpContext.Session.SetString(SessionConstants.Grid, responseData);
                 var formattedGrid = FormatGridForDisplay();
                 UpdateGameInfo();
 
@@ -106,6 +102,7 @@ namespace SavannaWebApplication.Pages
                     formattedGrid,
                     GameInfo
                 };
+
                 return new JsonResult(resultData);
             }
             else
@@ -118,7 +115,7 @@ namespace SavannaWebApplication.Pages
         }
         private async Task GetInitializedGridAsync()
         {
-            var grid = HttpContext.Session.GetString(SessionGridKey);
+            var grid = HttpContext.Session.GetString(SessionConstants.Grid);
             if (grid == null)
             {
                 var response = await _httpClient.GetAsync("api/Game/GetGrid");
@@ -127,10 +124,10 @@ namespace SavannaWebApplication.Pages
                     var responseData = await response.Content.ReadAsStringAsync();
                     var gridTmp = JsonConvert.DeserializeObject<GridModelDTO>(responseData);
 
-                    HttpContext.Session.SetString(SessionGridKey, responseData);
-                    HttpContext.Session.SetInt32(SessionGridDimensionKey, gridTmp.Grid.Count);
-                    HttpContext.Session.SetInt32(SessionGridTurnKey, (int)AnimalTypeEnums.Predator);
-                    HttpContext.Session.SetInt32(SessionGridCurrentTypeIndexKey, 0);
+                    HttpContext.Session.SetString(SessionConstants.Grid, responseData);
+                    HttpContext.Session.SetInt32(SessionConstants.GridDimensions, gridTmp.Grid.Count);
+                    HttpContext.Session.SetInt32(SessionConstants.GridTurn, (int)AnimalTypeEnums.Predator);
+                    HttpContext.Session.SetInt32(SessionConstants.GridCurrentTypeIndex, 0);
 
                     UpdateGameInfo();
                 }
@@ -142,18 +139,17 @@ namespace SavannaWebApplication.Pages
         }
         private async Task GetAnimalPluginListAsync()
         {
-            if (Animals.Count == 0)
+            HttpContext.Session.SetString(SessionConstants.AnimalList, string.Empty);
+            var animalList = HttpContext.Session.GetString(SessionConstants.AnimalList);
+            if (animalList == string.Empty)
             {
                 var response = await _httpClient.GetAsync("api/Game/GetAnimalPluginList");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
+                    var pluginBaseDTOList = JsonConvert.DeserializeObject<List<AnimalBaseDTO>>(responseData);
+                    List<AnimalBaseDTO> animals = new();
 
-                    var pluginBaseDTOList = System.Text.Json.JsonSerializer.Deserialize<List<AnimalBaseDTO>>(responseData, options);
                     foreach (var dto in pluginBaseDTOList)
                     {
                         var animal = new AnimalBaseDTO
@@ -163,8 +159,11 @@ namespace SavannaWebApplication.Pages
                             KeyBind = dto.KeyBind,
                             Color = dto.Color,
                         };
-                        Animals.Add(animal);
+                        animals.Add(animal);
                     }
+
+                    var animalsJson = JsonConvert.SerializeObject(animals);
+                    HttpContext.Session.SetString(SessionConstants.AnimalList, animalsJson);
                 }
                 else
                 {
@@ -175,8 +174,9 @@ namespace SavannaWebApplication.Pages
         private List<char> FormatGridForDisplay()
         {
             List<char> formattedGrid = new();
-            var grid = HttpContext.Session.GetString(SessionGridKey);
+            var grid = HttpContext.Session.GetString(SessionConstants.Grid);
             var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(grid);
+
             foreach (var cell in gridDTO.Grid)
             {
                 if (cell.Animal != null)
@@ -188,15 +188,19 @@ namespace SavannaWebApplication.Pages
                     formattedGrid.Add(GridConstants.EmptyCell);
                 }
             }
+
             return formattedGrid;
         }
         private void UpdateGameInfo()
         {
             Dictionary<string, int> animalCount = new();
-            var grid = HttpContext.Session.GetString(SessionGridKey);
-            var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(grid);
+            var gridString = HttpContext.Session.GetString(SessionConstants.Grid);
+            var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(gridString);
+            var animalsString = HttpContext.Session.GetString(SessionConstants.AnimalList);
+            var animalsDTO = JsonConvert.DeserializeObject<List<AnimalBaseDTO>>(animalsString);
+
             GameInfo.Add($"Grid size: {gridDTO.Grid.Count}");
-            foreach (var animal in Animals)
+            foreach (var animal in animalsDTO)
             {
                 if (animal.Name != null)
                 {
@@ -213,6 +217,7 @@ namespace SavannaWebApplication.Pages
                     }
                 }
             }
+
             foreach (var animal in animalCount)
             {
                 GameInfo.Add($"{animal.Key}: {animal.Value}");

@@ -1,6 +1,7 @@
 ﻿@page
 @using Newtonsoft.Json;
 @using SavannaWebApplication.Constants;
+@using SavannaWebApplication.Models;
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model IndexModel
 @{
@@ -16,7 +17,11 @@
             <p>Click on the buttons below to add animals to the grid.</p>
         </div>
         <div id="buttons" class="col col-2" style="margin-top: 5%;">
-            @foreach (var animal in IndexModel.Animals)
+            @{
+                var animalsString = HttpContext.Session.GetString(SessionConstants.AnimalList);
+                var animalsDTO = JsonConvert.DeserializeObject<List<AnimalBaseDTO>>(animalsString);
+            }
+            @foreach (var animal in animalsDTO)
             {
                 <div>
                     <button class="btn btn-primary text-black row mt-3" onclick="addAnimal(this.getAttribute('value'))" value="@animal.Name">Add @animal.Name</button>
@@ -28,10 +33,10 @@
                 @{
                     int colId = 0;
                 }
-                @for (int i = 0; i < MathF.Sqrt((float)HttpContext.Session.GetInt32(IndexModel.SessionGridDimensionKey)); i++)
+                @for (int i = 0; i < MathF.Sqrt((float)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); i++)
                 {
                     <div class="row">
-                        @for (int j = 0; j < MathF.Sqrt((float)HttpContext.Session.GetInt32(IndexModel.SessionGridDimensionKey)); j++)
+                        @for (int j = 0; j < MathF.Sqrt((float)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); j++)
                         {
                             char gridText = GridConstants.EmptyCell;
                             <div id="col @colId" class="col box bg-secondary border d-flex justify-content-center">

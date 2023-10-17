@@ -35,8 +35,8 @@ namespace ClassLibrary.Tests
             _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
 
             // Assert
-            Assert.AreEqual(1, _gameService.GetAnimalCount(grid, AnimalTypeEnums.Prey));
-            Assert.AreEqual(1, _gameService.GetAnimalCount(grid, AnimalTypeEnums.Predator));
+            Assert.AreEqual(1, Utilities.GetAnimalCount(grid, AnimalTypeEnums.Prey));
+            Assert.AreEqual(1, Utilities.GetAnimalCount(grid, AnimalTypeEnums.Predator));
         }
 
         [TestMethod()]
@@ -46,11 +46,13 @@ namespace ClassLibrary.Tests
             var grid = _grid.Initialize(dimensions);
             var animalLionModel = new LionModel();
             bool isChild = false;
+            AnimalTypeEnums turn = AnimalTypeEnums.Predator;
+            int currentTypeIndex = (int)AnimalTypeEnums.Predator;
             _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
             // Act
-            _gameService.MoveAnimals(dimensions, grid);
+            _gameService.MoveAnimals(dimensions, grid, ref turn, ref currentTypeIndex);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -62,12 +64,14 @@ namespace ClassLibrary.Tests
             var grid = _grid.Initialize(dimensions);
             var animalAntelopeModel = new AntelopeModel();
             bool isChild = false;
+            AnimalTypeEnums turn = AnimalTypeEnums.Prey;
+            int currentTypeIndex = (int)AnimalTypeEnums.Prey;
             _gameService.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
-            _gameService.MoveAnimals(dimensions, grid);
+            _gameService.MoveAnimals(dimensions, grid, ref turn, ref currentTypeIndex);
 
             // Act
-            _gameService.MoveAnimals(dimensions, grid);
+            _gameService.MoveAnimals(dimensions, grid, ref turn, ref currentTypeIndex);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -87,7 +91,7 @@ namespace ClassLibrary.Tests
             _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
 
             // Assert
-            Assert.AreEqual(2, _gameService.GetAnimalCount(grid, AnimalTypeEnums.All));
+            Assert.AreEqual(2, Utilities.GetAnimalCount(grid, AnimalTypeEnums.All));
         }
     }
 }

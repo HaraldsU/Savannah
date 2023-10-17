@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Savanna.Data.Models.Animals;
+using Savanna.Services.PluginHandlers;
 
 namespace ClassLibrary.PluginHandlers.Tests
 {

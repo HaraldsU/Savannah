@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Savanna.Data.Interfaces;
+using Savanna.Services;
 
 namespace ClassLibraryTests.PluginHandlers
 {
@@ -9,7 +11,7 @@ namespace ClassLibraryTests.PluginHandlers
         [TestMethod()]
         public void LoadPluginsTest()
         {
-            Assert.IsInstanceOfType(_gameService.Animals, typeof(List<IAnimal>));
+            Assert.IsInstanceOfType(_gameService.Animals, typeof(List<IAnimalProperties>));
         }
     }
 }
