@@ -1,10 +1,12 @@
-﻿using Savanna.Commons.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using Savanna.Commons.Enums;
 using Savanna.Data.CustomValidations;
 using Savanna.Data.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace Savanna.Data.Base
 {
+    [Keyless]
     public class AnimalBase : IAnimalProperties, IAnimalType
     {
         [Required]

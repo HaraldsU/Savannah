@@ -1,5 +1,6 @@
 ﻿using Savanna.Commons.Enums;
 using Savanna.Data.Models;
+using Savanna.Data.Models.DB;
 
 namespace Savanna.Services
 {

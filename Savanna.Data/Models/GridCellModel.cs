@@ -1,7 +1,10 @@
-﻿using Savanna.Data.Base;
+﻿using Microsoft.EntityFrameworkCore;
+using Savanna.Data.Base;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Savanna.Data.Models
 {
+    [Keyless]
     public class GridCellModel
     {
         public int X { get; set; }

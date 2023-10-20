@@ -4,6 +4,7 @@ using Savanna.Data;
 using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
+using Savanna.Data.Models.DB;
 using Savanna.Services.Helper;
 using Savanna.Services.PluginHandlers;
 
