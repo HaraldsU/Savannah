@@ -1,5 +1,6 @@
 ﻿using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
+using Savanna.Services.Constants;
 using System.Reflection;
 
 namespace Savanna.Services.PluginHandlers
@@ -17,7 +18,7 @@ namespace Savanna.Services.PluginHandlers
         }
         private void LoadImportedPlugins(List<IAnimalProperties> pluginsLists)
         {
-            string pluginDirectory = Environment.GetEnvironmentVariable("PLUGIN_DIRECTORY");
+            string pluginDirectory = Environment.GetEnvironmentVariable(EnvironmentVariableConstants.PluginDirectory);
             // Read the dll files from the extensions folder
             var files = Directory.GetFiles(pluginDirectory, "*.dll");
 
@@ -39,7 +40,7 @@ namespace Savanna.Services.PluginHandlers
         }
         private void LoadExistingPlugins(List<IAnimalProperties> pluginsLists)
         {
-            var animalLibraryAssembly = Assembly.Load("Savanna.Data");
+            var animalLibraryAssembly = Assembly.Load(AssemblyConstants.SavannaData);
 
             var baseClasses = new List<Type>
             {

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Savanna.Commons\Savanna.Commons.csproj" />
     <ProjectReference Include="..\Savanna.Data\Savanna.Data.csproj" />
   </ItemGroup>

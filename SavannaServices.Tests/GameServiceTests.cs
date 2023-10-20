@@ -11,7 +11,7 @@ namespace ClassLibrary.Tests
     {
         private readonly int dimensions = 8;
         private GameService? _gameService;
-        private GridService? _grid;
+        private InitializeService? _grid;
 
         [TestInitialize()]
         public void Initialize()
@@ -27,7 +27,7 @@ namespace ClassLibrary.Tests
             // Arrange
             var animalAntelopeModel = new AntelopeModel();
             var animalLionModel = new LionModel();
-            var grid = _grid.Initialize(dimensions);
+            var grid = _grid.InitializeGame(dimensions);
             bool isChild = false;
 
             // Act
@@ -43,7 +43,7 @@ namespace ClassLibrary.Tests
         public void MoveAnimalLionTest()
         {
             // Arrange
-            var grid = _grid.Initialize(dimensions);
+            var grid = _grid.InitializeGame(dimensions);
             var animalLionModel = new LionModel();
             bool isChild = false;
             AnimalTypeEnums turn = AnimalTypeEnums.Predator;
@@ -61,7 +61,7 @@ namespace ClassLibrary.Tests
         public void MoveAnimalAntelopeTest()
         {
             // Arrange
-            var grid = _grid.Initialize(dimensions);
+            var grid = _grid.InitializeGame(dimensions);
             var animalAntelopeModel = new AntelopeModel();
             bool isChild = false;
             AnimalTypeEnums turn = AnimalTypeEnums.Prey;
@@ -83,7 +83,7 @@ namespace ClassLibrary.Tests
             // Arrange
             var animalAntelopeModel = new AntelopeModel();
             var animalLionModel = new LionModel();
-            var grid = _grid.Initialize(dimensions);
+            var grid = _grid.InitializeGame(dimensions);
             bool isChild = false;
 
             // Act

@@ -3,6 +3,7 @@ using Savanna.Data;
 using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
+using Savanna.Services.Helper;
 
 namespace Savanna.Services
 {
@@ -156,7 +157,7 @@ namespace Savanna.Services
                     updates.Remove(updatesElement.Key);
                     updates.Add(updatesElement.Key, updatesElement.Key);
                 }
-                _gameService.AddAnimal(animal, pressedKey: ConsoleKey.NoName, grid, isChild: true, updates);
+                _gameService.AddAnimal(0, animal.Name, isChild: true, updates);
                 directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                 directionXSign = directionSigns.Item1;
                 directionXSign = directionSigns.Item2;

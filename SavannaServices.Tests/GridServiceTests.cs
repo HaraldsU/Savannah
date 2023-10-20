@@ -6,7 +6,7 @@ namespace ClassLibrary.Tests
     [TestClass()]
     public class GridServiceTests
     {
-        private GridService _grid;
+        private InitializeService _grid;
         [TestInitialize()]
         public void Initialize()
         {
@@ -19,7 +19,7 @@ namespace ClassLibrary.Tests
             int dimension = 8;
 
             // Act
-            var grid = _grid.Initialize(dimension);
+            var grid = _grid.InitializeGame(dimension);
 
             // Assert
             Assert.IsNotNull(grid);

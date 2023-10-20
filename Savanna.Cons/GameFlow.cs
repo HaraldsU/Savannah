@@ -5,7 +5,7 @@ namespace Savanna.Cons
     public class GameFlow
     {
         public int Dimension;
-        private readonly GridService _initializeGrid;
+        private readonly InitializeService _initializeGrid;
         private readonly Display _display;
         private readonly Input _input;
         private readonly GameService? _gameService;
@@ -31,7 +31,7 @@ namespace Savanna.Cons
 
             int cursorTop = Console.CursorTop;
             bool isGameRunning = true;
-            var grid = _initializeGrid.Initialize(Dimension);
+            var grid = _initializeGrid.InitializeGame(Dimension);
 
             while (isGameRunning)
             {

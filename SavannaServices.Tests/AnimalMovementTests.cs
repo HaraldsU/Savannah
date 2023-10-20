@@ -10,7 +10,7 @@ namespace ClassLibrary.Tests
     {
         private readonly int dimensions = 8;
         private GameService? _gameService;
-        private GridService? _grid;
+        private InitializeService? _grid;
         private AnimalBehaviour? _animalMovement;
 
         [TestInitialize()]
@@ -25,7 +25,7 @@ namespace ClassLibrary.Tests
         {
             // Arrange
             var animalAntelope = new AntelopeModel();
-            var grid = _grid.Initialize(dimensions);
+            var grid = _grid.InitializeGame(dimensions);
             bool isChild = false;
             AnimalTypeEnums turn = AnimalTypeEnums.Predator;
             Dictionary<int, int> updatesOld = new();

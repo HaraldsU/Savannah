@@ -1,4 +1,4 @@
-﻿namespace Savanna.Services
+﻿namespace Savanna.Services.Helper
 {
     public class RandomGenerator
     {

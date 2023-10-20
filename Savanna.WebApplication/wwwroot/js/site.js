@@ -38,7 +38,7 @@ function addAnimal(animalName) {
         },
         dataType: "json",
         success: function (data) {
-            updateGrid(data.formattedGrid);
+            updateGrid(data.grid);
             updateGameInfo(data.gameInfo);
         },
         error: function (error) {
@@ -62,7 +62,7 @@ function moveAnimals() {
         },
         contentType: "application/json; charset=utf-8",
         success: function (data) {
-            updateGrid(data.formattedGrid);
+            updateGrid(data.grid);
             updateGameInfo(data.gameInfo);;
         },
         error: function (error) {

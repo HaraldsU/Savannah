@@ -1,4 +1,5 @@
-﻿using Savanna.Commons.Enums;
+﻿using Savanna.Commons.Constants;
+using Savanna.Commons.Enums;
 using Savanna.Data.Base;
 
 namespace Savanna.Data
@@ -14,7 +15,7 @@ namespace Savanna.Data
                 case AnimalTypeEnums.Prey:
                     return new PreyBase();
                 default:
-                    throw new ArgumentException("Unknown animal type");
+                    throw new ArgumentException(ErrorMessageConstants.AnimalTypeError);
             }
         }
     }

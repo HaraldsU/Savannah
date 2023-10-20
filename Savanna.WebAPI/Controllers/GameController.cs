@@ -1,9 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Savanna.Commons.Enums;
-using Savanna.Data.Models;
 using Savanna.Services;
-using SavannaWebAPI.Helper;
 using SavannaWebAPI.Models;
 
 namespace SavannaWebAPI.Controllers
@@ -12,53 +8,59 @@ namespace SavannaWebAPI.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
-        private List<GridCellModel> Grid;
-        private AnimalTypeEnums turn;
-        private int currentTypeIndex;
-        private readonly GameService? _gameService;
-        private readonly GridService _initializeGrid;
-        private readonly int dimensions = 10;
+        private static readonly GameService _gameService = new();
+        private readonly InitializeService _gridService;
+        private readonly int dimensions = 4;
 
         public GameController()
         {
-            _gameService = new();
-            _initializeGrid = new();
+            _gridService = new(_gameService);
         }
 
-        // GET: api/Game/GetGrid
-        [HttpGet("GetGrid")]
-        public Task<IActionResult> GetGrid()
+        // GET: api/Game/GetInitializedGrid
+        [HttpGet("GetInitializedGrid")]
+        public IActionResult GetInitializedGrid()
         {
-            Grid = _initializeGrid.Initialize(dimensions);
-            var gridCellModelDTO = ModelConverter.GridCellModelToGridCellModelDto(Grid);
-            var gridModelDTO = new GridModelDTO
+            var gameData = _gridService.InitializeGame(dimensions);
+            var gameId = gameData.Item1;
+            var grid = gameData.Item2;
+
+            if (grid != null)
             {
-                Grid = gridCellModelDTO
-            };
-            return Task.FromResult<IActionResult>(Ok(gridModelDTO));
+                var response = new
+                {
+                    Id = gameId,
+                    Grid = grid
+                };
+
+                return Ok(response);
+            }
+            return BadRequest();
         }
 
         // GET: api/Game/GetGameService
         [HttpGet("GetAnimalPluginList")]
-        public Task<IActionResult> GetAnimalPluginList()
+        public IActionResult GetAnimalPluginList()
         {
-            var animalBaseDTOs = _gameService.Animals.Select(animal => new AnimalBaseDTO(animal)).ToList();
-            return Task.FromResult<IActionResult>(Ok(animalBaseDTOs));
+            var animalList = _gameService.GetAnimalList();
+
+            if (animalList != null)
+            {
+                return Ok(animalList);
+            }
+            return BadRequest();
         }
 
         // POST: api/Game/AddAnimal
         [HttpPost("AddAnimal")]
         public IActionResult AddAnimal(RequestsModel requestData)
         {
-            var animal = _gameService.Animals.FirstOrDefault(animal => animal.Name == requestData.AnimalName);
-            var gridString = requestData.Grid;
-            var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(gridString);
-            if (animal != null && gridString != null && _gameService != null)
+            var animal = requestData.AnimalName;
+            var id = requestData.GameId;
+            if (animal != null && id != null)
             {
-                Grid = ModelConverter.GridCellModelDtoToGridCellModel(gridDTO.Grid);
-                _gameService.AddAnimal(animal: null, animal.KeyBind, Grid, false);
-                gridDTO.Grid = ModelConverter.GridCellModelToGridCellModelDto(Grid);
-                return Ok(gridDTO);
+                var grid = _gameService.AddAnimal((int)id, animal);
+                return Ok(grid);
             }
             return BadRequest();
         }
@@ -67,24 +69,11 @@ namespace SavannaWebAPI.Controllers
         [HttpPost("MoveAnimals")]
         public IActionResult MoveAnimals(RequestsModel requestData)
         {
-            var gridString = requestData.Grid;
-            var gridDTO = JsonConvert.DeserializeObject<GridModelDTO>(gridString);
-            turn = (AnimalTypeEnums)requestData.Turn;
-            currentTypeIndex = (int)requestData.CurrentTypeIndex;
-            if (gridString != null && _gameService != null)
+            var id = requestData.GameId;
+            if (id != null)
             {
-                Grid = ModelConverter.GridCellModelDtoToGridCellModel(gridDTO.Grid);
-                _gameService.MoveAnimals(dimensions, Grid, ref turn, ref currentTypeIndex);
-                gridDTO.Grid = ModelConverter.GridCellModelToGridCellModelDto(Grid);
-
-                var response = JsonConvert.SerializeObject(new
-                {
-                    Grid,
-                    Turn = (int)turn,
-                    CurrentTypeIndex = currentTypeIndex
-                });
-
-                return Ok(response);
+                var grid = _gameService.MoveAnimals((int)id);
+                return Ok(grid);
             }
             return BadRequest();
         }

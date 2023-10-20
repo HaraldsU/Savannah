@@ -57,8 +57,9 @@ namespace Savanna.Data.Base
         /// Handles the after effect of eating another animal, e.g., increasing health.
         /// </summary>
         public virtual void AnimalEatsAnimal() { }
-        public virtual void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign, 
-                                              ref DirectionEnums directionYSign) { }
+        public virtual void SetDirectionSigns(int subjectX, int subjectY, int targetX, int targetY, ref DirectionEnums directionXSign,
+                                              ref DirectionEnums directionYSign)
+        { }
         public virtual AnimalBase CreateNewAnimal()
         {
             return (AnimalBase)MemberwiseClone();

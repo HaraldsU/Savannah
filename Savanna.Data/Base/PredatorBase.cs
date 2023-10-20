@@ -1,5 +1,4 @@
 ﻿using Savanna.Commons.Enums;
-using Savanna.Data.Interfaces;
 
 namespace Savanna.Data.Base
 {

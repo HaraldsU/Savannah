@@ -1,8 +1,10 @@
 ﻿using Savanna.Commons.Enums;
+using Savanna.Commons.Models;
 using Savanna.Data;
 using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
+using Savanna.Services.Helper;
 using Savanna.Services.PluginHandlers;
 
 namespace Savanna.Services
@@ -15,6 +17,8 @@ namespace Savanna.Services
         private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
         public readonly List<IAnimalProperties> Animals;
         public readonly string ValidationErrors;
+        public List<GameStateModel> Games;
+
         public GameService()
         {
             _pluginLoader = new();
@@ -22,10 +26,16 @@ namespace Savanna.Services
             loadedPlugins = _pluginLoader.LoadPlugins();
             Animals = loadedPlugins.Item1;
             ValidationErrors = loadedPlugins.Item2;
+
+            Games = new();
         }
 
-        public void AddAnimal(IAnimalProperties animal, ConsoleKey pressedKey, List<GridCellModel> grid, bool isChild, Dictionary<int, int>? updates = null)
+        public List<GridCellModel> AddAnimal(int id, string animalName, bool? isChild = false, Dictionary<int, int>? updates = null)
         {
+            var grid = Games[id].Grid;
+            var animalModel = Animals.Find(animal => animal.Name == animalName);
+            var pressedKey = animalModel?.KeyBind;
+
             var cellIndex = RandomGenerator.Next(grid.Count);
             var animalCount = GetAnimalCount(grid);
 
@@ -56,29 +66,36 @@ namespace Savanna.Services
                     }
                 }
 
-                if (animal == null && pressedKey != ConsoleKey.NoName)
+                if (animalModel == null && pressedKey != ConsoleKey.NoName)
                 {
                     foreach (IAnimalProperties plugin in Animals)
                     {
                         if (plugin.KeyBind == pressedKey)
                         {
-                            animal = plugin;
+                            animalModel = plugin;
                         }
                     }
                 }
-                if (animal != null)
+                if (animalModel != null)
                 {
-                    if (isChild)
+                    if ((bool)isChild)
                     {
-                        animal.ActiveBreedingCooldown = animal.BreedingCooldown;
+                        animalModel.ActiveBreedingCooldown = animalModel.BreedingCooldown;
                     }
-                    var animalModel = animal.CreateNewAnimal();
-                    grid[cellIndex].Animal = animalModel;
+                    var newAnimalModel = animalModel.CreateNewAnimal();
+                    grid[cellIndex].Animal = newAnimalModel;
                 }
             }
+
+            return grid;
         }
-        public void MoveAnimals(int dimension, List<GridCellModel> grid, ref AnimalTypeEnums turn, ref int currentTypeIndex)
+        public List<GridCellModel> MoveAnimals(int id)
         {
+            var grid = Games[id].Grid;
+            var dimension = Games[id].Dimensions;
+            var turn = Games[id].Turn;
+            var currentTypeIndex = Games[id].CurrentTypeIndex;
+
             DetermineAnimalTypeTurn(ref turn, ref currentTypeIndex);
             var updatedAnimalPositions = new Dictionary<int, int>();
             _animalMovement.GetAnimalsNewPositions(dimension, grid, turn, updatedAnimalPositions);
@@ -87,6 +104,12 @@ namespace Savanna.Services
             {
                 MoveAnimal(grid, update);
             }
+
+            Games[id].Grid = grid;
+            Games[id].Turn = turn;
+            Games[id].CurrentTypeIndex = currentTypeIndex;
+
+            return grid;
         }
         private void DetermineAnimalTypeTurn(ref AnimalTypeEnums turn, ref int currentTypeIndex)
         {
@@ -138,6 +161,15 @@ namespace Savanna.Services
                 }
             }
             return count;
+        }
+        public List<AnimalBaseDTO> GetAnimalList()
+        {
+            var animalList = ModelConverter.AnimalModelToDTO(Animals);
+            return animalList;
+        }
+        public int GetNextGameId(int id)
+        {
+            return id++;
         }
         private void DeleteAnimalNoHealth(List<GridCellModel> grid, int cell)
         {

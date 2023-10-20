@@ -1,5 +1,7 @@
 ﻿@page
 @using Newtonsoft.Json;
+@using Savanna.Commons.Constants;
+@using Savanna.Commons.Models;
 @using SavannaWebApplication.Constants;
 @using SavannaWebApplication.Models;
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
@@ -33,10 +35,10 @@
                 @{
                     int colId = 0;
                 }
-                @for (int i = 0; i < MathF.Sqrt((float)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); i++)
+                @for (int i = 0; i < MathF.Sqrt((int)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); i++)
                 {
                     <div class="row">
-                        @for (int j = 0; j < MathF.Sqrt((float)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); j++)
+                        @for (int j = 0; j < MathF.Sqrt((int)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); j++)
                         {
                             char gridText = GridConstants.EmptyCell;
                             <div id="col @colId" class="col box bg-secondary border d-flex justify-content-center">
