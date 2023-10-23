@@ -93,6 +93,57 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
+        public async Task<IActionResult> OnPostSaveGameAsync()
+        {
+            var requestData = JsonConvert.SerializeObject(new
+            {
+                GameId = HttpContext.Session.GetInt32(SessionConstants.GameId)
+            });
+            var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/Game/SaveGame", requestContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                return new JsonResult(responseJson);
+            }
+            else
+            {
+                return new JsonResult(new { success = false, message = ErrorMessageConstants.SaveGameFailed })
+                {
+                    StatusCode = 400
+                };
+            }
+        }
+        public async Task<IActionResult> OnPostLoadGameAsync(string gameId)
+        {
+            var requestData = JsonConvert.SerializeObject(new
+            {
+                GameId = gameId
+            });
+            var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/Game/LoadGame", requestContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                var isGame = JsonConvert.DeserializeObject<bool>(responseJson);
+
+                if (isGame)
+                {
+                    HttpContext.Session.SetInt32(SessionConstants.GameId, int.Parse(gameId));
+                }
+
+                return new JsonResult(responseJson);
+            }
+            else
+            {
+                return new JsonResult(new { success = false, message = ErrorMessageConstants.SaveGameFailed })
+                {
+                    StatusCode = 400
+                };
+            }
+        }
         private async Task GetInitializedGridAsync()
         {
             var gameId = HttpContext.Session.GetInt32(SessionConstants.GameId);

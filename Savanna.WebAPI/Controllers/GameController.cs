@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Savanna.Data.Models.DB;
 using Savanna.Services;
 using SavannaWebAPI.Models;
 
@@ -8,20 +9,19 @@ namespace SavannaWebAPI.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
-        private static readonly GameService _gameService = new();
-        private readonly InitializeService _gridService;
-        private readonly int dimensions = 4;
+        private readonly GameService _gameService;
+        private readonly int dimensions = 10;
 
-        public GameController()
+        public GameController(SavannaContext dbContext)
         {
-            _gridService = new(_gameService);
+            _gameService = new(dbContext);
         }
 
         // GET: api/Game/GetInitializedGrid
         [HttpGet("GetInitializedGrid")]
         public IActionResult GetInitializedGrid()
         {
-            var gameData = _gridService.InitializeGame(dimensions);
+            var gameData = _gameService.AddNewGame(dimensions);
             var gameId = gameData.Item1;
             var grid = gameData.Item2;
 
@@ -74,6 +74,32 @@ namespace SavannaWebAPI.Controllers
             {
                 var grid = _gameService.MoveAnimals((int)id);
                 return Ok(grid);
+            }
+            return BadRequest();
+        }
+
+        // POST: api/Game/SaveGame
+        [HttpPost("SaveGame")]
+        public IActionResult SaveGame(RequestsModel requestData)
+        {
+            var id = requestData.GameId;
+            if (id != null)
+            {
+                _gameService.SaveGame((int)id);
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        // GET: api/Game/LoadGame
+        [HttpPost("LoadGame")]
+        public IActionResult LoadGame(RequestsModel requestData)
+        {
+            var id = requestData.GameId;
+            if (id != null)
+            {
+                var isGame = _gameService.LoadGame((int)id);
+                return Ok(isGame);
             }
             return BadRequest();
         }

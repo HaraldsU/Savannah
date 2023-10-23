@@ -8,5 +8,6 @@
         public const string RetrieveAnimalListFailed = "Retrieve Animal List Failed!";
         public const string ImportingPluginsFailed = "Error Importing Plugin: ";
         public const string AnimalTypeError = "Unknown Animal Type!";
+        public const string SaveGameFailed = "Save Game Failed!";
     }
 }

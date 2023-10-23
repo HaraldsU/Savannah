@@ -1,4 +1,5 @@
-﻿using Savanna.Commons.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using Savanna.Commons.Enums;
 using Savanna.Commons.Models;
 using Savanna.Data;
 using Savanna.Data.Base;
@@ -12,28 +13,30 @@ namespace Savanna.Services
 {
     public class GameService
     {
-        private readonly AnimalTypeEnums[] animalTypes = (AnimalTypeEnums[])Enum.GetValues(typeof(AnimalTypeEnums));
-        private readonly AnimalBehaviour _animalMovement;
-        private readonly PluginLoader _pluginLoader;
-        private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
         public readonly List<IAnimalProperties> Animals;
         public readonly string ValidationErrors;
-        public List<GameStateModel> Games;
 
-        public GameService()
+        private readonly AnimalTypeEnums[] animalTypes = (AnimalTypeEnums[])Enum.GetValues(typeof(AnimalTypeEnums));
+        private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
+        private readonly AnimalBehaviour _animalMovement;
+        private readonly PluginLoader _pluginLoader;
+        private readonly SavannaContext _dbContext;
+        private static readonly InitializeService _initializeService = new();
+
+        public GameService(SavannaContext dbContext)
         {
             _pluginLoader = new();
-            _animalMovement = new(this);
             loadedPlugins = _pluginLoader.LoadPlugins();
             Animals = loadedPlugins.Item1;
             ValidationErrors = loadedPlugins.Item2;
 
-            Games = new();
+            _animalMovement = new(this);
+            _dbContext = dbContext;
         }
 
         public List<GridCellModel> AddAnimal(int id, string animalName, bool? isChild = false, Dictionary<int, int>? updates = null)
         {
-            var grid = Games[id].Grid;
+            var grid = _initializeService.Games[id].Grid;
             var animalModel = Animals.Find(animal => animal.Name == animalName);
             var pressedKey = animalModel?.KeyBind;
 
@@ -92,10 +95,11 @@ namespace Savanna.Services
         }
         public List<GridCellModel> MoveAnimals(int id)
         {
-            var grid = Games[id].Grid;
-            var dimension = Games[id].Dimensions;
-            var turn = Games[id].Turn;
-            var currentTypeIndex = Games[id].CurrentTypeIndex;
+            var game = _initializeService.Games.Find(game => game.Id == id);
+            var grid = game.Grid;
+            var dimension = game.Dimensions;
+            var turn = game.Turn;
+            var currentTypeIndex = game.CurrentTypeIndex;
 
             DetermineAnimalTypeTurn(ref turn, ref currentTypeIndex);
             var updatedAnimalPositions = new Dictionary<int, int>();
@@ -106,21 +110,64 @@ namespace Savanna.Services
                 MoveAnimal(grid, update);
             }
 
-            Games[id].Grid = grid;
-            Games[id].Turn = turn;
-            Games[id].CurrentTypeIndex = currentTypeIndex;
+            game.Grid = grid;
+            game.Turn = turn;
+            game.CurrentTypeIndex = currentTypeIndex;
 
             return grid;
         }
-        private void DetermineAnimalTypeTurn(ref AnimalTypeEnums turn, ref int currentTypeIndex)
+        public int GetAnimalCount(List<GridCellModel> grid)
         {
-            if (currentTypeIndex == animalTypes.Length - 1)
+            int count = 0;
+            foreach (var cell in grid)
             {
-                currentTypeIndex = 0;
+                if (cell.Animal != null)
+                {
+                    count++;
+                }
             }
-            AnimalTypeEnums nextType = animalTypes[(currentTypeIndex) % animalTypes.Length];
-            turn = nextType;
-            currentTypeIndex = (currentTypeIndex + 1) % animalTypes.Length;
+            return count;
+        }
+        public List<AnimalBaseDTO> GetAnimalList()
+        {
+            var animalList = ModelConverter.AnimalModelToDTO(Animals);
+            return animalList;
+        }
+        public void SaveGame(int id)
+        {
+            var gameToSave = _initializeService.Games[id];
+            var existingGameState = _dbContext.GameState.FirstOrDefault(gs => gs.Id == gameToSave.Id);
+
+            if (existingGameState != null)
+            {
+                _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSave);
+            }
+            else
+            {
+                _dbContext.GameState.Add(gameToSave);
+            }
+
+            _dbContext.SaveChanges();
+        
+        }
+        public bool LoadGame(int id)
+        {
+            var gameToLoad = _dbContext.GameState
+                .Include(gs => gs.Grid)
+                .ThenInclude(grid => grid.Animal)
+                .FirstOrDefault(gs => gs.Id == id);
+            _initializeService.Games.Add(gameToLoad);
+
+            if (gameToLoad != null)
+            {
+                return true;
+            }
+            return false;
+        }
+        public Tuple<int, List<GridCellModel>> AddNewGame(int dimensions)
+        {
+            var returnData = _initializeService.InitializeGame(dimensions);
+            return returnData;
         }
         private void MoveAnimal(List<GridCellModel> grid, KeyValuePair<int, int> update)
         {
@@ -151,26 +198,15 @@ namespace Savanna.Services
                 grid[update.Key].Animal = null;
             }
         }
-        public int GetAnimalCount(List<GridCellModel> grid)
+        private void DetermineAnimalTypeTurn(ref AnimalTypeEnums turn, ref int currentTypeIndex)
         {
-            int count = 0;
-            foreach (var cell in grid)
+            if (currentTypeIndex == animalTypes.Length - 1)
             {
-                if (cell.Animal != null)
-                {
-                    count++;
-                }
+                currentTypeIndex = 0;
             }
-            return count;
-        }
-        public List<AnimalBaseDTO> GetAnimalList()
-        {
-            var animalList = ModelConverter.AnimalModelToDTO(Animals);
-            return animalList;
-        }
-        public int GetNextGameId(int id)
-        {
-            return id++;
+            AnimalTypeEnums nextType = animalTypes[(currentTypeIndex) % animalTypes.Length];
+            turn = nextType;
+            currentTypeIndex = (currentTypeIndex + 1) % animalTypes.Length;
         }
         private void DeleteAnimalNoHealth(List<GridCellModel> grid, int cell)
         {
@@ -178,3 +214,4 @@ namespace Savanna.Services
         }
     }
 }
+

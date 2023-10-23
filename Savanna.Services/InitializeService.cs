@@ -6,28 +6,27 @@ namespace Savanna.Services
 {
     public class InitializeService
     {
-        private static int lastAssignedId = 0;
-        private readonly GameService _gameService;
-
-        public InitializeService(GameService gameService)
-        {
-            _gameService = gameService;
-        }
+        public List<GameStateModel> Games = new();
+        private int lastAssignedId = 0;
 
         public Tuple<int, List<GridCellModel>> InitializeGame(int dimension)
         {
             var game = new GameStateModel
             {
-                Id = _gameService.GetNextGameId(lastAssignedId),
+                Id = GetNextGameId(lastAssignedId),
                 Grid = InitializeGrid(dimension),
                 Turn = AnimalTypeEnums.Predator,
                 CurrentTypeIndex = 0,
                 Dimensions = dimension
             };
-            _gameService.Games.Add(game);
+            Games.Add(game);
             var returnData = Tuple.Create(game.Id, game.Grid);
 
             return returnData;
+        }
+        private int GetNextGameId(int id)
+        {
+            return id++;
         }
         private List<GridCellModel> InitializeGrid(int dimension)
         {

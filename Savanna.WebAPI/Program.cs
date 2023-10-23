@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using Savanna.Data.Models.DB;
+using System.Configuration;
+
 var MyAllowSpecificOrigins = "http://localhost:5266";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +21,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection") ?? throw new InvalidOperationException("Connection string not found.");
+builder.Services.AddDbContext<SavannaContext>(options => options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 

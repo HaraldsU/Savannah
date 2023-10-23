@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Savanna.Data.Base;
 
 namespace Savanna.Data.Models.DB
 {
@@ -11,6 +12,15 @@ namespace Savanna.Data.Models.DB
         public SavannaContext(DbContextOptions options) : base(options)
         {
 
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<GameStateModel>()
+                .HasMany(g => g.Grid)
+                .WithOne()
+                .HasForeignKey("GameStateId");
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 

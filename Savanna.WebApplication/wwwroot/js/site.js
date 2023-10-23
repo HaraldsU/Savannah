@@ -24,6 +24,8 @@ function updateGameInfo(gameInfo) {
         count++;
     });
 }
+
+// Ajax calls
 function addAnimal(animalName) {
     console.log("animalName = ", animalName);
     $.ajax({
@@ -40,6 +42,42 @@ function addAnimal(animalName) {
         success: function (data) {
             updateGrid(data.grid);
             updateGameInfo(data.gameInfo);
+        },
+        error: function (error) {
+            console.error(error);
+        }
+    });
+}
+function saveGame() {
+    $.ajax({
+        url: "Index?handler=SaveGame",
+        method: "post",
+        headers: {
+            RequestVerificationToken:
+                document.getElementById("RequestVerificationToken").value
+        },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (error) {
+            console.error(error);
+        }
+    });
+}
+function loadGame() {
+    var gameId = $("#typeText").val();
+    $.ajax({
+        url: "Index?handler=LoadGame",
+        method: "post",
+        headers: {
+            RequestVerificationToken:
+                document.getElementById("RequestVerificationToken").value
+        },
+        data: {
+            gameId: gameId
+        },
+        success: function (data) {
+            console.log(data);
         },
         error: function (error) {
             console.error(error);
@@ -75,6 +113,8 @@ function moveAnimals() {
     });
 }
 moveAnimals();
+
+// Helper
 function getTime() {
     const currentDate = new Date();
     const hours = currentDate.getHours();
