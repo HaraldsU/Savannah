@@ -4,5 +4,6 @@
     {
         public int? GameId { get; set; }
         public string? AnimalName { get; set; }
+        public int? Dimensions { get; set; }
     }
 }

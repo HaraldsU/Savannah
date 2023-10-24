@@ -29,39 +29,27 @@
                 </div>
             }
         </div>
-        <div id="grid" class="col-lg-6" style="width: 30%;">
-            <div class="container text-center gridDivs" style="margin-top: 8%;">
-                @{
-                    int colId = 0;
-                }
-                @for (int i = 0; i < MathF.Sqrt((int)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); i++)
-                {
-                    <div class="row">
-                        @for (int j = 0; j < MathF.Sqrt((int)HttpContext.Session.GetInt32(SessionConstants.GridDimensions)); j++)
-                        {
-                            char gridText = GridConstants.EmptyCell;
-                            <div id="col @colId" class="col box bg-secondary border d-flex justify-content-center">
-                                <span id="gridCells" style="margin-top: 50%;">@gridText</span>
-                            </div>
-                            colId++;
-                        }
-                    </div>
-                }
+        <div id="grid" class="col-lg-6 mt-5" style="width: 30%;">
+            <div id="gridContainer" class="container text-center gridDivs" style="margin-top: 8%;">
+
             </div>
         </div>
         <div id="loadSave" class="col-2" style="margin-top: 6%; margin-right: 35%; width: 2.5%;">
-            <button id="saveButton" class="btn btn-primary text-black row mt-3" onclick="saveGame()">Save</button>
-            <button id="loadButton" class="btn btn-primary text-black row mt-3" onclick="loadGame()">Load</button>
-
+            <button id="startButton" class="btn btn-primary text-black row mt-3" onclick="startGame()">Start</button>
             <div class="row form-outline mt-3" style="width: 55px;">
-                <input type="text" id="typeText" class="form-control" />
+                <input type="text" id="gameDimensions" class="form-control" placeholder="Dim" />
             </div>
 
-        </div>
+            <button id="saveButton" class="btn btn-primary text-black row mt-3" onclick="saveGame()">Save</button>
+
+            <button id="loadButton" class="btn btn-primary text-black row mt-3" onclick="loadGame()">Load</button>
+            <div class="row form-outline mt-3" style="width: 55px;">
+                <input type="text" id="loadId" class="form-control" placeholder="Id" />
+            </div>
         </div>
         <div id="gameInfo" style="width: 50%; margin-right: 27%; margin-top: 1.5%;">
             @{
-                colId = 0;
+                var colId = 0;
             }
             @foreach(var info in Model.GameInfo)
             {

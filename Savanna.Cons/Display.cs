@@ -1,7 +1,7 @@
 ﻿using Figgle;
+using Savanna.Commons.Constants;
 using Savanna.Commons.Enums;
-using Savanna.Data.Models;
-using Savanna.Services;
+using Savanna.Commons.Models;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -9,40 +9,42 @@ namespace Savanna.Cons
 {
     public class Display
     {
-        private readonly GameService _gameService = new();
-
         public void DisplayPluginLoadValidationError(string validationError)
         {
             Console.WriteLine(validationError);
         }
-        public void DisplayAnimalCount()
+        public void DisplayAnimalCount(List<AnimalBaseDTO> animals)
         {
-            var animalModels = Environment.GetEnvironmentVariable("ANIMAL_MODELS");
+            var animalModels = Environment.GetEnvironmentVariable(EnvironmentVariableConstants.AnimalModels);
             var files = Directory.GetFiles(animalModels);
-            Console.WriteLine($"{_gameService.Animals.Count} Animal(s) found");
-            Console.WriteLine($"{_gameService.Animals.Count - files.Length} Plugin(s) found\n");
+            Console.WriteLine($"{animals.Count} Animal(s) found");
+            Console.WriteLine($"{animals.Count - files.Length} Plugin(s) found\n");
+        }
+        public void DisplayGameTitle()
+        {
+            Console.WriteLine(FiggleFonts.MaxFour.Render("Savannah!"));
         }
         public void DisplayGridSizeInputPrompt()
         {
             Console.SetCursorPosition(0, 0);
             Console.Write("Enter Grid Size (int 4 to 10): ");
         }
-        public void DisplayGameTitle()
-        {
-            Console.WriteLine(FiggleFonts.MaxFour.Render("Savannah!"));
-        }
-        public void DisplayGameplayInfo()
+        public void DisplayGameplayInfo(List<AnimalBaseDTO> animals)
         {
             string article;
             string pattern = @"[AEIOU]";
             bool isVowel;
-            foreach (var animal in _gameService.Animals)
+            foreach (var animal in animals)
             {
                 isVowel = Regex.IsMatch(animal.FirstLetter.ToString(), pattern);
                 if (isVowel)
+                {
                     article = "an";
+                }
                 else
+                {
                     article = "a";
+                }
                 string animalType = string.Empty;
                 switch (animal.AnimalType)
                 {
@@ -58,68 +60,29 @@ namespace Savanna.Cons
             }
             Console.WriteLine("Press 'Q' to quit ...");
         }
-        public void DisplayGrid(List<GridCellModel> grid, int cursorTop, int dimension)
+
+        public void DisplayGrid(List<GridCellModelDTO> grid, List<AnimalBaseDTO> animals, int cursorTop)
         {
             Console.CursorVisible = false;
             Console.SetCursorPosition(0, cursorTop - 1);
             StringBuilder gridStringBuilder = new();
-            gridStringBuilder = MakeGrid(grid, gridStringBuilder, dimension);
+            gridStringBuilder = MakeGrid(grid, gridStringBuilder, (int)MathF.Sqrt(grid.Count));
 
             string pattern = @"^[A-Z]$";
             for (int i = 0; i < gridStringBuilder.Length; i++)
             {
                 bool isAnimal = Regex.IsMatch(gridStringBuilder[i].ToString(), pattern);
                 if (isAnimal)
-                    ChangeColor(gridStringBuilder[i].ToString(), GetColor(gridStringBuilder[i]));
+                {
+                    ChangeColor(gridStringBuilder[i].ToString(), GetColor(animals, gridStringBuilder[i]));
+                }
                 else
+                {
                     ChangeColor(gridStringBuilder[i].ToString(), "Red");
+                }
             }
         }
-        public void ChangeColor(string text, string color)
-        {
-            if (color == "Yellow")
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (color == "Dark_yellow")
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-            else if (color == "Gray")
-                Console.ForegroundColor = ConsoleColor.Gray;
-            else if (color == "Dark_gray")
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-            else if (color == "Red")
-                Console.ForegroundColor = ConsoleColor.Red;
-            else if (color == "Dark_red")
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-            else if (color == "Blue")
-                Console.ForegroundColor = ConsoleColor.Blue;
-            else if (color == "Dark_blue")
-                Console.ForegroundColor = ConsoleColor.DarkBlue;
-            else if (color == "Green")
-                Console.ForegroundColor = ConsoleColor.Green;
-            else if (color == "Dark_green")
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-            else if (color == "Magenta")
-                Console.ForegroundColor = ConsoleColor.Magenta;
-            else if (color == "Dark_magenta")
-                Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            else if (color == "Cyan")
-                Console.ForegroundColor = ConsoleColor.Cyan;
-            else if (color == "Dark_cyan")
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-            else if (color == "White")
-                Console.ForegroundColor = ConsoleColor.White;
-            Console.Write(text);
-            Console.ResetColor();
-        }
-        private string GetColor(char firstLetter)
-        {
-            foreach (var plugin in _gameService.Animals)
-            {
-                if (plugin.FirstLetter == firstLetter)
-                    return plugin.Color;
-            }
-            return string.Empty;
-        }
-        private StringBuilder MakeGrid(List<GridCellModel> grid, StringBuilder gridStringBuilder, int dimension)
+        private StringBuilder MakeGrid(List<GridCellModelDTO> grid, StringBuilder gridStringBuilder, int dimension)
         {
             int height = (dimension * 2) + 1;
             int width = (dimension * 3) + 2;
@@ -133,7 +96,9 @@ namespace Savanna.Cons
                     if (i % 2 == 0)
                     {
                         if (j != width - 1)
+                        {
                             gridStringBuilder.Append('-');
+                        }
                     }
                     else
                     {
@@ -150,19 +115,105 @@ namespace Savanna.Cons
                                 count = 1;
                             }
                             if (grid[listIndex].Animal != null)
+                            {
                                 gridStringBuilder.Append(grid[listIndex].Animal?.FirstLetter);
+                            }
                             else
+                            {
                                 gridStringBuilder.Append(' ');
+                            }
                         }
                     }
                 }
                 count = 0;
                 if (i != 0 && i % 2 == 0)
+                {
                     listIndex++;
+                }
                 gridStringBuilder.Append('\n');
             }
             gridStringBuilder.Append('\n');
+
             return gridStringBuilder;
+        }
+
+        public void ChangeColor(string text, string color)
+        {
+            if (color == "Yellow")
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            }
+            else if (color == "Dark_yellow")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+            }
+            else if (color == "Gray")
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            else if (color == "Dark_gray")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
+            else if (color == "Red")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else if (color == "Dark_red")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+            }
+            else if (color == "Blue")
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+            }
+            else if (color == "Dark_blue")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkBlue;
+            }
+            else if (color == "Green")
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else if (color == "Dark_green")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+            }
+            else if (color == "Magenta")
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+            }
+            else if (color == "Dark_magenta")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            }
+            else if (color == "Cyan")
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            }
+            else if (color == "Dark_cyan")
+            {
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+            }
+            else if (color == "White")
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            Console.Write(text);
+            Console.ResetColor();
+        }
+        private string GetColor(List<AnimalBaseDTO> animals, char firstLetter)
+        {
+            foreach (var animal in animals)
+            {
+                if (animal.FirstLetter == firstLetter)
+                {
+                    return animal.Color;
+                }
+            }
+
+            return string.Empty;
         }
     }
 }

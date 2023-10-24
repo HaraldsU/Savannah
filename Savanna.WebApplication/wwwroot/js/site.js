@@ -12,6 +12,30 @@ function updateGrid(grid) {
         count++;
     });
 }
+function makeEmptyGrid(dimensions) {
+    var gridContainer = document.getElementById("gridContainer");
+    var gridHtml = "";
+
+    for (var i = 0; i < dimensions; i++) {
+        var rowHtml = '<div class="row">';
+
+        for (var j = 0; j < dimensions; j++) {
+            var colId = i * dimensions + j;
+            var gridText = '\u00AD';
+
+            var colHtml = '<div id="col' + colId + '" class="col box bg-secondary border d-flex justify-content-center">';
+            colHtml += '<span id="gridCells" style="margin-top: 50%;">' + gridText + '</span>';
+            colHtml += '</div>';
+
+            rowHtml += colHtml;
+        }
+
+        rowHtml += '</div>';
+        gridHtml += rowHtml;
+    }
+
+    gridContainer.innerHTML = gridHtml;
+}
 function updateGameInfo(gameInfo) {
     const gameInfoSpans = $('[id*="info"]');
     let count = 0;
@@ -48,6 +72,27 @@ function addAnimal(animalName) {
         }
     });
 }
+function startGame() {
+    var dimensions = $("#gameDimensions").val();
+    $.ajax({
+        url: "Index?handler=StartGame",
+        method: "post",
+        headers: {
+            RequestVerificationToken:
+                document.getElementById("RequestVerificationToken").value
+        },
+        data: {
+            dimensions: dimensions
+        },
+        success: function (data) {
+            console.log(data);
+            makeEmptyGrid(data);
+        },
+        error: function (error) {
+            console.error(error);
+        }
+    });
+}
 function saveGame() {
     $.ajax({
         url: "Index?handler=SaveGame",
@@ -65,7 +110,7 @@ function saveGame() {
     });
 }
 function loadGame() {
-    var gameId = $("#typeText").val();
+    var gameId = $("#loadId").val();
     $.ajax({
         url: "Index?handler=LoadGame",
         method: "post",

@@ -1,46 +1,52 @@
-﻿using Savanna.Services;
+﻿using Savanna.Commons.Models;
+using System.Net.Http;
 
 namespace Savanna.Cons
 {
     public class GameFlow
     {
-        public int Dimension;
-        private readonly InitializeService _initializeGrid;
+        private int dimension;
+        private List<AnimalBaseDTO>? animals;
         private readonly Display _display;
         private readonly Input _input;
-        private readonly GameService? _gameService;
+        private ApiRequests? _apiRequests;
         public GameFlow()
         {
-            _initializeGrid = new();
             _display = new();
             _input = new();
-            _gameService = new();
         }
-        public void Run()
+        public async Task Run(HttpClient httpClient)
         {
-            var validationErrorList = _gameService.ValidationErrors;
-            if (validationErrorList != String.Empty)
+            _apiRequests = new(httpClient);
+            var validationErrorList = await _apiRequests.GetAnimalPluginListValidationsAsync();
+            if (string.IsNullOrWhiteSpace(validationErrorList))
             {
                 _display.DisplayPluginLoadValidationError(validationErrorList);
                 Environment.Exit(0);
             }
-            Dimension = _input.GridSizeInput();
+            dimension = _input.GridSizeInput();
+            animals = await _apiRequests.GetAnimalListAsync();
 
-            _display.DisplayAnimalCount();
+            _display.DisplayAnimalCount(animals);
             _display.DisplayGameTitle();
 
             int cursorTop = Console.CursorTop;
             bool isGameRunning = true;
-            var grid = _initializeGrid.InitializeGame(Dimension);
+            var grid = await _apiRequests.PostInitializedGridAsync(dimension);
+
 
             while (isGameRunning)
             {
-                _display.DisplayGrid(grid, cursorTop, Dimension);
-                //_gameService.MoveAnimals(Dimension, grid);
+                _display.DisplayGrid(grid, animals, cursorTop);
+                grid = await _apiRequests.OnPostMoveAnimalsAsync(); 
                 Thread.Sleep(500);
 
-                _input.ButtonListener(grid);
-                _display.DisplayGameplayInfo();
+                var buttonListener = await _input.ButtonListener(_apiRequests, animals);
+                if (buttonListener != null)
+                {
+                    grid = buttonListener;
+                }
+                _display.DisplayGameplayInfo(animals);
             }
         }
     }

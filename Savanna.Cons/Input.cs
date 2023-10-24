@@ -1,21 +1,18 @@
-﻿using Savanna.Data.Models;
-using Savanna.Services;
+﻿using Savanna.Commons.Models;
 
 namespace Savanna.Cons
 {
     public class Input
     {
         private readonly Display _display;
-        private readonly GameService _gameService;
         public Input()
         {
             _display = new();
-            _gameService = new();
         }
-        /// <summary>
-        /// Gets grid dimension size from the user.
-        /// </summary>
-        /// <returns></returns>
+        ///// <summary>
+        ///// Gets grid dimension size from the user.
+        ///// </summary>
+        ///// <returns></returns>
         public int GridSizeInput()
         {
             string warningWrongType = "Size needs to be an integer";
@@ -49,19 +46,27 @@ namespace Savanna.Cons
                 }
             } while (true);
         }
-        public void ButtonListener(List<GridCellModel> grid)
+        public async Task<List<GridCellModelDTO>> ButtonListener(ApiRequests apiRequests, List<AnimalBaseDTO> animals)
         {
             if (Console.KeyAvailable)
             {
                 ConsoleKeyInfo click;
                 click = Console.ReadKey(true);
+
                 if (click.Key == ConsoleKey.Q)
+                {
                     Environment.Exit(0);
+                }
                 else
                 {
-                    _gameService.AddAnimal(animal: null, click.Key, grid, isChild: false, updates: null);
+                    var animal = animals.FirstOrDefault(x => x.KeyBind == click.Key);
+                    var grid = await apiRequests.OnPostAddAnimalAsync(animal.Name);
+                    return grid;
                 }
             }
+
+            return null;
         }
+
     }
 }

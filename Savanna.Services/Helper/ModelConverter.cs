@@ -22,6 +22,7 @@ namespace Savanna.Services.Helper
                             Name = gridCell.Animal.Name,
                             FirstLetter = gridCell.Animal.FirstLetter,
                             KeyBind = gridCell.Animal.KeyBind,
+                            AnimalType = gridCell.Animal.AnimalType,
                             Color = gridCell.Animal.Color
                         }
                         : null
@@ -43,6 +44,7 @@ namespace Savanna.Services.Helper
                     Name = animal.Name,
                     FirstLetter = animal.FirstLetter,
                     KeyBind = animal.KeyBind,
+                    AnimalType = animal.AnimalType,
                     Color = animal.Color
                 };
 

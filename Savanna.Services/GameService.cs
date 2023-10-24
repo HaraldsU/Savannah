@@ -13,7 +13,7 @@ namespace Savanna.Services
 {
     public class GameService
     {
-        public readonly List<IAnimalProperties> Animals;
+        public readonly List<IAnimalProperties>? Animals;
         public readonly string ValidationErrors;
 
         private readonly AnimalTypeEnums[] animalTypes = (AnimalTypeEnums[])Enum.GetValues(typeof(AnimalTypeEnums));
@@ -21,7 +21,7 @@ namespace Savanna.Services
         private readonly AnimalBehaviour _animalMovement;
         private readonly PluginLoader _pluginLoader;
         private readonly SavannaContext _dbContext;
-        private static readonly InitializeService _initializeService = new();
+        private readonly InitializeService _initializeService;
 
         public GameService(SavannaContext dbContext)
         {
@@ -32,70 +32,76 @@ namespace Savanna.Services
 
             _animalMovement = new(this);
             _dbContext = dbContext;
+            _initializeService = new(dbContext);
         }
 
-        public List<GridCellModel> AddAnimal(int id, string animalName, bool? isChild = false, Dictionary<int, int>? updates = null)
+        public List<GridCellModelDTO> AddAnimal(int id, string animalName, bool? isChild = false, Dictionary<int, int>? updates = null)
         {
-            var grid = _initializeService.Games[id].Grid;
-            var animalModel = Animals.Find(animal => animal.Name == animalName);
-            var pressedKey = animalModel?.KeyBind;
-
-            var cellIndex = RandomGenerator.Next(grid.Count);
-            var animalCount = GetAnimalCount(grid);
-
-            if (animalCount < grid.Count)
+            var game = InitializeService.Games.FirstOrDefault(game => game.Id == id);
+            if (game != null)
             {
-                if (updates == null)
-                {
-                    if (grid[cellIndex].Animal != null)
-                    {
-                        do
-                        {
-                            cellIndex = RandomGenerator.Next(grid.Count);
-                        } while (grid[cellIndex].Animal != null);
-                    }
-                }
-                else
-                {
-                    if (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex))
-                    {
-                        do
-                        {
-                            cellIndex = RandomGenerator.Next(grid.Count);
-                            if (grid[cellIndex].Animal == null && isChild == true)
-                            {
-                                break;
-                            }
-                        } while (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex));
-                    }
-                }
+                var grid = game.Grid;
+                var animalModel = Animals.Find(animal => animal.Name == animalName);
+                var pressedKey = animalModel?.KeyBind;
 
-                if (animalModel == null && pressedKey != ConsoleKey.NoName)
+                var cellIndex = RandomGenerator.Next(grid.Count);
+                var animalCount = GetAnimalCount(grid);
+
+                if (animalCount < grid.Count)
                 {
-                    foreach (IAnimalProperties plugin in Animals)
+                    if (updates == null)
                     {
-                        if (plugin.KeyBind == pressedKey)
+                        if (grid[cellIndex].Animal != null)
                         {
-                            animalModel = plugin;
+                            do
+                            {
+                                cellIndex = RandomGenerator.Next(grid.Count);
+                            } while (grid[cellIndex].Animal != null);
                         }
                     }
-                }
-                if (animalModel != null)
-                {
-                    if ((bool)isChild)
+                    else
                     {
-                        animalModel.ActiveBreedingCooldown = animalModel.BreedingCooldown;
+                        if (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex))
+                        {
+                            do
+                            {
+                                cellIndex = RandomGenerator.Next(grid.Count);
+                                if (grid[cellIndex].Animal == null && isChild == true)
+                                {
+                                    break;
+                                }
+                            } while (grid[cellIndex].Animal != null || updates.ContainsValue(cellIndex));
+                        }
                     }
-                    var newAnimalModel = animalModel.CreateNewAnimal();
-                    grid[cellIndex].Animal = newAnimalModel;
-                }
-            }
 
-            return grid;
+                    if (animalModel == null && pressedKey != ConsoleKey.NoName)
+                    {
+                        foreach (IAnimalProperties plugin in Animals)
+                        {
+                            if (plugin.KeyBind == pressedKey)
+                            {
+                                animalModel = plugin;
+                            }
+                        }
+                    }
+                    if (animalModel != null)
+                    {
+                        if ((bool)isChild)
+                        {
+                            animalModel.ActiveBreedingCooldown = animalModel.BreedingCooldown;
+                        }
+                        var newAnimalModel = animalModel.CreateNewAnimal();
+                        grid[cellIndex].Animal = newAnimalModel;
+                    }
+                }
+
+                return ModelConverter.GridCellModelToDTO(grid);
+            }
+            return new();
         }
-        public List<GridCellModel> MoveAnimals(int id)
+        public List<GridCellModelDTO> MoveAnimals(int id)
         {
-            var game = _initializeService.Games.Find(game => game.Id == id);
+            var game = InitializeService.Games.Find(game => game.Id == id);
             var grid = game.Grid;
             var dimension = game.Dimensions;
             var turn = game.Turn;
@@ -114,7 +120,7 @@ namespace Savanna.Services
             game.Turn = turn;
             game.CurrentTypeIndex = currentTypeIndex;
 
-            return grid;
+            return ModelConverter.GridCellModelToDTO(grid);
         }
         public int GetAnimalCount(List<GridCellModel> grid)
         {
@@ -133,9 +139,13 @@ namespace Savanna.Services
             var animalList = ModelConverter.AnimalModelToDTO(Animals);
             return animalList;
         }
+        public string GetAnimalValidationErrors()
+        {
+            return ValidationErrors;
+        }
         public void SaveGame(int id)
         {
-            var gameToSave = _initializeService.Games[id];
+            var gameToSave = InitializeService.Games.FirstOrDefault(game => game.Id == id);
             var existingGameState = _dbContext.GameState.FirstOrDefault(gs => gs.Id == gameToSave.Id);
 
             if (existingGameState != null)
@@ -156,7 +166,7 @@ namespace Savanna.Services
                 .Include(gs => gs.Grid)
                 .ThenInclude(grid => grid.Animal)
                 .FirstOrDefault(gs => gs.Id == id);
-            _initializeService.Games.Add(gameToLoad);
+            InitializeService.Games.Add(gameToLoad);
 
             if (gameToLoad != null)
             {

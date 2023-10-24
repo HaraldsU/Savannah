@@ -4,7 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "PLUGIN_DIRECTORY": "C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\Savannah\\bin\\Debug\\net7.0\\Plugins",
-        "ANIMAL_MODELS": "C:\\Users\\haralds.upitis\\source\\repos\\Upitis_Savanna\\Savanna.Data\\Models\\Animals"
+        "ANIMAL_MODELS": "C:\\Users\\INTEL\\source\\repos\\HaraldsU\\Savannah\\Savanna.Data\\Models\\Animals"
       }
     }
   }

@@ -9,5 +9,6 @@
         public const string ImportingPluginsFailed = "Error Importing Plugin: ";
         public const string AnimalTypeError = "Unknown Animal Type!";
         public const string SaveGameFailed = "Save Game Failed!";
+        public const string StartGameFailed = "Start Game Failed!";
     }
 }

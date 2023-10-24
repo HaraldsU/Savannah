@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Savanna.Data.Models.DB;
-using System.Configuration;
 
 var MyAllowSpecificOrigins = "http://localhost:5266";
 

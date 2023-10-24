@@ -9,13 +9,15 @@
 
   <ItemGroup>
     <PackageReference Include="Figgle" Version="0.5.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Savanna.Services\Savanna.Services.csproj" />
+    <ProjectReference Include="..\Savanna.Commons\Savanna.Commons.csproj" />
   </ItemGroup>
 
 </Project>

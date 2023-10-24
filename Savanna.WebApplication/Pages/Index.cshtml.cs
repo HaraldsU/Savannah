@@ -5,6 +5,7 @@ using Savanna.Commons.Constants;
 using Savanna.Commons.Models;
 using SavannaWebApplication.Constants;
 using SavannaWebApplication.Models;
+using System;
 using System.Text;
 
 namespace SavannaWebApplication.Pages
@@ -28,7 +29,6 @@ namespace SavannaWebApplication.Pages
         public async Task OnGet()
         {
             await GetAnimalListAsync();
-            await GetInitializedGridAsync();
         }
         public async Task<IActionResult> OnPostMoveAnimalsAsync()
         {
@@ -63,9 +63,10 @@ namespace SavannaWebApplication.Pages
         }
         public async Task<IActionResult> OnPostAddAnimalAsync(string animalName)
         {
+            var gameId = HttpContext.Session.GetInt32(SessionConstants.GameId);
             var requestData = JsonConvert.SerializeObject(new
             {
-                GameId = HttpContext.Session.GetInt32(SessionConstants.GameId),
+                GameId = gameId,
                 AnimalName = animalName
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
@@ -144,29 +145,33 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
-        private async Task GetInitializedGridAsync()
+        public async Task<IActionResult> OnPostStartGameAsync(string dimensions)
         {
-            var gameId = HttpContext.Session.GetInt32(SessionConstants.GameId);
-            if (gameId == null)
+            var requestData = JsonConvert.SerializeObject(new
             {
-                var response = await _httpClient.GetAsync("api/Game/GetInitializedGrid");
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseJson = await response.Content.ReadAsStringAsync();
-                    var responseData = JsonConvert.DeserializeObject<ResponseModel>(responseJson);
+                Dimensions = dimensions
+            });
+            var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
-                    gameId = responseData.GameId;
-                    Grid = JsonConvert.SerializeObject(responseData.Grid);
+            var response = await _httpClient.PostAsync("api/Game/PostStartGame", requestContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                var responseData = JsonConvert.DeserializeObject<ResponseModel>(responseJson);
 
-                    HttpContext.Session.SetInt32(SessionConstants.GameId, (int)gameId);
-                    HttpContext.Session.SetInt32(SessionConstants.GridDimensions, responseData.Grid.Count);
-                    UpdateGameInfo(Grid);
-                }
-                else
-                {
-                    throw new Exception($"{ErrorMessageConstants.RetrieveGridFailed}: {response.StatusCode}");
-                }
+                var gameId = responseData.GameId;
+                Grid = JsonConvert.SerializeObject(responseData.Grid);
+
+                HttpContext.Session.SetInt32(SessionConstants.GameId, gameId);
+                HttpContext.Session.SetInt32(SessionConstants.GridDimensions, (int)MathF.Sqrt(responseData.Grid.Count));
+                UpdateGameInfo(Grid);
+
+                return new JsonResult(HttpContext.Session.GetInt32(SessionConstants.GridDimensions));
             }
+            return new JsonResult(new { success = false, message = ErrorMessageConstants.StartGameFailed })
+            {
+                StatusCode = 400
+            };
         }
         private async Task GetAnimalListAsync()
         {
@@ -178,6 +183,7 @@ namespace SavannaWebApplication.Pages
                 {
                     var responseJson = await response.Content.ReadAsStringAsync();
                     HttpContext.Session.SetString(SessionConstants.AnimalList, responseJson);
+                    HttpContext.Session.SetInt32(SessionConstants.GridDimensions, 0);
                 }
                 else
                 {
