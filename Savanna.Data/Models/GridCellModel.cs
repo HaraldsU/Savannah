@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Savanna.Data.Base;
+﻿using Savanna.Data.Base;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

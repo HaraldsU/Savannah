@@ -5,7 +5,6 @@ using Savanna.Commons.Constants;
 using Savanna.Commons.Models;
 using SavannaWebApplication.Constants;
 using SavannaWebApplication.Models;
-using System;
 using System.Text;
 
 namespace SavannaWebApplication.Pages
@@ -13,7 +12,7 @@ namespace SavannaWebApplication.Pages
     public class IndexModel : PageModel
     {
         public List<string> GameInfo = new();
-        public string Grid;
+        public string? Grid;
 
         private readonly ILogger<IndexModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -28,38 +27,8 @@ namespace SavannaWebApplication.Pages
 
         public async Task OnGet()
         {
-            await GetAnimalListAsync();
-        }
-        public async Task<IActionResult> OnPostMoveAnimalsAsync()
-        {
-            var requestData = JsonConvert.SerializeObject(new
-            {
-                GameId = HttpContext.Session.GetInt32(SessionConstants.GameId)
-            });
-            var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("api/Game/MoveAnimals", requestContent);
-            if (response.IsSuccessStatusCode)
-            {
-                var responseJson = await response.Content.ReadAsStringAsync();
-                var grid = FormatGridForDisplay(JsonConvert.DeserializeObject<List<GridCellModelDTO>>(responseJson));
-                UpdateGameInfo(responseJson);
-
-                var returnData = new
-                {
-                    Grid = grid,
-                    GameInfo
-                };
-
-                return new JsonResult(returnData);
-            }
-            else
-            {
-                return new JsonResult(new { success = false, message = ErrorMessageConstants.MoveAnimalsFailed })
-                {
-                    StatusCode = 400
-                };
-            }
+            await OnGetSetSessionIdAsync();
+            await OnGetAnimalListAsync();
         }
         public async Task<IActionResult> OnPostAddAnimalAsync(string animalName)
         {
@@ -67,6 +36,7 @@ namespace SavannaWebApplication.Pages
             var requestData = JsonConvert.SerializeObject(new
             {
                 GameId = gameId,
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
                 AnimalName = animalName
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
@@ -75,9 +45,10 @@ namespace SavannaWebApplication.Pages
             if (response.IsSuccessStatusCode)
             {
                 var responseJson = await response.Content.ReadAsStringAsync();
-                var grid = FormatGridForDisplay(JsonConvert.DeserializeObject<List<GridCellModelDTO>>(responseJson));
-                UpdateGameInfo(responseJson);
+                Grid = responseJson;
+                UpdateGameInfo(Grid);
 
+                var grid = FormatGridForDisplay(JsonConvert.DeserializeObject<List<GridCellModelDTO>>(responseJson));
                 var returnData = new
                 {
                     grid,
@@ -94,23 +65,34 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
-        public async Task<IActionResult> OnPostSaveGameAsync()
+        public async Task<IActionResult> OnPostMoveAnimalsAsync()
         {
             var requestData = JsonConvert.SerializeObject(new
             {
-                GameId = HttpContext.Session.GetInt32(SessionConstants.GameId)
+                GameId = HttpContext.Session.GetInt32(SessionConstants.GameId),
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId)
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/Game/SaveGame", requestContent);
+            var response = await _httpClient.PostAsync("api/Game/MoveAnimals", requestContent);
             if (response.IsSuccessStatusCode)
             {
                 var responseJson = await response.Content.ReadAsStringAsync();
-                return new JsonResult(responseJson);
+                Grid = responseJson;
+                UpdateGameInfo(Grid);
+
+                var grid = FormatGridForDisplay(JsonConvert.DeserializeObject<List<GridCellModelDTO>>(responseJson));
+                var returnData = new
+                {
+                    Grid = grid,
+                    GameInfo
+                };
+
+                return new JsonResult(returnData);
             }
             else
             {
-                return new JsonResult(new { success = false, message = ErrorMessageConstants.SaveGameFailed })
+                return new JsonResult(new { success = false, message = ErrorMessageConstants.MoveAnimalsFailed })
                 {
                     StatusCode = 400
                 };
@@ -120,7 +102,8 @@ namespace SavannaWebApplication.Pages
         {
             var requestData = JsonConvert.SerializeObject(new
             {
-                GameId = gameId
+                GameId = gameId,
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId)
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
@@ -145,15 +128,39 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
+        public async Task<IActionResult> OnPostSaveGameAsync()
+        {
+            var requestData = JsonConvert.SerializeObject(new
+            {
+                GameId = HttpContext.Session.GetInt32(SessionConstants.GameId),
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId)
+            });
+            var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/Game/SaveGame", requestContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                return new JsonResult(responseJson);
+            }
+            else
+            {
+                return new JsonResult(new { success = false, message = ErrorMessageConstants.SaveGameFailed })
+                {
+                    StatusCode = 400
+                };
+            }
+        }
         public async Task<IActionResult> OnPostStartGameAsync(string dimensions)
         {
             var requestData = JsonConvert.SerializeObject(new
             {
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
                 Dimensions = dimensions
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/Game/PostStartGame", requestContent);
+            var response = await _httpClient.PostAsync("api/Game/StartGame", requestContent);
             if (response.IsSuccessStatusCode)
             {
                 var responseJson = await response.Content.ReadAsStringAsync();
@@ -173,22 +180,38 @@ namespace SavannaWebApplication.Pages
                 StatusCode = 400
             };
         }
-        private async Task GetAnimalListAsync()
+
+        private async Task OnGetAnimalListAsync()
         {
             var animalList = HttpContext.Session.GetString(SessionConstants.AnimalList);
             if (animalList == null)
             {
-                var response = await _httpClient.GetAsync("api/Game/GetAnimalPluginList");
+                var response = await _httpClient.GetAsync("api/Game/AnimalList");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseJson = await response.Content.ReadAsStringAsync();
                     HttpContext.Session.SetString(SessionConstants.AnimalList, responseJson);
                     HttpContext.Session.SetInt32(SessionConstants.GridDimensions, 0);
+
+                    UpdateGameInfo(Grid);
                 }
                 else
                 {
                     throw new Exception($"{ErrorMessageConstants.RetrieveAnimalListFailed}: {response.StatusCode}");
                 }
+            }
+        }
+        private async Task OnGetSetSessionIdAsync()
+        {
+            var response = await _httpClient.GetAsync("api/Game/SessionId");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                HttpContext.Session.SetInt32(SessionConstants.SessionId, int.Parse(responseJson));
+            }
+            else
+            {
+                throw new Exception($"{ErrorMessageConstants.RetrieveSessionIdFailed}: {response.StatusCode}");
             }
         }
         private List<char> FormatGridForDisplay(List<GridCellModelDTO> grid)
@@ -212,9 +235,14 @@ namespace SavannaWebApplication.Pages
         private void UpdateGameInfo(string grid)
         {
             Dictionary<string, int> animalCount = new();
-            var gridDTO = JsonConvert.DeserializeObject<List<GridCellModelDTO>>(grid);
             var animalsString = HttpContext.Session.GetString(SessionConstants.AnimalList);
             var animalsDTO = JsonConvert.DeserializeObject<List<AnimalBaseDTO>>(animalsString);
+
+            var gridDTO = new List<GridCellModelDTO>();
+            if (Grid != null)
+            {
+                gridDTO = JsonConvert.DeserializeObject<List<GridCellModelDTO>>(grid);
+            }
 
             GameInfo.Add($"Grid size: {gridDTO.Count}");
             foreach (var animal in animalsDTO)

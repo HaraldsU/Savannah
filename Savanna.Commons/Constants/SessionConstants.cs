@@ -6,5 +6,6 @@
         public const string LastAssignedId = "_LastAssignedId";
         public const string AnimalList = "_AnimalList";
         public const string GridDimensions = "_GridDimensions";
+        public const string SessionId = "_SessionId";
     }
 }
