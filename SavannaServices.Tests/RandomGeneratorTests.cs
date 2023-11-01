@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Savanna.Services.Helper;
 
-namespace ClassLibrary.Tests
+namespace Savanna.Services.Tests
 {
     [TestClass()]
     public class RandomGeneratorTests

@@ -24,6 +24,7 @@ namespace Savanna.Cons.Handlers
             {
                 var requestData = JsonConvert.SerializeObject(new
                 {
+                    SessionId = 0,
                     Dimensions = dimensions
                 });
                 var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");

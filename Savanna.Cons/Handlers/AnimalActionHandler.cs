@@ -20,8 +20,9 @@ namespace Savanna.Cons.Handlers
         {
             var requestData = JsonConvert.SerializeObject(new
             {
-                AnimalName = animalName,
-                GameId = 0
+                GameId = 1,
+                SessionId = 0,
+                AnimalName = animalName
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
@@ -43,7 +44,8 @@ namespace Savanna.Cons.Handlers
         {
             var requestData = JsonConvert.SerializeObject(new
             {
-                GameId = 0
+                GameId = 1,
+                SessionId = 0
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 

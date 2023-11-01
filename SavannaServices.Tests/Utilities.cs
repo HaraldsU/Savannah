@@ -1,7 +1,7 @@
 ﻿using Savanna.Commons.Enums;
 using Savanna.Data.Models;
 
-namespace ClassLibraryTests
+namespace Savanna.Services.Tests
 {
     public static class Utilities
     {
