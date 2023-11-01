@@ -1,5 +1,5 @@
 ﻿using Savanna.Commons.Models;
-using System.Net.Http;
+using Savanna.Cons.Facade;
 
 namespace Savanna.Cons
 {
@@ -9,44 +9,45 @@ namespace Savanna.Cons
         private List<AnimalBaseDTO>? animals;
         private readonly Display _display;
         private readonly Input _input;
-        private ApiRequests? _apiRequests;
+        private GameFacade? _gameFacade;
+
         public GameFlow()
         {
             _display = new();
             _input = new();
         }
-        public async Task Run(HttpClient httpClient)
+
+        public async Task RunGame(HttpClient httpClient)
         {
-            _apiRequests = new(httpClient);
-            var validationErrorList = await _apiRequests.OnGetAnimalPluginListValidationsAsync();
+            _gameFacade = new(httpClient, _display);
+
+            var validationErrorList = await _gameFacade.GetAnimalValidationErrorsAsync();
             if (string.IsNullOrWhiteSpace(validationErrorList))
             {
                 _display.DisplayPluginLoadValidationError(validationErrorList);
                 Environment.Exit(0);
             }
+
             dimension = _input.GridSizeInput();
-            animals = await _apiRequests.OnGetAnimalListAsync();
+            animals = await _gameFacade.GetAnimalListAsync();
 
             _display.DisplayAnimalCount(animals);
-            _display.DisplayGameTitle();
 
-            int cursorTop = Console.CursorTop;
             bool isGameRunning = true;
-            var grid = await _apiRequests.OnPostInitializedGridAsync(dimension);
-
+            var grid = await _gameFacade.StartGameAsync(dimension);
 
             while (isGameRunning)
             {
-                _display.DisplayGrid(grid, animals, cursorTop);
-                grid = await _apiRequests.OnPostMoveAnimalsAsync(); 
+                _display.DisplayGame(grid, animals);
+
+                grid = await _gameFacade.MoveAnimalsAsync();
                 Thread.Sleep(500);
 
-                var buttonListener = await _input.ButtonListener(_apiRequests, animals);
-                if (buttonListener != null)
+                var buttonListener = await _input.ButtonListener(_gameFacade, animals);
+                if (buttonListener.Count != 0)
                 {
                     grid = buttonListener;
                 }
-                _display.DisplayGameplayInfo(animals);
             }
         }
     }

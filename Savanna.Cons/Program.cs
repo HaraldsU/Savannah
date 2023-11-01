@@ -13,7 +13,7 @@ class Program
         };
 
         var gameFlow = new GameFlow();
-        var gameFlowTask = gameFlow.Run(httpClient);
+        var gameFlowTask = gameFlow.RunGame(httpClient);
         gameFlowTask.Wait();
     }
 }

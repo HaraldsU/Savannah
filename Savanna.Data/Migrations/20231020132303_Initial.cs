@@ -38,8 +38,8 @@ namespace Savanna.Data.Migrations
                 name: "GameState",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    //.Annotation("SqlServer:Identity", "1, 1"),
                     Turn = table.Column<int>(type: "int", nullable: false),
                     CurrentTypeIndex = table.Column<int>(type: "int", nullable: false),
                     Dimensions = table.Column<int>(type: "int", nullable: false)

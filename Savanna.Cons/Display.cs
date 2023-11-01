@@ -2,6 +2,7 @@
 using Savanna.Commons.Constants;
 using Savanna.Commons.Enums;
 using Savanna.Commons.Models;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -9,6 +10,15 @@ namespace Savanna.Cons
 {
     public class Display
     {
+        private readonly GridService _gridService = new();
+
+        public void DisplayGame(List<GridCellModelDTO> grid, List<AnimalBaseDTO> animals)
+        {
+            Console.SetCursorPosition(0, 3);
+            DisplayGameTitle();
+            DisplayGrid(grid, animals);
+            DisplayGameplayInfo(animals);
+        }
         public void DisplayPluginLoadValidationError(string validationError)
         {
             Console.WriteLine(validationError);
@@ -34,6 +44,7 @@ namespace Savanna.Cons
             string article;
             string pattern = @"[AEIOU]";
             bool isVowel;
+
             foreach (var animal in animals)
             {
                 isVowel = Regex.IsMatch(animal.FirstLetter.ToString(), pattern);
@@ -45,6 +56,7 @@ namespace Savanna.Cons
                 {
                     article = "a";
                 }
+
                 string animalType = string.Empty;
                 switch (animal.AnimalType)
                 {
@@ -60,13 +72,26 @@ namespace Savanna.Cons
             }
             Console.WriteLine("Press 'Q' to quit ...");
         }
+        public async Task<int> DisplayErrorRetryMessage(string errorMessage, HttpStatusCode statusCode, int maxTries, int timeOut)
+        {
+            Console.WriteLine($"{errorMessage}: {statusCode}, retrying in {timeOut}s ({maxTries} more times) ...");
+            await Task.Delay(RetryPolicyConstants.timeOut * 1000);
+            return maxTries - 1;
+        }
+        public async void DisplayErrorRetryMessage(string errorMessage, HttpStatusCode statusCode)
+        {
+            ChangeColor($"{errorMessage}: {statusCode}", "Red");
+            await Task.Delay(RetryPolicyConstants.timeOut * 1000);
 
-        public void DisplayGrid(List<GridCellModelDTO> grid, List<AnimalBaseDTO> animals, int cursorTop)
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+        }
+        public void DisplayGrid(List<GridCellModelDTO> grid, List<AnimalBaseDTO> animals)
         {
             Console.CursorVisible = false;
-            Console.SetCursorPosition(0, cursorTop - 1);
+            //Console.SetCursorPosition(0, cursorTop - 1);
             StringBuilder gridStringBuilder = new();
-            gridStringBuilder = MakeGrid(grid, gridStringBuilder, (int)MathF.Sqrt(grid.Count));
+            gridStringBuilder = _gridService.MakeGrid(grid, gridStringBuilder, (int)MathF.Sqrt(grid.Count));
 
             string pattern = @"^[A-Z]$";
             for (int i = 0; i < gridStringBuilder.Length; i++)
@@ -81,60 +106,6 @@ namespace Savanna.Cons
                     ChangeColor(gridStringBuilder[i].ToString(), "Red");
                 }
             }
-        }
-        private StringBuilder MakeGrid(List<GridCellModelDTO> grid, StringBuilder gridStringBuilder, int dimension)
-        {
-            int height = (dimension * 2) + 1;
-            int width = (dimension * 3) + 2;
-            int count = 0;
-            int listIndex = 0;
-
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    if (i % 2 == 0)
-                    {
-                        if (j != width - 1)
-                        {
-                            gridStringBuilder.Append('-');
-                        }
-                    }
-                    else
-                    {
-                        if (j % 3 == 0)
-                        {
-                            gridStringBuilder.Append('|');
-                            count++;
-                        }
-                        else if (j + 1 != width)
-                        {
-                            if (count == 2)
-                            {
-                                listIndex++;
-                                count = 1;
-                            }
-                            if (grid[listIndex].Animal != null)
-                            {
-                                gridStringBuilder.Append(grid[listIndex].Animal?.FirstLetter);
-                            }
-                            else
-                            {
-                                gridStringBuilder.Append(' ');
-                            }
-                        }
-                    }
-                }
-                count = 0;
-                if (i != 0 && i % 2 == 0)
-                {
-                    listIndex++;
-                }
-                gridStringBuilder.Append('\n');
-            }
-            gridStringBuilder.Append('\n');
-
-            return gridStringBuilder;
         }
 
         public void ChangeColor(string text, string color)

@@ -1,4 +1,5 @@
 ﻿using Savanna.Commons.Models;
+using Savanna.Cons.Facade;
 
 namespace Savanna.Cons
 {
@@ -46,7 +47,7 @@ namespace Savanna.Cons
                 }
             } while (true);
         }
-        public async Task<List<GridCellModelDTO>> ButtonListener(ApiRequests apiRequests, List<AnimalBaseDTO> animals)
+        public async Task<List<GridCellModelDTO>> ButtonListener(GameFacade apiRequests, List<AnimalBaseDTO> animals)
         {
             if (Console.KeyAvailable)
             {
@@ -60,12 +61,15 @@ namespace Savanna.Cons
                 else
                 {
                     var animal = animals.FirstOrDefault(x => x.KeyBind == click.Key);
-                    var grid = await apiRequests.OnPostAddAnimalAsync(animal.Name);
-                    return grid;
+                    if (animal != null)
+                    {
+                        var grid = await apiRequests.AddAnimalAsync(animal.Name);
+                        return grid;
+                    }
                 }
             }
 
-            return null;
+            return new List<GridCellModelDTO>();
         }
 
     }

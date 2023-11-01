@@ -10,5 +10,7 @@
         public const string AnimalTypeError = "Unknown Animal Type!";
         public const string SaveGameFailed = "Save Game Failed!";
         public const string StartGameFailed = "Start Game Failed!";
+        public const string MaxRetriesReached = "Max Retries Reached!";
+        public const string RetrieveSessionIdFailed = "Retrieve Session Id Failed!";
     }
 }

@@ -59,8 +59,6 @@ namespace Savanna.Services.PluginHandlers
                 pluginsLists.Add(instance);
             }
         }
-
-
         private Tuple<bool, string> ValidatePlugins(List<IAnimalProperties> pluginsLists)
         {
             foreach (var plugin in pluginsLists.ToList())

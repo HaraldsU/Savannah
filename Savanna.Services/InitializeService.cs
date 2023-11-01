@@ -6,35 +6,20 @@ namespace Savanna.Services
 {
     public class InitializeService
     {
-        public static List<GameStateModel> Games = new();
-        private readonly SavannaContext _dbContext;
-
-        public InitializeService(SavannaContext dbContext)
+        public Tuple<int, List<GridCellModel>> InitializeGame(int dimension, ref GameStateModel oldGameState, int newId)
         {
-            _dbContext = dbContext;
-        }
-
-        public Tuple<int, List<GridCellModel>> InitializeGame(int dimension)
-        {
-            var game = new GameStateModel
+            var newGameState = new GameStateModel
             {
-                Id = GetNextGameId(),
+                Id = newId,
                 Grid = InitializeGrid(dimension),
                 Turn = AnimalTypeEnums.Predator,
                 CurrentTypeIndex = 0,
                 Dimensions = dimension
             };
-            Games.Add(game);
-            var returnData = Tuple.Create(game.Id, game.Grid);
+            oldGameState = newGameState;
+            var returnData = Tuple.Create(newGameState.Id, newGameState.Grid);
 
             return returnData;
-        }
-        private int GetNextGameId()
-        {
-            var lastId = (from gameState in _dbContext.GameState
-                           orderby gameState.Id descending
-                           select gameState.Id).FirstOrDefault();
-            return lastId + 1;
         }
         private List<GridCellModel> InitializeGrid(int dimension)
         {
