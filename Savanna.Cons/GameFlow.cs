@@ -18,21 +18,21 @@ namespace Savanna.Cons
         public async Task Run(HttpClient httpClient)
         {
             _apiRequests = new(httpClient);
-            var validationErrorList = await _apiRequests.GetAnimalPluginListValidationsAsync();
+            var validationErrorList = await _apiRequests.OnGetAnimalPluginListValidationsAsync();
             if (string.IsNullOrWhiteSpace(validationErrorList))
             {
                 _display.DisplayPluginLoadValidationError(validationErrorList);
                 Environment.Exit(0);
             }
             dimension = _input.GridSizeInput();
-            animals = await _apiRequests.GetAnimalListAsync();
+            animals = await _apiRequests.OnGetAnimalListAsync();
 
             _display.DisplayAnimalCount(animals);
             _display.DisplayGameTitle();
 
             int cursorTop = Console.CursorTop;
             bool isGameRunning = true;
-            var grid = await _apiRequests.PostInitializedGridAsync(dimension);
+            var grid = await _apiRequests.OnPostInitializedGridAsync(dimension);
 
 
             while (isGameRunning)

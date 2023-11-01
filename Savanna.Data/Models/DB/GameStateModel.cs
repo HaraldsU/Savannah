@@ -1,5 +1,4 @@
 ﻿using Savanna.Commons.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Savanna.Data.Models.DB
 {
