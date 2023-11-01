@@ -229,7 +229,7 @@ namespace Savanna.Services
 
             return returnData;
         }
-        public int CreateNewSessionId()
+        public int GetNewSessionId()
         {
             if (_currentSessions.Sessions.Count == 0)
             {
