@@ -22,6 +22,7 @@ namespace Savanna.Services
         private readonly PluginLoader _pluginLoader;
         private readonly InitializeService _initializeService;
         private readonly SavannaContext _dbContext;
+
         private CurrentGamesModel? _currentGames;
         private CurrentSessionModel? _currentSessions;
 
@@ -229,7 +230,7 @@ namespace Savanna.Services
 
             return returnData;
         }
-        public int CreateNewSessionId()
+        public int GetNewSessionId()
         {
             if (_currentSessions.Sessions.Count == 0)
             {

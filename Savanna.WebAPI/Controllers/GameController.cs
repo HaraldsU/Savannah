@@ -45,7 +45,7 @@ namespace SavannaWebAPI.Controllers
         [HttpGet("SessionId")]
         public IActionResult OnGetCreateNewSessionId()
         {
-            var sessionId = _gameService.CreateNewSessionId();
+            var sessionId = _gameService.GetNewSessionId();
 
             if (sessionId != null)
             {
