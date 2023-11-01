@@ -1,38 +1,42 @@
-﻿using ClassLibraryTests;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Savanna.Commons.Enums;
+using Savanna.Data.Models;
 using Savanna.Data.Models.Animals;
-using Savanna.Services;
+using Savanna.Data.Models.DB;
 
-namespace ClassLibrary.Tests
+namespace Savanna.Services.Tests
 {
     [TestClass()]
     public class GameServiceTests
     {
         private readonly int dimensions = 8;
         private GameService? _gameService;
-        private InitializeService? _grid;
+        private InitializeService? _initializeService;
 
         [TestInitialize()]
-        public void Initialize()
+        public void Initialize(SavannaContext dbContext, CurrentGamesModel currentGames, CurrentSessionModel currentSessions)
         {
-            _gameService = new();
-            _grid = new();
+            _gameService = new(dbContext, currentGames, currentSessions);
+            _initializeService = new();
         }
-
 
         [TestMethod()]
         public void AddAnimalTest()
         {
             // Arrange
-            var animalAntelopeModel = new AntelopeModel();
-            var animalLionModel = new LionModel();
-            var grid = _grid.InitializeGame(dimensions);
-            bool isChild = false;
+            var oldGameState = new GameStateModel();
+            int gameId = 1;
+            int sessionId = 0;
+            var grid = _initializeService.InitializeGame(dimensions, ref oldGameState, gameId).Item2;
+
+            var antelopeModel = new AntelopeModel();
+            var antelope = antelopeModel.Name;
+            var lionModel = new LionModel();
+            var lion = lionModel.Name;
 
             // Act
-            _gameService.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
-            _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _gameService.AddAnimal(gameId, sessionId, antelope);
+            _gameService.AddAnimal(gameId, sessionId, lion);
 
             // Assert
             Assert.AreEqual(1, Utilities.GetAnimalCount(grid, AnimalTypeEnums.Prey));
@@ -43,35 +47,42 @@ namespace ClassLibrary.Tests
         public void MoveAnimalLionTest()
         {
             // Arrange
-            var grid = _grid.InitializeGame(dimensions);
-            var animalLionModel = new LionModel();
-            bool isChild = false;
-            AnimalTypeEnums turn = AnimalTypeEnums.Predator;
-            int currentTypeIndex = (int)AnimalTypeEnums.Predator;
-            _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            var oldGameState = new GameStateModel();
+            int gameId = 1;
+            int sessionId = 0;
+            var grid = _initializeService.InitializeGame(dimensions, ref oldGameState, gameId).Item2;
+
+            var lionModel = new LionModel();
+            var lion = lionModel.Name;
+            _gameService.AddAnimal(gameId, sessionId, lion);
+
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
 
             // Act
-            _gameService.MoveAnimals(dimensions, grid, ref turn, ref currentTypeIndex);
+            _gameService.MoveAnimals(gameId, sessionId);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
         }
+
         [TestMethod()]
         public void MoveAnimalAntelopeTest()
         {
             // Arrange
-            var grid = _grid.InitializeGame(dimensions);
-            var animalAntelopeModel = new AntelopeModel();
-            bool isChild = false;
-            AnimalTypeEnums turn = AnimalTypeEnums.Prey;
-            int currentTypeIndex = (int)AnimalTypeEnums.Prey;
-            _gameService.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            var oldGameState = new GameStateModel();
+            int gameId = 1;
+            int sessionId = 0;
+            var grid = _initializeService.InitializeGame(dimensions, ref oldGameState, gameId).Item2;
+
+            var antelopeModel = new AntelopeModel();
+            var antelope = antelopeModel.Name;
+            _gameService.AddAnimal(gameId, sessionId, antelope);
+
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(grid);
-            _gameService.MoveAnimals(dimensions, grid, ref turn, ref currentTypeIndex);
+            _gameService.MoveAnimals(gameId, sessionId);
 
             // Act
-            _gameService.MoveAnimals(dimensions, grid, ref turn, ref currentTypeIndex);
+            _gameService.MoveAnimals(gameId, sessionId);
 
             // Assert
             Assert.AreNotEqual(animalOldPosition, Utilities.GetFirstCellWithAnimal(grid));
@@ -81,14 +92,19 @@ namespace ClassLibrary.Tests
         public void GetAnimalCountTest()
         {
             // Arrange
-            var animalAntelopeModel = new AntelopeModel();
-            var animalLionModel = new LionModel();
-            var grid = _grid.InitializeGame(dimensions);
-            bool isChild = false;
+            var oldGameState = new GameStateModel();
+            int gameId = 1;
+            int sessionId = 0;
+            var grid = _initializeService.InitializeGame(dimensions, ref oldGameState, gameId).Item2;
+
+            var antelopeModel = new AntelopeModel();
+            var antelope = antelopeModel.Name;
+            var lionModel = new LionModel();
+            var lion = lionModel.Name;
 
             // Act
-            _gameService.AddAnimal(animalAntelopeModel, pressedKey: ConsoleKey.NoName, grid, isChild);
-            _gameService.AddAnimal(animalLionModel, pressedKey: ConsoleKey.NoName, grid, isChild);
+            _gameService.AddAnimal(gameId, sessionId, antelope);
+            _gameService.AddAnimal(gameId, sessionId, lion);
 
             // Assert
             Assert.AreEqual(2, Utilities.GetAnimalCount(grid, AnimalTypeEnums.All));
