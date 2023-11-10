@@ -8,12 +8,12 @@ namespace Savanna.Services.Helper
     public class GameCleanupBackgroundTask : BackgroundService
     {
         private readonly TimeSpan _period = TimeSpan.FromMinutes(0.5);
-        private CurrentGamesHolder _currentGamesHolder;
+        private CurrentGamesHolder _currentGames;
         private readonly ILogger<GameCleanupBackgroundTask> _logger;
 
         public GameCleanupBackgroundTask(CurrentGamesHolder currentGamesHolder, ILogger<GameCleanupBackgroundTask> logger)
         {
-            _currentGamesHolder = currentGamesHolder;
+            _currentGames = currentGamesHolder;
             _logger = logger;
         }
 
@@ -27,12 +27,12 @@ namespace Savanna.Services.Helper
                 {
                     await timer.WaitForNextTickAsync(stoppingToken);
 
-                    for (int i = _currentGamesHolder.Games.Count - 1; i >= 0; i--)
+                    for (int i = _currentGames.Games.Count - 1; i >= 0; i--)
                     {
-                        var game = _currentGamesHolder.Games[i];
+                        var game = _currentGames.Games[i];
                         if (DateTime.Now - game.Timestamp > _period)
                         {
-                            _currentGamesHolder.Games.RemoveAt(i);
+                            _currentGames.Games.RemoveAt(i);
                         }
                     }
                 }

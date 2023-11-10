@@ -10,7 +10,7 @@ using Savanna.Data.Models.DB;
 namespace Savanna.Services.Tests
 {
     [TestClass()]
-    public class AnimalMovementTests
+    public class AnimalBehaviourTests
     {
         private readonly int dimensions = 4;
         private readonly int sessionId = 0;

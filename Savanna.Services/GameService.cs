@@ -146,24 +146,16 @@ namespace Savanna.Services
             {
                 if (_currentGames.Games.Count != 0)
                 {
-                    var gameToSave = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
-                    var gameToSaveCopy = new GameStateModel
-                    {
-                        Id = 0,
-                        Grid = gameToSave.Game.Grid,
-                        Turn = gameToSave.Game.Turn,
-                        CurrentTypeIndex = gameToSave.Game.CurrentTypeIndex,
-                        Dimensions = gameToSave.Game.Dimensions
-                    };
-                    var existingGameState = _dbContext.GameState.FirstOrDefault(gs => gs.Id == gameToSaveCopy.Id);
+                    var gameToSave = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId).Game;
 
+                    var existingGameState = _dbContext.GameState.Where(gs => gs.Id == gameToSave.Id).FirstOrDefault();
                     if (existingGameState != null)
                     {
-                        _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSaveCopy);
+                        _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSave);
                     }
                     else
                     {
-                        _dbContext.GameState.Add(gameToSaveCopy);
+                        _dbContext.GameState.Add(gameToSave);
                     }
 
                     int affectedRows = _dbContext.SaveChanges();

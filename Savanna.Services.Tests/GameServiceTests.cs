@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using Savanna.Services;
+using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Savanna.Commons.Enums;
@@ -55,7 +56,7 @@ namespace Savanna.Services.Tests
             _gameService.AddNewGame(dimensions, sessionId);
             var lionModel = new LionModel();
             var lion = lionModel.Name;
-            gridDto =  _gameService.AddAnimal(gameId, sessionId, lion, false, new());
+            gridDto = _gameService.AddAnimal(gameId, sessionId, lion, false, new());
             var animalOldPosition = Utilities.GetFirstCellWithAnimal(gridDto);
 
             // Act
@@ -96,9 +97,55 @@ namespace Savanna.Services.Tests
             // Act
             gridDto = _gameService.AddAnimal(gameId, sessionId, antelope, false, new());
             gridDto = _gameService.AddAnimal(gameId, sessionId, lion, false, new());
+            var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
+            var grid = currentGame.Game.Grid;
 
             // Assert
-            Assert.AreEqual(2, Utilities.GetAnimalCount(gridDto, AnimalTypeEnums.All));
+            Assert.AreEqual(2, _gameService.GetAnimalCount(grid));
+        }
+
+        [TestMethod()]
+        public void GetAnimalListTest()
+        {
+            Assert.IsNotNull(_gameService.GetAnimalList());
+        }
+
+        [TestMethod()]
+        public void GetAnimalValidationErrorsTest()
+        {
+            Assert.IsNotNull(_gameService.GetAnimalValidationErrors());
+        }
+
+        [TestMethod()]
+        public void AddNewGameTest()
+        {
+            //Act
+            _gameService.AddNewGame(dimensions, sessionId);
+
+            //Assert
+            Assert.AreEqual(1, _currentGames.Games.Count);
+        }
+
+        [TestMethod()]
+        public void GetNewSessionIdTest()
+        {
+            //Act
+            _gameService.AddNewGame(dimensions, sessionId);
+
+            //Assert
+            Assert.AreEqual(1, _gameService.GetNewSessionId());
+        }
+
+        [TestMethod()]
+        public void SaveGameTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LoadGameTest()
+        {
+            Assert.Fail();
         }
     }
 }

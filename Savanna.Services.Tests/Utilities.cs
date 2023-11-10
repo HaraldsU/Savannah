@@ -1,6 +1,5 @@
 ﻿using Savanna.Commons.Enums;
 using Savanna.Commons.Models;
-using Savanna.Data.Models;
 
 namespace Savanna.Services.Tests
 {

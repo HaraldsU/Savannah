@@ -6,7 +6,7 @@ namespace Savanna.Data.Models.DB
 {
     public class SavannaContext : DbContext
     {
-        public DbSet<GameStateModel> GameState { get; set; }
+        public virtual DbSet<GameStateModel> GameState { get; set; }
 
         public SavannaContext(DbContextOptions options) : base(options)
         {

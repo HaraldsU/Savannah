@@ -1,5 +1,4 @@
 ﻿using Savanna.Commons.Models;
-using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
 
