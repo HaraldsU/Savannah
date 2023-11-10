@@ -22,11 +22,9 @@ namespace Savanna.Services
         private readonly PluginLoader _pluginLoader;
         private readonly InitializeService _initializeService;
         private readonly SavannaContext _dbContext;
+        private CurrentGamesHolder? _currentGames;
 
-        private CurrentGamesModel? _currentGames;
-        private CurrentSessionModel? _currentSessions;
-
-        public GameService(SavannaContext dbContext, CurrentGamesModel currentGames, CurrentSessionModel currentSessions)
+        public GameService(SavannaContext dbContext, CurrentGamesHolder currentGames)
         {
             _pluginLoader = new();
             loadedPlugins = _pluginLoader.LoadPlugins();
@@ -37,14 +35,14 @@ namespace Savanna.Services
             _initializeService = new();
             _dbContext = dbContext;
             _currentGames = currentGames;
-            _currentSessions = currentSessions;
         }
 
-        public List<GridCellModelDTO> AddAnimal(int gameId, int sessionId, string animalName, bool? isChild = false, Dictionary<int, int>? updates = null)
+        public virtual List<GridCellModelDTO> AddAnimal(int gameId, int sessionId, string animalName, bool isChild, Dictionary<int, int> updates)
         {
             if (_currentGames.Games.Count != 0)
             {
-                var grid = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId).Game.Grid;
+                var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
+                var grid = currentGame.Game.Grid;
                 var animalModel = Animals.Find(animal => animal.Name == animalName);
                 var pressedKey = animalModel?.KeyBind;
 
@@ -99,12 +97,14 @@ namespace Savanna.Services
                     }
                 }
 
-                return ModelConverter.GridCellModelToDTO(grid);
+                currentGame.Timestamp = DateTime.Now;
+
+                return ModelConverter.GridCellModelToDto(grid);
             }
 
             return new();
         }
-        public List<GridCellModelDTO> MoveAnimals(int gameId, int sessionId)
+        public virtual List<GridCellModelDTO> MoveAnimals(int gameId, int sessionId)
         {
             var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
             var grid = currentGame.Game.Grid;
@@ -124,13 +124,14 @@ namespace Savanna.Services
             currentGame.Game.Grid = grid;
             currentGame.Game.Turn = turn;
             currentGame.Game.CurrentTypeIndex = currentTypeIndex;
+            currentGame.Timestamp = DateTime.Now;
 
-            return ModelConverter.GridCellModelToDTO(grid);
+            return ModelConverter.GridCellModelToDto(grid);
         }
 
         public List<AnimalBaseDTO> GetAnimalList()
         {
-            var animalList = ModelConverter.AnimalModelToDTO(Animals);
+            var animalList = ModelConverter.AnimalModelToDto(Animals);
 
             return animalList;
         }
@@ -199,7 +200,8 @@ namespace Savanna.Services
                 var newGame = new CurrentGameModel
                 {
                     Game = gameToLoad,
-                    SessionId = sessionId
+                    SessionId = sessionId,
+                    Timestamp = DateTime.Now
                 };
                 _currentGames.Games.Add(newGame);
                 return true;
@@ -224,7 +226,8 @@ namespace Savanna.Services
             var newGame = new CurrentGameModel
             {
                 Game = newGameState,
-                SessionId = sessionId
+                SessionId = sessionId,
+                Timestamp = DateTime.Now
             };
             _currentGames.Games.Add(newGame);
 
@@ -232,16 +235,14 @@ namespace Savanna.Services
         }
         public int GetNewSessionId()
         {
-            if (_currentSessions.Sessions.Count == 0)
+            if (_currentGames.Games.Count == 0)
             {
-                _currentSessions.Sessions.Add(1);
                 return 1;
             }
             else
             {
-                var lastSession = _currentSessions.Sessions[_currentSessions.Sessions.Count - 1];
-                _currentSessions.Sessions.Add(lastSession + 1);
-                return lastSession + 1;
+                var lastSession = _currentGames.Games[_currentGames.Games.Count - 1];
+                return lastSession.SessionId + 1;
             }
         }
 

@@ -12,5 +12,6 @@
         public const string StartGameFailed = "Start Game Failed!";
         public const string MaxRetriesReached = "Max Retries Reached!";
         public const string RetrieveSessionIdFailed = "Retrieve Session Id Failed!";
+        public const string BackgroundTaskFailed = "An error occurred in the background task!";
     }
 }

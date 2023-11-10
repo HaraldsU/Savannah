@@ -1,45 +1,50 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FakeItEasy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Savanna.Commons.Enums;
+using Savanna.Commons.Models;
 using Savanna.Data.Models;
 using Savanna.Data.Models.Animals;
 using Savanna.Data.Models.DB;
-using Savanna.Services;
 
 namespace Savanna.Services.Tests
 {
     [TestClass()]
     public class AnimalMovementTests
     {
-        private readonly int dimensions = 8;
+        private readonly int dimensions = 4;
+        private readonly int sessionId = 0;
+        private readonly int gameId = 1;
+
+        private SavannaContext? _dbContext;
+        private CurrentGamesHolder? _currentGames;
         private GameService? _gameService;
-        private InitializeService? _initializeService;
         private AnimalBehaviour? _animalBehaviour;
+        private List<GridCellModelDTO>? gridDto;
 
         [TestInitialize()]
-        public void Initialize(SavannaContext dbContext, CurrentGamesModel currentGames, CurrentSessionModel currentSessions)
+        public void Initialize()
         {
-            _gameService = new(dbContext, currentGames, currentSessions);
-            _initializeService = new();
+            _dbContext = A.Fake<SavannaContext>(x => x.WithArgumentsForConstructor(() => new SavannaContext(new DbContextOptions<SavannaContext>())));
+            _currentGames = A.Fake<CurrentGamesHolder>();
+            _gameService = new GameService(_dbContext, _currentGames);
             _animalBehaviour = new(_gameService);
         }
         [TestMethod()]
         public void GetAnimalsNewPositionsTest()
         {
             // Arrange
-            var oldGameState = new GameStateModel();
-            var gameId = 1;
-            var sessionId = 0;
-            var grid = _initializeService.InitializeGame(dimensions, ref oldGameState, gameId).Item2;
-
+            _gameService.AddNewGame(dimensions, sessionId);
             Dictionary<int, int> updatesOld = new();
             Dictionary<int, int> updates = new();
-
             var animalAntelope = new AntelopeModel();
             var antelope = animalAntelope.Name;
             AnimalTypeEnums turn = AnimalTypeEnums.Predator;
 
             // Act
-            _gameService.AddAnimal(gameId, sessionId, antelope);
+            gridDto = _gameService.AddAnimal(gameId, sessionId, antelope, false, new());
+            var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
+            var grid = currentGame.Game.Grid;
             _animalBehaviour.GetAnimalsNewPositions(dimensions, grid, turn, updates, gameId, sessionId);
 
             // Assert

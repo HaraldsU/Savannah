@@ -1,4 +1,5 @@
 ﻿using Savanna.Commons.Models;
+using Savanna.Data.Base;
 using Savanna.Data.Interfaces;
 using Savanna.Data.Models;
 
@@ -6,7 +7,7 @@ namespace Savanna.Services.Helper
 {
     public static class ModelConverter
     {
-        public static List<GridCellModelDTO> GridCellModelToDTO(List<GridCellModel> grid)
+        public static List<GridCellModelDTO> GridCellModelToDto(List<GridCellModel> grid)
         {
             List<GridCellModelDTO> result = new();
 
@@ -33,7 +34,7 @@ namespace Savanna.Services.Helper
 
             return result;
         }
-        public static List<AnimalBaseDTO> AnimalModelToDTO(List<IAnimalProperties> animals)
+        public static List<AnimalBaseDTO> AnimalModelToDto(List<IAnimalProperties> animals)
         {
             List<AnimalBaseDTO> result = new();
 

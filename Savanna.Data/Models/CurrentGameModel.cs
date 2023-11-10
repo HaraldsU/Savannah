@@ -6,5 +6,6 @@ namespace Savanna.Data.Models
     {
         public GameStateModel Game { get; set; } = new();
         public int SessionId { get; set; }
+        public DateTime Timestamp { get; set; }
     }
 }

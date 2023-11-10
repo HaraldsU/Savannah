@@ -12,9 +12,9 @@ namespace SavannaWebAPI.Controllers
     {
         private readonly GameService _gameService;
 
-        public GameController(SavannaContext savannaContext, CurrentGamesModel currentGames, CurrentSessionModel currentSession)
+        public GameController(SavannaContext savannaContext, CurrentGamesHolder currentGames)
         {
-            _gameService = new(savannaContext, currentGames, currentSession);
+            _gameService = new(savannaContext, currentGames);
         }
 
         // GET: api/Game/AnimalPluginList
@@ -87,7 +87,7 @@ namespace SavannaWebAPI.Controllers
 
             if (animal != null && gameId != null && sessionId != null && isInAnimalList)
             {
-                var grid = _gameService.AddAnimal((int)gameId, (int)sessionId, animal);
+                var grid = _gameService.AddAnimal((int)gameId, (int)sessionId, animal, false, new());
                 return Ok(grid);
             }
             return BadRequest();

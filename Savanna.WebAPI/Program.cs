@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Savanna.Data.Models;
 using Savanna.Data.Models.DB;
+using Savanna.Services.Helper;
 
 var MyAllowSpecificOrigins = "http://localhost:5266";
 
@@ -16,8 +17,8 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DatabaseConnection") ?? throw new InvalidOperationException("Connection string not found.");
 builder.Services.AddDbContext<SavannaContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddSingleton<CurrentGamesModel>();
-builder.Services.AddSingleton<CurrentSessionModel>();
+builder.Services.AddSingleton<CurrentGamesHolder>();
+builder.Services.AddHostedService<GameCleanupBackgroundTask>();
 
 var app = builder.Build();
 

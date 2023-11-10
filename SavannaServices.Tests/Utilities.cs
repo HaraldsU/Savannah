@@ -1,13 +1,14 @@
 ﻿using Savanna.Commons.Enums;
+using Savanna.Commons.Models;
 using Savanna.Data.Models;
 
 namespace Savanna.Services.Tests
 {
     public static class Utilities
     {
-        public static GridCellModel GetFirstCellWithAnimal(List<GridCellModel> grid)
+        public static GridCellModelDTO GetFirstCellWithAnimal(List<GridCellModelDTO> grid)
         {
-            var animalCell = new GridCellModel();
+            var animalCell = new GridCellModelDTO();
             foreach (var cell in grid)
             {
                 if (cell.Animal != null)
@@ -17,7 +18,7 @@ namespace Savanna.Services.Tests
             }
             return animalCell;
         }
-        public static int GetAnimalCount(List<GridCellModel> grid, AnimalTypeEnums type = AnimalTypeEnums.All)
+        public static int GetAnimalCount(List<GridCellModelDTO> grid, AnimalTypeEnums type = AnimalTypeEnums.All)
         {
             int count = 0;
             foreach (var cell in grid)
