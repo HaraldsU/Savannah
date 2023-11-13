@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Savanna.Data.Models.DB;
-using Savanna.Data.Models;
-using FakeItEasy;
+﻿using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
-using Savanna.Data.Models.Animals;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Savanna.Data.Models;
+using Savanna.Data.Models.DB;
 
 namespace Savanna.Services.Helper.Tests
 {

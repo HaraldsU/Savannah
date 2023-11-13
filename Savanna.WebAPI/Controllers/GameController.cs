@@ -19,7 +19,7 @@ namespace SavannaWebAPI.Controllers
 
         // GET: api/Game/AnimalPluginList
         [HttpGet("AnimalList")]
-        public IActionResult OnGetAnimalList()
+        public IActionResult GetAnimalList()
         {
             var animalList = _gameService.GetAnimalList();
 
@@ -31,7 +31,7 @@ namespace SavannaWebAPI.Controllers
         }
         // GET: api/Game/AnimalValidationErrors
         [HttpGet("AnimalValidationErrors")]
-        public IActionResult OnGetAnimalValidationErrors()
+        public IActionResult GetAnimalValidationErrors()
         {
             var validationErrors = _gameService.GetAnimalValidationErrors();
 
@@ -43,7 +43,7 @@ namespace SavannaWebAPI.Controllers
         }
         // GET: api/Game/SessionId
         [HttpGet("SessionId")]
-        public IActionResult OnGetCreateNewSessionId()
+        public IActionResult CreateNewSessionId()
         {
             var sessionId = _gameService.GetNewSessionId();
 
@@ -56,11 +56,11 @@ namespace SavannaWebAPI.Controllers
 
         // POST: api/Game/StartGame
         [HttpPost("StartGame")]
-        public IActionResult OnPostStartGame(RequestsModel requestData)
+        public IActionResult StartGame(RequestsModel requestData)
         {
             var dimensions = requestData.Dimensions;
             var sessionId = requestData.SessionId;
-            var gameData = _gameService.AddNewGame((int)dimensions, (int) sessionId);
+            var gameData = _gameService.AddNewGame((int)dimensions, (int)sessionId);
 
             var gameId = gameData.Item1;
             var grid = gameData.Item2;
@@ -78,7 +78,7 @@ namespace SavannaWebAPI.Controllers
         }
         // POST: api/Game/AddAnimal
         [HttpPost("AddAnimal")]
-        public IActionResult OnPostAddAnimal(RequestsModel requestData)
+        public IActionResult AddAnimal(RequestsModel requestData)
         {
             var animal = requestData.AnimalName;
             var gameId = requestData.GameId;
@@ -94,7 +94,7 @@ namespace SavannaWebAPI.Controllers
         }
         // POST: api/Game/MoveAnimals
         [HttpPost("MoveAnimals")]
-        public IActionResult OnPostMoveAnimals(RequestsModel requestData)
+        public IActionResult MoveAnimals(RequestsModel requestData)
         {
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;
@@ -108,7 +108,7 @@ namespace SavannaWebAPI.Controllers
         }
         // POST: api/Game/LoadGame
         [HttpPost("LoadGame")]
-        public IActionResult OnPostLoadGame(RequestsModel requestData)
+        public IActionResult LoadGame(RequestsModel requestData)
         {
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;
@@ -122,7 +122,7 @@ namespace SavannaWebAPI.Controllers
         }
         // POST: api/Game/SaveGame
         [HttpPost("SaveGame")]
-        public IActionResult OnPostSaveGame(RequestsModel requestData)
+        public IActionResult SaveGame(RequestsModel requestData)
         {
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;

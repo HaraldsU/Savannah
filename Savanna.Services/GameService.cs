@@ -88,7 +88,7 @@ namespace Savanna.Services
                     }
                     if (animalModel != null)
                     {
-                        if ((bool)isChild)
+                        if (isChild)
                         {
                             animalModel.ActiveBreedingCooldown = animalModel.BreedingCooldown;
                         }
@@ -147,11 +147,19 @@ namespace Savanna.Services
                 if (_currentGames.Games.Count != 0)
                 {
                     var gameToSave = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId).Game;
+                    var gameStateLocal = _dbContext.GameState.Local;
 
-                    var existingGameState = _dbContext.GameState.Where(gs => gs.Id == gameToSave.Id).FirstOrDefault();
-                    if (existingGameState != null)
+                    if (gameStateLocal != null)
                     {
-                        _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSave);
+                        var existingGameState = _dbContext.GameState.Where(gs => gs.Id == gameToSave.Id).FirstOrDefault();
+                        if (existingGameState != null)
+                        {
+                            _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSave);
+                        }
+                        else
+                        {
+                            _dbContext.GameState.Add(gameToSave);
+                        }
                     }
                     else
                     {

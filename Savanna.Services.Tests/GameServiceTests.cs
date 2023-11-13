@@ -1,12 +1,14 @@
-﻿using Savanna.Services;
-using FakeItEasy;
+﻿using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using Savanna.Commons.Enums;
 using Savanna.Commons.Models;
 using Savanna.Data.Models;
 using Savanna.Data.Models.Animals;
 using Savanna.Data.Models.DB;
+using System.Linq.Expressions;
+using System.Net.Sockets;
 
 namespace Savanna.Services.Tests
 {
@@ -17,17 +19,24 @@ namespace Savanna.Services.Tests
         private readonly int sessionId = 0;
         private readonly int gameId = 1;
 
-        private SavannaContext? _dbContext;
+        //private SavannaContext? _dbContext;
         private CurrentGamesHolder? _currentGames;
         private GameService? _gameService;
         private List<GridCellModelDTO>? gridDto;
 
+        private Mock<DbSet<GameStateModel>> _mockSet;
+        private Mock<SavannaContext> _mockContext;
+
         [TestInitialize()]
         public void Initialize()
         {
-            _dbContext = A.Fake<SavannaContext>(x => x.WithArgumentsForConstructor(() => new SavannaContext(new DbContextOptions<SavannaContext>())));
+            _mockSet = new Mock<DbSet<GameStateModel>>();
+            _mockContext = new Mock<SavannaContext>();
+            _mockContext.Setup(m => m.GameState).Returns(_mockSet.Object);
+
+            //_dbContext = A.Fake<SavannaContext>(x => x.WithArgumentsForConstructor(() => new SavannaContext(new DbContextOptions<SavannaContext>())));
             _currentGames = A.Fake<CurrentGamesHolder>();
-            _gameService = new GameService(_dbContext, _currentGames);
+            _gameService = new GameService(_mockContext.Object, _currentGames);
         }
 
         [TestMethod()]
@@ -139,13 +148,15 @@ namespace Savanna.Services.Tests
         [TestMethod()]
         public void SaveGameTest()
         {
-            Assert.Fail();
-        }
+            // Arrange
+            _gameService.AddNewGame(dimensions, sessionId);
 
-        [TestMethod()]
-        public void LoadGameTest()
-        {
-            Assert.Fail();
+            // Act
+            _gameService.SaveGame(gameId, sessionId);
+
+            // Assert
+            _mockSet.Verify(m => m.Add(It.IsAny<GameStateModel>()), Moq.Times.Once());
+            _mockContext.Verify(m => m.SaveChanges(), Moq.Times.Once());
         }
     }
 }

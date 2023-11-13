@@ -1,17 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Savanna.Data.DB;
 
 namespace Savanna.Data.Models.DB
 {
-    public class SavannaContext : DbContext
+    public class SavannaContext : IdentityDbContext<SavannaWebApplicationUser>
     {
         public virtual DbSet<GameStateModel> GameState { get; set; }
 
-        public SavannaContext(DbContextOptions options) : base(options)
+        public SavannaContext(DbContextOptions<SavannaContext> options) : base(options)
         {
 
         }
+        public SavannaContext()
+        {
+
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<GameStateModel>()
@@ -37,3 +44,4 @@ namespace Savanna.Data.Models.DB
         }
     }
 }
+

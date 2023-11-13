@@ -5,17 +5,13 @@ namespace Savanna.Cons.Facade
 {
     public class GameFacade
     {
-        private readonly Display _display;
-        private readonly AnimalActionHandler _animalActionHandler;
         private readonly AnimalListHandler _animalListHandler;
-        private readonly GameManagerHandler _gameManager;
+        private readonly GameHandler _gameHandler;
 
         public GameFacade(HttpClient httpClient, Display display)
         {
-            _display = display;
-            _animalActionHandler = new(httpClient, display);
             _animalListHandler = new(httpClient, display);
-            _gameManager = new(httpClient, display);
+            _gameHandler = new(httpClient, display);
         }
 
         public async Task<List<AnimalBaseDTO>> GetAnimalListAsync()
@@ -30,17 +26,17 @@ namespace Savanna.Cons.Facade
 
         public async Task<List<GridCellModelDTO>> StartGameAsync(int dimensions)
         {
-            return await _gameManager.OnPostStartGameAsync(dimensions);
+            return await _gameHandler.OnPostStartGameAsync(dimensions);
         }
 
         public async Task<List<GridCellModelDTO>> AddAnimalAsync(string animalName)
         {
-            return await _animalActionHandler.OnPostAddAnimalAsync(animalName);
+            return await _gameHandler.OnPostAddAnimalAsync(animalName);
         }
 
         public async Task<List<GridCellModelDTO>> MoveAnimalsAsync()
         {
-            return await _animalActionHandler.OnPostMoveAnimalsAsync();
+            return await _gameHandler.OnPostMoveAnimalsAsync();
         }
     }
 }
