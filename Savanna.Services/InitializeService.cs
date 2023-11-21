@@ -11,6 +11,7 @@ namespace Savanna.Services
             var newGameState = new GameStateModel
             {
                 Id = newId,
+                UserId = oldGameState.UserId,
                 Grid = InitializeGrid(dimension),
                 Turn = AnimalTypeEnums.Predator,
                 CurrentTypeIndex = 0,

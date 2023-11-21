@@ -7,7 +7,7 @@ namespace Savanna.Services.Helper
 {
     public class GameCleanupBackgroundTask : BackgroundService
     {
-        private readonly TimeSpan _period = TimeSpan.FromMinutes(0.5);
+        private readonly TimeSpan _period = TimeSpan.FromMinutes(5);
         private CurrentGamesHolder _currentGames;
         private readonly ILogger<GameCleanupBackgroundTask> _logger;
 

@@ -1,17 +1,32 @@
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Savanna.Data.DB;
 using Savanna.Data.Models.DB;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var bingApiKey = builder.Configuration["BingSearchApi:SubscriptionKey"];
+
 var connectionString = builder.Configuration.GetConnectionString("SavannaWebApplicationContextConnection") ?? throw new InvalidOperationException("Connection string 'SavannaWebApplicationContextConnection' not found.");
 
-builder.Services.AddDbContext<SavannaContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<SavannaContext>(options =>
+{
+    options.UseSqlServer(
+                            connectionString,
+                            sqlServerOptionsAction: sqlOptions =>
+                            {
+                                sqlOptions.EnableRetryOnFailure(maxRetryCount: 2);
+                            }
+                        );
+});
 
-builder.Services.AddDefaultIdentity<SavannaWebApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SavannaContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SavannaContext>();
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizePage("/Index");
+});
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

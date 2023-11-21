@@ -1,8 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using Savanna.Data.DB;
 
-@inject SignInManager<SavannaWebApplicationUser> SignInManager
-@inject UserManager<SavannaWebApplicationUser> UserManager
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))

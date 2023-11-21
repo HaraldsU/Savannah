@@ -6,9 +6,27 @@ function updateGrid(grid) {
     const colons = $('[id*="col"]');
     let count = 0;
     colons.each(function () {
-        const spanChild = $(this).children('span');
+        const parentDiv = $(this);
+        const parentWidth = parentDiv.outerWidth();
+        const parentHeight = parentDiv.outerHeight();
+        const minDimension = Math.min(parentWidth, parentHeight) * 0.75;
+        const spanChild = parentDiv.children('span');
         let newText = grid[count];
-        spanChild.text(newText);
+        //spanChild.text(newText);
+        var emptyCell = '\u00AD'.toString();
+        if (newText != emptyCell) {
+            const imageElement = $('<img>', {
+                src: newText,
+                alt: 'AnimalImage', // You can set any alt text here
+                width: minDimension,
+                height: minDimension
+            });
+            spanChild.empty().append(imageElement);
+        }
+        else {
+            spanChild.find('img').remove();
+            spanChild.text(emptyCell);
+        }
         count++;
     });
 }
@@ -72,10 +90,39 @@ function addAnimal(animalName) {
         }
     });
 }
-function startGame() {
+function moveAnimals() {
+    if (isRequestInProgress) {
+        return;
+    }
+    isRequestInProgress = true;
+
+    $.ajax({
+        url: "Index?handler=MoveAnimals",
+        method: "post",
+        headers: {
+            RequestVerificationToken:
+                document.getElementById("RequestVerificationToken").value
+        },
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+            updateGrid(data.grid);
+            updateGameInfo(data.gameInfo);;
+        },
+        error: function (error) {
+            console.error(error);
+        },
+        complete: function () {
+            isRequestInProgress = false;
+            setTimeout(moveAnimals, 500);
+        }
+    });
+}
+let isRequestInProgress = false;
+moveAnimals();
+function newGame() {
     var dimensions = $("#gameDimensions").val();
     $.ajax({
-        url: "Index?handler=StartGame",
+        url: "Index?handler=NewGame",
         method: "post",
         headers: {
             RequestVerificationToken:
@@ -129,35 +176,6 @@ function loadGame() {
         }
     });
 }
-let isRequestInProgress = false;
-function moveAnimals() {
-    if (isRequestInProgress) {
-        return;
-    }
-    isRequestInProgress = true;
-
-    $.ajax({
-        url: "Index?handler=MoveAnimals",
-        method: "post",
-        headers: {
-            RequestVerificationToken:
-                document.getElementById("RequestVerificationToken").value
-        },
-        contentType: "application/json; charset=utf-8",
-        success: function (data) {
-            updateGrid(data.grid);
-            updateGameInfo(data.gameInfo);;
-        },
-        error: function (error) {
-            console.error(error);
-        },
-        complete: function () {
-            isRequestInProgress = false;
-            setTimeout(moveAnimals, 500);
-        }
-    });
-}
-moveAnimals();
 
 // Helper
 function getTime() {

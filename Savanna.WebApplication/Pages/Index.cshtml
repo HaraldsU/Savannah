@@ -15,6 +15,7 @@
 }
 
 <input id="RequestVerificationToken" type="hidden" value="@requestToken" />
+<input type="hidden" id="currentUserId" value="@User.Identity.Name" />
 <div class="container text-center"">
     <div class="row justify-content-md-center" style="margin-left: 18%; margin-top: 2%;">
         <div id="heading" style="margin-right: 24%;">
@@ -39,7 +40,7 @@
             </div>
         </div>
         <div id="loadSave" class="col-2" style="margin-top: 6%; margin-right: 35%; width: 2.5%;">
-            <button id="startButton" class="btn btn-primary text-black row mt-3" onclick="startGame()">Start</button>
+            <button id="startButton" class="btn btn-primary text-black row mt-3" onclick="newGame()">Start</button>
             <div class="row form-outline mt-3" style="width: 55px;">
                 <input type="text" id="gameDimensions" class="form-control" placeholder="Dim" />
             </div>

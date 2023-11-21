@@ -7,5 +7,7 @@
         public const string AnimalList = "_AnimalList";
         public const string GridDimensions = "_GridDimensions";
         public const string SessionId = "_SessionId";
+        public const string UserId = "_UserId";
+        public const string AnimalImages = "_AnimalImages";
     }
 }

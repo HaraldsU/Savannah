@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Savanna.Commons.Enums;
 using Savanna.Commons.Models;
 using Savanna.Data;
@@ -20,6 +21,7 @@ namespace Savanna.Services
         private readonly Tuple<List<IAnimalProperties>, string> loadedPlugins;
         private readonly AnimalBehaviour _animalMovement;
         private readonly PluginLoader _pluginLoader;
+
         private readonly InitializeService _initializeService;
         private readonly SavannaContext _dbContext;
         private CurrentGamesHolder? _currentGames;
@@ -37,11 +39,11 @@ namespace Savanna.Services
             _currentGames = currentGames;
         }
 
-        public virtual List<GridCellModelDTO> AddAnimal(int gameId, int sessionId, string animalName, bool isChild, Dictionary<int, int> updates)
+        public virtual List<GridCellModelDTO> AddAnimal(int gameId, int sessionId, string userId, string animalName, bool isChild, Dictionary<int, int> updates)
         {
             if (_currentGames.Games.Count != 0)
             {
-                var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
+                var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId && g.Game.UserId == userId);
                 var grid = currentGame.Game.Grid;
                 var animalModel = Animals.Find(animal => animal.Name == animalName);
                 var pressedKey = animalModel?.KeyBind;
@@ -104,29 +106,34 @@ namespace Savanna.Services
 
             return new();
         }
-        public virtual List<GridCellModelDTO> MoveAnimals(int gameId, int sessionId)
+        public virtual List<GridCellModelDTO> MoveAnimals(int gameId, int sessionId, string userId)
         {
-            var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId);
-            var grid = currentGame.Game.Grid;
-            var dimension = currentGame.Game.Dimensions;
-            var turn = currentGame.Game.Turn;
-            var currentTypeIndex = currentGame.Game.CurrentTypeIndex;
-
-            DetermineAnimalTypeTurn(ref turn, ref currentTypeIndex);
-            var updatedAnimalPositions = new Dictionary<int, int>();
-            _animalMovement.GetAnimalsNewPositions(dimension, grid, turn, updatedAnimalPositions, gameId, sessionId);
-
-            foreach (var update in updatedAnimalPositions)
+            if (_currentGames.Games.Count != 0)
             {
-                MoveAnimal(grid, update);
+                var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId && g.Game.UserId == userId);
+                var grid = currentGame.Game.Grid;
+                var dimension = currentGame.Game.Dimensions;
+                var turn = currentGame.Game.Turn;
+                var currentTypeIndex = currentGame.Game.CurrentTypeIndex;
+
+                DetermineAnimalTypeTurn(ref turn, ref currentTypeIndex);
+                var updatedAnimalPositions = new Dictionary<int, int>();
+                _animalMovement.GetAnimalsNewPositions(dimension, grid, turn, updatedAnimalPositions, gameId, sessionId, userId);
+
+                foreach (var update in updatedAnimalPositions)
+                {
+                    MoveAnimal(grid, update);
+                }
+
+                currentGame.Game.Grid = grid;
+                currentGame.Game.Turn = turn;
+                currentGame.Game.CurrentTypeIndex = currentTypeIndex;
+                currentGame.Timestamp = DateTime.Now;
+
+                return ModelConverter.GridCellModelToDto(grid);
             }
 
-            currentGame.Game.Grid = grid;
-            currentGame.Game.Turn = turn;
-            currentGame.Game.CurrentTypeIndex = currentTypeIndex;
-            currentGame.Timestamp = DateTime.Now;
-
-            return ModelConverter.GridCellModelToDto(grid);
+            return new();
         }
 
         public List<AnimalBaseDTO> GetAnimalList()
@@ -140,76 +147,7 @@ namespace Savanna.Services
             return ValidationErrors;
         }
 
-        public bool SaveGame(int gameId, int sessionId)
-        {
-            try
-            {
-                if (_currentGames.Games.Count != 0)
-                {
-                    var gameToSave = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId).Game;
-                    var gameStateLocal = _dbContext.GameState.Local;
-
-                    if (gameStateLocal != null)
-                    {
-                        var existingGameState = _dbContext.GameState.Where(gs => gs.Id == gameToSave.Id).FirstOrDefault();
-                        if (existingGameState != null)
-                        {
-                            _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSave);
-                        }
-                        else
-                        {
-                            _dbContext.GameState.Add(gameToSave);
-                        }
-                    }
-                    else
-                    {
-                        _dbContext.GameState.Add(gameToSave);
-                    }
-
-                    int affectedRows = _dbContext.SaveChanges();
-                    return affectedRows > 0;
-                }
-                return false;
-            }
-            catch (DbUpdateException ex)
-            {
-                return false;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-        public bool LoadGame(int gameId, int sessionId)
-        {
-            var gameToLoad = _dbContext.GameState
-                .Include(gs => gs.Grid)
-                .ThenInclude(grid => grid.Animal)
-                .FirstOrDefault(gs => gs.Id == gameId);
-
-            if (gameToLoad != null)
-            {
-                // Remove old game
-                var currentGame = _currentGames.Games.Find(g => g.SessionId == sessionId);
-                if (currentGame != null)
-                {
-                    _currentGames.Games.Remove(currentGame);
-                }
-
-                // Add new game
-                var newGame = new CurrentGameModel
-                {
-                    Game = gameToLoad,
-                    SessionId = sessionId,
-                    Timestamp = DateTime.Now
-                };
-                _currentGames.Games.Add(newGame);
-                return true;
-            }
-
-            return false;
-        }
-        public Tuple<int, List<GridCellModel>> AddNewGame(int dimensions, int sessionId)
+        public Tuple<int, List<GridCellModel>> AddNewGame(int dimensions, int sessionId, string userId)
         {
             // Remove old game
             var currentGame = _currentGames.Games.Find(g => g.SessionId == sessionId);
@@ -219,7 +157,10 @@ namespace Savanna.Services
             }
 
             // Add new game
-            GameStateModel newGameState = new();
+            GameStateModel newGameState = new()
+            {
+                UserId = userId
+            };
             var newId = GetNewGameId();
             var returnData = _initializeService.InitializeGame(dimensions, ref newGameState, newId);
 
@@ -244,6 +185,87 @@ namespace Savanna.Services
                 var lastSession = _currentGames.Games[_currentGames.Games.Count - 1];
                 return lastSession.SessionId + 1;
             }
+        }
+        public bool SaveGame(int gameId, int sessionId, string userId)
+        {
+            try
+            {
+                if (_currentGames.Games.Count != 0)
+                {
+                    var gameToSave = _currentGames.Games
+                        .Where(g => g.Game.Id == gameId && g.SessionId == sessionId && g.Game.UserId == userId)
+                        .Select(g => DeepCopy(g.Game))
+                        .FirstOrDefault();
+                    var gameStateLocal = _dbContext.GameState.Local;
+
+                    if (gameToSave != null)
+                    {
+                        gameToSave.Id = 0;
+                        if (gameStateLocal != null)
+                        {
+                            var existingGameState = _dbContext.GameState.Where(gs => gs.Id == gameToSave.Id).FirstOrDefault();
+                            if (existingGameState != null)
+                            {
+                                _dbContext.Entry(existingGameState).CurrentValues.SetValues(gameToSave);
+                            }
+                            else
+                            {
+                                _dbContext.GameState.Add(gameToSave);
+                            }
+                        }
+                        else
+                        {
+                            _dbContext.GameState.Add(gameToSave);
+                        }
+                    }
+
+                    int affectedRows = _dbContext.SaveChanges();
+                    return affectedRows > 0;
+                }
+                return false;
+            }
+            catch (DbUpdateException ex)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        private GameStateModel DeepCopy(GameStateModel original)
+        {
+            var serialized = JsonConvert.SerializeObject(original);
+            return JsonConvert.DeserializeObject<GameStateModel>(serialized);
+        }
+        public bool LoadGame(int gameId, int sessionId, string userId)
+        {
+            var gameToLoad = _dbContext.GameState
+                .Include(gs => gs.Grid)
+                .ThenInclude(grid => grid.Animal)
+                .FirstOrDefault(gs => gs.Id == gameId);
+
+            if (gameToLoad != null)
+            {
+                // Remove old game
+                var currentGame = _currentGames.Games.Find(g => g.Game.Id == gameId && g.SessionId == sessionId && g.Game.UserId == userId);
+                if (currentGame != null)
+                {
+                    _currentGames.Games.Remove(currentGame);
+                }
+
+                // Add new game
+                var newGame = new CurrentGameModel
+                {
+                    Game = gameToLoad,
+                    SessionId = sessionId,
+                    Timestamp = DateTime.Now
+                };
+                _currentGames.Games.Add(newGame);
+                return true;
+            }
+
+            return false;
         }
 
         public int GetAnimalCount(List<GridCellModel> grid)

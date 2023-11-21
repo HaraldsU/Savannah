@@ -12,16 +12,18 @@ namespace Savanna.Services
         private readonly GameService _gameService;
         private int gameId;
         private int sessionId;
+        private string? userId;
 
         public AnimalBehaviour(GameService gameService)
         {
             _gameService = gameService;
         }
 
-        public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, AnimalTypeEnums turn, Dictionary<int, int> updates, int gameId, int sessionId)
+        public void GetAnimalsNewPositions(int dimension, List<GridCellModel> grid, AnimalTypeEnums turn, Dictionary<int, int> updates, int gameId, int sessionId, string userId)
         {
             this.gameId = gameId;
             this.sessionId = sessionId;
+            this.userId = userId;
 
             for (int i = 0; i < dimension; i++)
             {
@@ -162,7 +164,7 @@ namespace Savanna.Services
                     updates.Remove(updatesElement.Key);
                     updates.Add(updatesElement.Key, updatesElement.Key);
                 }
-                _gameService.AddAnimal(gameId, sessionId, animal.Name, isChild: true, updates);
+                _gameService.AddAnimal(gameId, sessionId, userId, animal.Name, isChild: true, updates);
                 directionSigns = GetTargetDirectionSigns(dimension, coordinates, grid, target, grid[coordinates], updates);
                 directionXSign = directionSigns.Item1;
                 directionXSign = directionSigns.Item2;

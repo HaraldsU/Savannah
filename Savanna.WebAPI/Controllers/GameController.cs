@@ -54,13 +54,14 @@ namespace SavannaWebAPI.Controllers
             return BadRequest();
         }
 
-        // POST: api/Game/StartGame
-        [HttpPost("StartGame")]
-        public IActionResult StartGame(RequestsModel requestData)
+        // POST: api/Game/NewGame
+        [HttpPost("NewGame")]
+        public IActionResult NewGame(RequestsModel requestData)
         {
             var dimensions = requestData.Dimensions;
             var sessionId = requestData.SessionId;
-            var gameData = _gameService.AddNewGame((int)dimensions, (int)sessionId);
+            var userId = requestData.UserId;
+            var gameData = _gameService.AddNewGame((int)dimensions, (int)sessionId, userId);
 
             var gameId = gameData.Item1;
             var grid = gameData.Item2;
@@ -83,11 +84,12 @@ namespace SavannaWebAPI.Controllers
             var animal = requestData.AnimalName;
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;
+            var userId = requestData.UserId;
             var isInAnimalList = _gameService.Animals.Any(a => a.Name == animal);
 
             if (animal != null && gameId != null && sessionId != null && isInAnimalList)
             {
-                var grid = _gameService.AddAnimal((int)gameId, (int)sessionId, animal, false, new());
+                var grid = _gameService.AddAnimal((int)gameId, (int)sessionId, userId, animal, false, new());
                 return Ok(grid);
             }
             return BadRequest();
@@ -98,10 +100,11 @@ namespace SavannaWebAPI.Controllers
         {
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;
+            var userId = requestData.UserId;
 
             if (gameId != null && sessionId != null)
             {
-                var grid = _gameService.MoveAnimals((int)gameId, (int)sessionId);
+                var grid = _gameService.MoveAnimals((int)gameId, (int)sessionId, userId);
                 return Ok(grid);
             }
             return BadRequest();
@@ -112,10 +115,11 @@ namespace SavannaWebAPI.Controllers
         {
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;
+            var userId = requestData.UserId;
 
             if (gameId != null && sessionId != null)
             {
-                var isGame = _gameService.LoadGame((int)gameId, (int)sessionId);
+                var isGame = _gameService.LoadGame((int)gameId, (int)sessionId, userId);
                 return Ok(isGame);
             }
             return BadRequest();
@@ -126,10 +130,11 @@ namespace SavannaWebAPI.Controllers
         {
             var gameId = requestData.GameId;
             var sessionId = requestData.SessionId;
+            var userId = requestData.UserId;
 
             if (gameId != null && sessionId != null)
             {
-                var isSaved = _gameService.SaveGame((int)gameId, (int)sessionId);
+                var isSaved = _gameService.SaveGame((int)gameId, (int)sessionId, userId);
                 return Ok(isSaved);
             }
             return BadRequest();

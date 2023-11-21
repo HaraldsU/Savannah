@@ -1,10 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
+using NuGet.ProjectModel;
+using NuGet.Protocol;
 using Savanna.Commons.Constants;
 using Savanna.Commons.Models;
 using SavannaWebApplication.Constants;
 using SavannaWebApplication.Models;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace SavannaWebApplication.Pages
@@ -18,17 +26,27 @@ namespace SavannaWebApplication.Pages
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly HttpClient _httpClient;
 
-        public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _config;
+
+        private readonly string _baseUri = "https://api.bing.microsoft.com/v7.0/images/search";
+
+        private const string QUERY_PARAMETER = "?q=";  // Required
+        private const string MKT_PARAMETER = "&mkt=";  // Strongly suggested
+
+        public IndexModel(ILogger<IndexModel> logger, IHttpClientFactory httpClientFactory, IConfiguration config)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _httpClient = _httpClientFactory.CreateClient("Grid");
+            _config = config;
         }
 
         public async Task OnGet()
         {
-            await OnGetSetSessionIdAsync();
+            await SetSessionIdAsync();
+            await SetCurrentUserIdSession();
             await OnGetAnimalListAsync();
+            await OnPostAnimalImagesAsync();
         }
         public async Task<IActionResult> OnPostAddAnimalAsync(string animalName)
         {
@@ -37,6 +55,7 @@ namespace SavannaWebApplication.Pages
             {
                 GameId = gameId,
                 SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
+                UserId = HttpContext.Session.GetString(SessionConstants.UserId),
                 AnimalName = animalName
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
@@ -70,7 +89,8 @@ namespace SavannaWebApplication.Pages
             var requestData = JsonConvert.SerializeObject(new
             {
                 GameId = HttpContext.Session.GetInt32(SessionConstants.GameId),
-                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId)
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
+                UserId = HttpContext.Session.GetString(SessionConstants.UserId)
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
@@ -103,7 +123,8 @@ namespace SavannaWebApplication.Pages
             var requestData = JsonConvert.SerializeObject(new
             {
                 GameId = gameId,
-                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId)
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
+                UserId = HttpContext.Session.GetString(SessionConstants.UserId)
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
@@ -133,7 +154,8 @@ namespace SavannaWebApplication.Pages
             var requestData = JsonConvert.SerializeObject(new
             {
                 GameId = HttpContext.Session.GetInt32(SessionConstants.GameId),
-                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId)
+                SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
+                UserId = HttpContext.Session.GetString(SessionConstants.UserId)
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
@@ -151,16 +173,17 @@ namespace SavannaWebApplication.Pages
                 };
             }
         }
-        public async Task<IActionResult> OnPostStartGameAsync(string dimensions)
+        public async Task<IActionResult> OnPostNewGameAsync(string dimensions)
         {
             var requestData = JsonConvert.SerializeObject(new
             {
                 SessionId = HttpContext.Session.GetInt32(SessionConstants.SessionId),
+                UserId = HttpContext.Session.GetString(SessionConstants.UserId),
                 Dimensions = dimensions
             });
             var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/Game/StartGame", requestContent);
+            var response = await _httpClient.PostAsync("api/Game/NewGame", requestContent);
             if (response.IsSuccessStatusCode)
             {
                 var responseJson = await response.Content.ReadAsStringAsync();
@@ -201,7 +224,140 @@ namespace SavannaWebApplication.Pages
                 }
             }
         }
-        private async Task OnGetSetSessionIdAsync()
+        private async Task OnPostAnimalImagesAsync()
+        {
+            bool successOuter;
+            do
+            {
+                successOuter = true;
+                try
+                {
+                    var animalImageList = new List<Tuple<string, string>>();
+                    var animalList = HttpContext.Session.GetString(SessionConstants.AnimalList);
+                    var animalListDTO = JsonConvert.DeserializeObject<List<AnimalBaseDTO>>(animalList);
+
+                    foreach (var animal in animalListDTO)
+                    {
+                        var searchString = $"{animal.Name} animal pixelated icon transparent";
+
+                        // Remember to encode the q query parameter.
+                        var queryString = QUERY_PARAMETER + Uri.EscapeDataString(searchString);
+                        queryString += MKT_PARAMETER + "en-us";
+
+                        HttpResponseMessage response = await AnimalImages(queryString);
+
+                        var contentString = await response.Content.ReadAsStringAsync();
+                        Dictionary<string, object> searchResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(contentString);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var imageIndex = 0;
+                            var animalImage = searchResponse["value"].ToJToken()[imageIndex]["contentUrl"];
+                            var animalImageValue = ((Newtonsoft.Json.Linq.JValue)animalImage).Value;
+
+                            HttpClient client = new();
+                            HttpResponseMessage imageResponse;
+
+                            bool successInner;
+                            do
+                            {
+                                successInner = true;
+                                try
+                                {
+                                    imageResponse = await client.GetAsync(animalImageValue.ToString());
+                                }
+                                catch (Exception e)
+                                {
+                                    imageIndex++;
+                                    animalImage = searchResponse["value"].ToJToken()[imageIndex]["contentUrl"];
+                                    animalImageValue = ((Newtonsoft.Json.Linq.JValue)animalImage).Value;
+
+                                    successInner = false;
+                                    Debug.WriteLine(e.Message);
+                                }
+                                
+                            } while (!successInner);
+
+                            animalImageList.Add(Tuple.Create(animal.Name, animalImageValue.ToString()));
+                        }
+                        else
+                        {
+                            PrintErrors(response.Headers, searchResponse);
+                        }
+
+                    }
+                    HttpContext.Session.SetString(SessionConstants.AnimalImages, JsonConvert.SerializeObject(animalImageList));
+                }
+                catch (Exception e)
+                {
+                    successOuter = false;
+                    Debug.WriteLine(e.Message);
+                }
+            } while (!successOuter);
+            var animalImageListNew = JsonConvert.DeserializeObject<List<Tuple<string, string>>>(HttpContext.Session.GetString(SessionConstants.AnimalImages));
+        }
+        static void PrintErrors(HttpResponseHeaders headers, Dictionary<String, object> response)
+        {
+            Debug.WriteLine("The response contains the following errors:\n");
+
+            object value;
+
+            if (response.TryGetValue("error", out value))  // typically 401, 403
+            {
+                PrintError(response["error"] as Newtonsoft.Json.Linq.JToken);
+            }
+            else if (response.TryGetValue("errors", out value))
+            {
+                // Bing API error
+
+                foreach (Newtonsoft.Json.Linq.JToken error in response["errors"] as Newtonsoft.Json.Linq.JToken)
+                {
+                    PrintError(error);
+                }
+
+                // Included only when HTTP status code is 400; not included with 401 or 403.
+
+                IEnumerable<string> headerValues;
+                if (headers.TryGetValues("BingAPIs-TraceId", out headerValues))
+                {
+                    Debug.WriteLine("\nTrace ID: " + headerValues.FirstOrDefault());
+                }
+            }
+
+        }
+        static void PrintError(Newtonsoft.Json.Linq.JToken error)
+        {
+            string value = null;
+
+            Debug.WriteLine("Code: " + error["code"]);
+            Debug.WriteLine("Message: " + error["message"]);
+
+            if ((value = (string)error["parameter"]) != null)
+            {
+                Debug.WriteLine("Parameter: " + value);
+            }
+
+            if ((value = (string)error["value"]) != null)
+            {
+                Debug.WriteLine("Value: " + value);
+            }
+        }
+        async Task<HttpResponseMessage> AnimalImages(string queryString)
+        {
+            var client = new HttpClient();
+
+            // Request headers. The subscription key is the only required header but you should
+            // include User-Agent (especially for mobile), X-MSEdge-ClientID, X-Search-Location
+            // and X-MSEdge-ClientIP (especially for local aware queries).
+
+            var subscriptionKey = _config["BingSearchApi:SubscriptionKey"];
+
+            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+            return (await client.GetAsync(_baseUri + queryString));
+        }
+
+        private async Task SetSessionIdAsync()
         {
             var response = await _httpClient.GetAsync("api/Game/SessionId");
             if (response.IsSuccessStatusCode)
@@ -214,19 +370,28 @@ namespace SavannaWebApplication.Pages
                 throw new Exception($"{ErrorMessageConstants.RetrieveSessionIdFailed}: {response.StatusCode}");
             }
         }
-        private List<char> FormatGridForDisplay(List<GridCellModelDTO> grid)
+        private async Task SetCurrentUserIdSession()
         {
-            List<char> formattedGrid = new();
+            HttpContext.Session.SetString(SessionConstants.UserId, User.Identity.Name);
+        }
+        private List<string> FormatGridForDisplay(List<GridCellModelDTO> grid)
+        {
+            List<string> formattedGrid = new();
+            var animalImageList = JsonConvert.DeserializeObject<List<Tuple<string, string>>>(HttpContext.Session.GetString(SessionConstants.AnimalImages));
 
             foreach (var cell in grid)
             {
                 if (cell.Animal != null)
                 {
-                    formattedGrid.Add(cell.Animal.FirstLetter);
+                    var animalImage = animalImageList.Where(x => x.Item1 == cell.Animal.Name).FirstOrDefault().Item2;
+                    //formattedGrid.Add(cell.Animal.FirstLetter);
+                    formattedGrid.Add(animalImage);
                 }
                 else
                 {
-                    formattedGrid.Add(GridConstants.EmptyCell);
+                    //formattedGrid.Add(GridConstants.EmptyCell);
+                    var emptyCell = GridConstants.EmptyCell.ToString();
+                    formattedGrid.Add(emptyCell);
                 }
             }
 

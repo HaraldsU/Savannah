@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Savanna.Data.DB;
 
 namespace Savanna.Data.Models.DB
 {
-    public class SavannaContext : IdentityDbContext<SavannaWebApplicationUser>
+    public class SavannaContext : IdentityDbContext<IdentityUser>
     {
         public virtual DbSet<GameStateModel> GameState { get; set; }
 
