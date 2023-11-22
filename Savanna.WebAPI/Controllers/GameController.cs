@@ -139,5 +139,17 @@ namespace SavannaWebAPI.Controllers
             }
             return BadRequest();
         }
+        [HttpPost("SwitchAnimalDisplayType")]
+        public IActionResult SwitchAnimalDisplayType(RequestsModel requestData)
+        {
+            var displayAnimalsAsImages = requestData.DisplayAnimalsAsImages;
+
+            if (displayAnimalsAsImages != null)
+            {
+                var returnValue = _gameService.SwitchAnimalDisplayType((bool)displayAnimalsAsImages);
+                return Ok(returnValue);
+            }
+            return BadRequest();
+        }
     }
 }

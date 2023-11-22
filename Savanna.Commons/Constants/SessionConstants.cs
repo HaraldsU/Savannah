@@ -9,5 +9,6 @@
         public const string SessionId = "_SessionId";
         public const string UserId = "_UserId";
         public const string AnimalImages = "_AnimalImages";
+        public const string DisplayAnimalsAsImages = "_DisplayAnimalsAsImages";
     }
 }

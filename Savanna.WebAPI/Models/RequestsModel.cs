@@ -7,5 +7,6 @@
         public string? UserId { get; set; }
         public string? AnimalName { get; set; }
         public int? Dimensions { get; set; }
+        public bool? DisplayAnimalsAsImages { get; set; }
     }
 }

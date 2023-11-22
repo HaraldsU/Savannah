@@ -12,21 +12,27 @@ function updateGrid(grid) {
         const minDimension = Math.min(parentWidth, parentHeight) * 0.75;
         const spanChild = parentDiv.children('span');
         let newText = grid[count];
-        //spanChild.text(newText);
-        var emptyCell = '\u00AD'.toString();
-        if (newText != emptyCell) {
-            const imageElement = $('<img>', {
-                src: newText,
-                alt: 'AnimalImage', // You can set any alt text here
-                width: minDimension,
-                height: minDimension
-            });
-            spanChild.empty().append(imageElement);
+
+        if (newText.includes('https')) {
+            var emptyCell = '\u00AD'.toString();
+            if (newText != emptyCell) {
+                const imageElement = $('<img>', {
+                    src: newText,
+                    alt: 'AnimalImage',
+                    width: minDimension,
+                    height: minDimension
+                });
+                spanChild.empty().append(imageElement);
+            }
+            else {
+                spanChild.find('img').remove();
+                spanChild.text(emptyCell);
+            }
         }
         else {
-            spanChild.find('img').remove();
-            spanChild.text(emptyCell);
+            spanChild.text(newText);
         }
+
         count++;
     });
 }
@@ -167,6 +173,22 @@ function loadGame() {
         },
         data: {
             gameId: gameId
+        },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (error) {
+            console.error(error);
+        }
+    });
+}
+function switchAnimalDisplayType() {
+    $.ajax({
+        url: "Index?handler=SwitchAnimalDisplayType",
+        method: "post",
+        headers: {
+            RequestVerificationToken:
+                document.getElementById("RequestVerificationToken").value
         },
         success: function (data) {
             console.log(data);

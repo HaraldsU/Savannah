@@ -45,9 +45,11 @@ namespace SavannaWebApplication.Pages
         {
             await SetSessionIdAsync();
             await SetCurrentUserIdSession();
+            await SetAnimalDisplayType();
             await OnGetAnimalListAsync();
             await OnPostAnimalImagesAsync();
         }
+
         public async Task<IActionResult> OnPostAddAnimalAsync(string animalName)
         {
             var gameId = HttpContext.Session.GetInt32(SessionConstants.GameId);
@@ -192,7 +194,7 @@ namespace SavannaWebApplication.Pages
                 var gameId = responseData.GameId;
                 Grid = JsonConvert.SerializeObject(responseData.Grid);
 
-                HttpContext.Session.SetInt32(SessionConstants.GameId, gameId);
+                HttpContext.Session.SetInt32(SessionConstants.GameId, (int)gameId);
                 HttpContext.Session.SetInt32(SessionConstants.GridDimensions, (int)MathF.Sqrt(responseData.Grid.Count));
                 UpdateGameInfo(Grid);
 
@@ -203,6 +205,33 @@ namespace SavannaWebApplication.Pages
                 StatusCode = 400
             };
         }
+        public async Task<IActionResult> OnPostSwitchAnimalDisplayType()
+        {
+            var requestData = JsonConvert.SerializeObject(new
+            {
+                DisplayAnimalsAsImages = Convert.ToBoolean(HttpContext.Session.GetInt32(SessionConstants.DisplayAnimalsAsImages))
+            });
+            var requestContent = new StringContent(requestData, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/Game/SwitchAnimalDisplayType", requestContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseJson = await response.Content.ReadAsStringAsync();
+                var displayAnimalsAsImages = JsonConvert.DeserializeObject<bool>(responseJson);
+
+                HttpContext.Session.SetInt32(SessionConstants.DisplayAnimalsAsImages, Convert.ToInt32(displayAnimalsAsImages));
+
+                return new JsonResult(new { success = true });
+            }
+            else
+            {
+                return new JsonResult(new { success = false, message = ErrorMessageConstants.StartGameFailed })
+                {
+                    StatusCode = 400
+                };
+            }
+        }
+
 
         private async Task OnGetAnimalListAsync()
         {
@@ -296,7 +325,7 @@ namespace SavannaWebApplication.Pages
             } while (!successOuter);
             var animalImageListNew = JsonConvert.DeserializeObject<List<Tuple<string, string>>>(HttpContext.Session.GetString(SessionConstants.AnimalImages));
         }
-        static void PrintErrors(HttpResponseHeaders headers, Dictionary<String, object> response)
+        private static void PrintErrors(HttpResponseHeaders headers, Dictionary<String, object> response)
         {
             Debug.WriteLine("The response contains the following errors:\n");
 
@@ -325,7 +354,7 @@ namespace SavannaWebApplication.Pages
             }
 
         }
-        static void PrintError(Newtonsoft.Json.Linq.JToken error)
+        private static void PrintError(Newtonsoft.Json.Linq.JToken error)
         {
             string value = null;
 
@@ -342,7 +371,7 @@ namespace SavannaWebApplication.Pages
                 Debug.WriteLine("Value: " + value);
             }
         }
-        async Task<HttpResponseMessage> AnimalImages(string queryString)
+        private async Task<HttpResponseMessage> AnimalImages(string queryString)
         {
             var client = new HttpClient();
 
@@ -357,6 +386,10 @@ namespace SavannaWebApplication.Pages
             return (await client.GetAsync(_baseUri + queryString));
         }
 
+        private async Task SetAnimalDisplayType()
+        {
+            HttpContext.Session.SetInt32(SessionConstants.DisplayAnimalsAsImages, 0);
+        }
         private async Task SetSessionIdAsync()
         {
             var response = await _httpClient.GetAsync("api/Game/SessionId");
@@ -376,22 +409,35 @@ namespace SavannaWebApplication.Pages
         }
         private List<string> FormatGridForDisplay(List<GridCellModelDTO> grid)
         {
-            List<string> formattedGrid = new();
             var animalImageList = JsonConvert.DeserializeObject<List<Tuple<string, string>>>(HttpContext.Session.GetString(SessionConstants.AnimalImages));
+            var displayAnimalsAsImages = Convert.ToBoolean(HttpContext.Session.GetInt32(SessionConstants.DisplayAnimalsAsImages));
+            List<string> formattedGrid = new();
 
             foreach (var cell in grid)
             {
-                if (cell.Animal != null)
+                if (displayAnimalsAsImages)
                 {
-                    var animalImage = animalImageList.Where(x => x.Item1 == cell.Animal.Name).FirstOrDefault().Item2;
-                    //formattedGrid.Add(cell.Animal.FirstLetter);
-                    formattedGrid.Add(animalImage);
+                    if (cell.Animal != null)
+                    {
+                        var animalImage = animalImageList.Where(x => x.Item1 == cell.Animal.Name).FirstOrDefault().Item2;
+                        formattedGrid.Add(animalImage);
+                    }
+                    else
+                    {
+                        var emptyCell = GridConstants.EmptyCell.ToString();
+                        formattedGrid.Add(emptyCell);
+                    }
                 }
                 else
                 {
-                    //formattedGrid.Add(GridConstants.EmptyCell);
-                    var emptyCell = GridConstants.EmptyCell.ToString();
-                    formattedGrid.Add(emptyCell);
+                    if (cell.Animal != null)
+                    {
+                        formattedGrid.Add(cell.Animal.FirstLetter.ToString());
+                    }
+                    else
+                    {
+                        formattedGrid.Add(GridConstants.EmptyCell.ToString());
+                    }
                 }
             }
 

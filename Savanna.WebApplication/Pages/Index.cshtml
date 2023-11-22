@@ -40,6 +40,11 @@
             </div>
         </div>
         <div id="loadSave" class="col-2" style="margin-top: 6%; margin-right: 35%; width: 2.5%;">
+            <div style="width: 100px;">
+                <input type="checkbox" id="switchDisplayType" onclick="switchAnimalDisplayType()">
+                <label for="switchDisplayType">Show Images</label>
+            </div>
+
             <button id="startButton" class="btn btn-primary text-black row mt-3" onclick="newGame()">Start</button>
             <div class="row form-outline mt-3" style="width: 55px;">
                 <input type="text" id="gameDimensions" class="form-control" placeholder="Dim" />

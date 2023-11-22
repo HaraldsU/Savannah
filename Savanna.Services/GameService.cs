@@ -267,6 +267,10 @@ namespace Savanna.Services
 
             return false;
         }
+        public bool SwitchAnimalDisplayType(bool displayAnimalsAsImages)
+        {
+            return !displayAnimalsAsImages;
+        }
 
         public int GetAnimalCount(List<GridCellModel> grid)
         {
